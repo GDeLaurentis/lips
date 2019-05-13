@@ -18,12 +18,10 @@ import random
 import re
 import os
 import operator
-import functools
-import multiprocessing as mp
 
 from copy import deepcopy
 from antares.core.bh_patch import accuracy
-from antares.core.tools import settings, MinkowskiMetric, Pauli, Pauli_bar, flatten, pA2, pS2, pNB, Hyphens, vec_to_str, Progress, MyPool, myException
+from antares.core.tools import settings, MinkowskiMetric, Pauli, Pauli_bar, flatten, pA2, pS2, pNB, Hyphens, vec_to_str, myException, mapThreads
 from antares.core.invariants import All_Strings
 from antares.particles.particle import Particle
 from antares.particles.particles_compute import Particles_Compute
@@ -560,45 +558,21 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 
-def phase_space_points(n, small_invs=None, small_invs_exps=None):
-    """Returns n phase space points (Particles objects) of given multiplicity in collinear limit described by small_invs & small_invs_exps."""
+def phase_space_points(multiplicity=None, nbr_points=None, small_invs=None, small_invs_exps=None):
+    """Returns phase space points (Particles objects) of given multiplicity in collinear limit described by small_invs & small_invs_exps."""
     time_start = time.time()
-    lParticles = _phase_space_points(n, small_invs, small_invs_exps)
+    lParticles = mapThreads(phase_space_point, multiplicity, small_invs, small_invs_exps, range(nbr_points), UseParallelisation=settings.UseParallelisation, Cores=settings.Cores)
     time_end = time.time()
     seconds = time_end - time_start
     m, s = divmod(seconds, 60)
     h, m = divmod(m, 60)
-    sys.stdout.write("\rGenrated %i phase space points in %d:%02d:%02d.                                            " % (n, h, m, s))
+    sys.stdout.write("\rGenrated %i phase space points in %d:%02d:%02d.                                            " % (nbr_points, h, m, s))
     sys.stdout.flush()
     return lParticles
 
 
-def _phase_space_points(n, small_invs, small_invs_exps):
-    if settings.UseParallelisation is True:
-        l = mp.Lock()
-        p = Progress(n)
-        phase_space_points_partial = functools.partial(_phase_space_point, small_invs, small_invs_exps, n)
-        with MyPool(settings.Cores, initializer=init, initargs=(l, p, )) as pool:
-            lParticles = pool.map(phase_space_points_partial, range(n))
-    else:
-        global prog
-        prog = Progress(n)
-        phase_space_points_partial = functools.partial(_phase_space_point, small_invs, small_invs_exps, n)
-        lParticles = map(phase_space_points_partial, range(n))
-    return lParticles
-
-
-def _phase_space_point(small_invs, small_invs_exps, n, n_current):
-    if settings.UseParallelisation is True:
-        with lock:
-            prog.increment()
-            sys.stdout.write("\rGenerating {} phase space points: {}                 ".format(n, prog.write()))
-            sys.stdout.flush()
-    else:
-        prog.increment()
-        sys.stdout.write("\rGenerating {} phase space points: {}                 ".format(n, prog.write()))
-        sys.stdout.flush()
-    oParticles = Particles(settings.multiplicity)
+def phase_space_point(multiplicity, small_invs, small_invs_exps, nbr_point):
+    oParticles = Particles(multiplicity)
     if small_invs is None or len(small_invs) == 0:
         oParticles.fix_mom_cons()
     elif len(small_invs) == 1 and len(small_invs_exps) == 1:
@@ -608,12 +582,3 @@ def _phase_space_point(small_invs, small_invs_exps, n, n_current):
     else:
         raise Exception("Bad format for small_invs and small_invs_exps in phase_space_points.")
     return oParticles
-
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
-
-
-def init(l, p):
-    global lock, prog
-    lock = l
-    prog = p
