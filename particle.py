@@ -27,6 +27,13 @@ class Particle(object):
         """Initialisation. Calls randomise."""
         self.randomise()
 
+    def __eq__(self, other):
+        """Equality checks equality of four momenta."""
+        if type(self) == type(other):
+            return all(self.four_mom == other.four_mom)
+        else:
+            return False
+
     # GETTERS and SETTERS
 
     @property

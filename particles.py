@@ -17,7 +17,6 @@ import numpy as np
 import random
 import re
 import os
-import operator
 
 from copy import deepcopy
 from antares.core.bh_patch import accuracy
@@ -54,10 +53,12 @@ def indexing_decorator(func):
 class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
     """Describes the kinematics of n particles."""
 
-    def __init__(self, number_of_particles_or_particles=None):
+    def __init__(self, number_of_particles_or_particles=None, seed=None):
         """Initialisation. Requires either multiplicity of phace space or list of Particle objects."""
         list.__init__(self)
         if isinstance(number_of_particles_or_particles, int):
+            if seed is not None:
+                random.seed(seed)
             for i in range(number_of_particles_or_particles):
                 self.append(Particle())
         elif isinstance(number_of_particles_or_particles, list):
@@ -66,9 +67,14 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
         elif number_of_particles_or_particles is not None:
             raise Exception("Invalid initialisation of Particles instance.")
 
+    def __eq__(self, other):
+        if type(self) == type(other):
+            return all(self[i] == other[i] for i in range(1, len(self) + 1))
+        else:
+            return False
+
     def __hash__(self):
-        num = reduce(operator.mul, [sum(oParticle.four_mom) for oParticle in self])
-        return hash(repr(num.real) + repr(num.imag))
+        return hash("".join(flatten([map(str, oParticle.four_mom) for oParticle in self])))
 
     def randomise_all(self):
         """Randomises all particles. Breaks momentum conservation."""
