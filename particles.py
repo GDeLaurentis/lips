@@ -57,8 +57,7 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
         """Initialisation. Requires either multiplicity of phace space or list of Particle objects."""
         list.__init__(self)
         if isinstance(number_of_particles_or_particles, int):
-            if seed is not None:
-                random.seed(seed)
+            random.seed(seed) if seed is not None else random.seed()
             for i in range(number_of_particles_or_particles):
                 self.append(Particle())
         elif isinstance(number_of_particles_or_particles, list):
@@ -578,7 +577,7 @@ def phase_space_points(multiplicity=None, nbr_points=None, small_invs=None, smal
 
 
 def phase_space_point(multiplicity, small_invs, small_invs_exps, nbr_point):
-    oParticles = Particles(multiplicity)
+    oParticles = Particles(multiplicity, seed=nbr_point)
     if small_invs is None or len(small_invs) == 0:
         oParticles.fix_mom_cons()
     elif len(small_invs) == 1 and len(small_invs_exps) == 1:
