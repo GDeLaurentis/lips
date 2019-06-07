@@ -17,6 +17,7 @@ import numpy as np
 import random
 import re
 import os
+import gmpTools
 
 from copy import deepcopy
 from antares.core.bh_patch import accuracy
@@ -152,7 +153,7 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
             if abs(self.total_mom[i]) > mom_violation:
                 mom_violation = abs(self.total_mom[i])
         if silent is False:
-            print("The largest momentum violation is {}".format(mom_violation))
+            print("The largest momentum violation is {}".format(gmpTools.to_double(mom_violation)))
         if mom_violation > 10 ** -(0.9 * accuracy()):
             myException("Momentum conservation violation.")
             return False
@@ -165,8 +166,8 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
             if abs(self.ldot(i, i)) > onshell_violation:
                 onshell_violation = abs(self.ldot(i, i))
         if silent is False:
-            print("The largest on shell violation is {}".format(onshell_violation))
-            print("{}-------------------{}".format(Hyphens, Hyphens))
+            print("The largest on shell violation is {}".format(gmpTools.to_double(onshell_violation)))
+            # print("{}-------------------{}".format(Hyphens, Hyphens))
         if onshell_violation > 10 ** -(0.9 * accuracy()):
             myException("Onshell relation violation.")
             return False
@@ -181,8 +182,8 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
             _invars = [invariant for invariant in invariants]
 
         if silent is False:
-            print ""
-            print("{} Consistency check {}".format(Hyphens, Hyphens))
+            print "Consistency check:"
+            # print("{} Consistency check {}".format(Hyphens, Hyphens))
 
         mom_cons = self.momentum_conservation_check(silent)         # momentum conservation violation
         on_shell = self.onshell_relation_check(silent)              # onshell violation
@@ -213,7 +214,7 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
                 small_outliers += [_invars[i]]
                 small_outliers_values += [values[i]]
                 if silent is False:
-                    print "{} = {}".format(_invars[i], values[i])
+                    print "{} = {}".format(_invars[i], gmpTools.to_double(values[i]))
             if values[i] > 0.0001:
                 break
         if silent is False:
@@ -224,9 +225,10 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
                 big_outliers += [_invars[i]]
                 big_outliers_values += [values[i]]
                 if silent is False:
-                    print "{} = {}".format(_invars[i], values[i])
+                    print "{} = {}".format(_invars[i], gmpTools.to_double(values[i]))
         if silent is False:
-            print("{}-------------------{}".format(Hyphens, Hyphens))
+            pass
+            # print("{}-------------------{}".format(Hyphens, Hyphens))
         return mom_cons, on_shell, big_outliers, small_outliers
 
     # BASE ONE LIST
