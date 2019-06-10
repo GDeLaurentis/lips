@@ -405,10 +405,10 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
         relist = filter(None, relist)
 
         # consistency of s_ijk "Δ", "Ω", "Π"
-        if init in ["s", "S", "Δ", "Ω", "Π", "δ"]:
+        if init in ["s", "S", "Δ", "Ω", "Π", "δ"] or temp_string[0:3] == "tr5":
             if temp_string[0] == "δ" and temp_string[1] == "5":
                 return
-            elif temp_string[1] == "_":
+            elif temp_string[1] == "_" or (temp_string[0:3] == "tr5" and temp_string[4] == "_"):
                 return
             else:
                 myException("Expected \'_\' after \'s\' in s_ijk or d_ijk")

@@ -16,7 +16,7 @@ import sys
 import numpy as np
 import re
 
-from antares.core.tools import MinkowskiMetric, pSijk, pd5, pDijk, pOijk, pPijk, pA2, pS2, pNB
+from antares.core.tools import MinkowskiMetric, pSijk, pd5, pDijk, pOijk, pPijk, pA2, pS2, pNB, ptr5
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -32,8 +32,13 @@ class Particles_Compute:
 
     def compute(self, temp_string):
         """Computes spinor strings.\n
-        Available variables: ⟨a|b⟩, [a|b], ⟨a|b+c|d], ⟨a|b+c|d+e|f], ..., s_ijk, Δ_ijk, Ω_ijk, Π_ijk"""
+        Available variables: ⟨a|b⟩, [a|b], ⟨a|b+c|d], ⟨a|b+c|d+e|f], ..., s_ijk, Δ_ijk, Ω_ijk, Π_ijk, tr5_ijkl"""
         self.check_consistency(temp_string)                         # Check consistency of string
+
+        if ptr5.findall(temp_string) != []:                         # tr5_ijkl [i|j|k|l|i⟩ - ⟨i|j|k|l|i]
+            ijkl = map(int, ptr5.findall(temp_string)[0])
+            return (self.compute("[{a}|{b}|{c}|{d}|{a}⟩".format(a=ijkl[0], b=ijkl[1], c=ijkl[2], d=ijkl[3])) -
+                    self.compute("⟨{a}|{b}|{c}|{d}|{a}]".format(a=ijkl[0], b=ijkl[1], c=ijkl[2], d=ijkl[3])))
 
         if pOijk.findall(temp_string) != []:                        # Ω_ijk
             ijk = map(int, pOijk.findall(temp_string)[0])
