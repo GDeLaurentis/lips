@@ -98,7 +98,7 @@ class Particle(object):
 
     @property
     def r2_sp(self):
-        """Four Momentum with upper index: P^{\u0307αα}"""
+        """Four Momentum Slashed with upper indices: P^{\u0307αα}"""
         return self._r2_sp
 
     @r2_sp.setter
@@ -107,7 +107,7 @@ class Particle(object):
 
     @property
     def r2_sp_b(self):
-        """Four Momentum with upper index: P\u0305^{α\u0307α}"""
+        """Four Momentum Slashed with lower indices: P\u0305_{α\u0307α}"""
         return self._r2_sp_b
 
     @r2_sp_b.setter
@@ -156,6 +156,13 @@ class Particle(object):
         p2 = p[0] * p[0] + p[1] * p[1] + p[2] * p[2]
         p_zero = gmpTools.csqrt(p2)
         self.four_mom = numpy.array([p_zero] + p)
+        self._four_mom_to_four_mom_d()
+        self._four_mom_d_to_r2_sp()
+        self._four_mom_d_to_r2_sp_b()
+        self._four_mom_to_r_sp_d()
+        self._r_sp_d_to_r_sp_u()
+        self._four_mom_to_l_sp_d()
+        self._l_sp_d_to_l_sp_u()
 
     def angles_for_squares(self):
         """Flips left and right spinors."""
@@ -198,10 +205,10 @@ class Particle(object):
         self._four_mom = numpy.dot(MinkowskiMetric, self.four_mom_d)
 
     def _four_mom_d_to_r2_sp(self):
-        self._r2_s = numpy.tensordot(self._four_mom_d, Pauli, axes=(0, 0))
+        self._r2_sp = numpy.tensordot(self._four_mom_d, Pauli, axes=(0, 0))
 
     def _four_mom_d_to_r2_sp_b(self):
-        self._r2_s_b = numpy.tensordot(self._four_mom_d, Pauli_bar, axes=(0, 0))
+        self._r2_sp_b = numpy.tensordot(self._four_mom_d, Pauli_bar, axes=(0, 0))
 
     def _r1_sp_to_r2_sp(self):
         self._r2_sp = numpy.dot(self.l_sp_u, self.r_sp_u)
