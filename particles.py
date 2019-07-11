@@ -22,7 +22,7 @@ import gmpTools
 from copy import deepcopy
 from antares.core.bh_patch import accuracy
 from antares.core.tools import settings, MinkowskiMetric, Pauli, Pauli_bar, flatten, pA2, pS2, pNB, Hyphens, vec_to_str, myException, mapThreads
-from antares.core.invariants import All_Strings
+from antares.core.invariants import all_strings
 from antares.particles.particle import Particle
 from antares.particles.particles_compute import Particles_Compute
 from antares.particles.particles_set import Particles_Set
@@ -177,7 +177,7 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
         """Runs momentum and onshell checks. Looks for outliers in phase space."""
 
         if invariants == []:
-            _invars = All_Strings(len(self), "2")
+            _invars = all_strings(len(self), "2")
         else:
             _invars = [invariant for invariant in invariants]
 

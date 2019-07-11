@@ -91,7 +91,7 @@ class Particles_Set:
         c = (X - b * d) / a                                          # c = (X - b * d) / a
         self[B].r_sp_d = np.array([c, d])                            # set |B⟩
         if fix_mom is True:
-            self.fix_mom_cons(plist[0], plist[1])
+            self.fix_mom_cons(plist[0], plist[1], axis=2)
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
@@ -107,7 +107,7 @@ class Particles_Set:
         c = (X - b * d) / a                                          # c = (X - b * d) / a
         self[B].l_sp_u = np.array([c, d])                            # set |B]
         if fix_mom is True:
-            self.fix_mom_cons(plist[0], plist[1])
+            self.fix_mom_cons(plist[0], plist[1], axis=1)
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
