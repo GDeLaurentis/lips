@@ -103,7 +103,14 @@ class Particle(object):
 
     @r2_sp.setter
     def r2_sp(self, temp_r2_sp):
-        raise Exception("Not implemented")
+        self._r2_sp = temp_r2_sp
+        self._r2_sp_to_four_momentum()
+        self._four_mom_to_four_mom_d()
+        self._four_mom_d_to_r2_sp_b()
+        self._four_mom_to_r_sp_d()
+        self._r_sp_d_to_r_sp_u()
+        self._four_mom_to_l_sp_d()
+        self._l_sp_d_to_l_sp_u()
 
     @property
     def r2_sp_b(self):
@@ -112,7 +119,14 @@ class Particle(object):
 
     @r2_sp_b.setter
     def r2_sp_b(self, temp_r2_sp_b):
-        raise Exception("Not implemented")
+        self._r2_sp_b = temp_r2_sp_b
+        self._r2_sp_b_to_four_momentum()
+        self._four_mom_to_four_mom_d()
+        self._four_mom_d_to_r2_sp()
+        self._four_mom_to_r_sp_d()
+        self._r_sp_d_to_r_sp_u()
+        self._four_mom_to_l_sp_d()
+        self._l_sp_d_to_l_sp_u()
 
     @property
     def four_mom(self):
@@ -193,6 +207,10 @@ class Particle(object):
         lambdabar_two = (self._four_mom[1] - self._four_mom[2] * 1j) / lambdabar_one
         self._l_sp_d = numpy.array([lambdabar_one, lambdabar_two])
         self._l_sp_d.shape = (1, 2)    # row vector
+
+    def _r2_sp_to_four_momentum(self):
+        for i in range(4):
+            self._four_mom[i] = numpy.trace(numpy.dot(Pauli_bar[i], self.r2_sp)) / 2
 
     def _r2_sp_b_to_four_momentum(self):
         for i in range(4):
