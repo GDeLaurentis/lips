@@ -192,6 +192,11 @@ class Particle(object):
 
     # PRIVATE METHODS
 
+    def __neg__(self):
+        minus_self = Particle()
+        minus_self.four_mom = -1 * self.four_mom
+        return minus_self
+
     def _four_mom_to_r_sp_d(self):     # r_sp_d is \lambda_\alpha
         lambda_one = gmpTools.csqrt(self._four_mom[0] + self._four_mom[3])
         if abs(lambda_one) == 0:
