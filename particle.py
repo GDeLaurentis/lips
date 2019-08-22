@@ -200,16 +200,24 @@ class Particle(object):
     def _four_mom_to_r_sp_d(self):     # r_sp_d is \lambda_\alpha
         lambda_one = gmpTools.csqrt(self._four_mom[0] + self._four_mom[3])
         if abs(lambda_one) == 0:
-            raise ValueError("Encountered zero denominator in spinor.")
-        lambda_two = (self._four_mom[1] + self._four_mom[2] * 1j) / lambda_one
+            if self._four_mom[1] == 0 and self._four_mom[2] == 0:
+                lambda_two = lambda_one  # i.e. zero
+            else:
+                raise ValueError("Encountered zero denominator in spinor.")
+        else:
+            lambda_two = (self._four_mom[1] + self._four_mom[2] * 1j) / lambda_one
         self._r_sp_d = numpy.array([lambda_one, lambda_two])
         self._r_sp_d.shape = (2, 1)    # column vector
 
     def _four_mom_to_l_sp_d(self):     # l_sp_d is \bar{\lambda}_{\dot\alpha}
         lambdabar_one = gmpTools.csqrt(self._four_mom[0] + self._four_mom[3])
         if abs(lambdabar_one) == 0:
-            raise ValueError("Encountered zero denominator in spinor.")
-        lambdabar_two = (self._four_mom[1] - self._four_mom[2] * 1j) / lambdabar_one
+            if self._four_mom[1] == 0 and self._four_mom[2] == 0:
+                lambdabar_two = lambdabar_one  # i.e. zero
+            else:
+                raise ValueError("Encountered zero denominator in spinor.")
+        else:
+            lambdabar_two = (self._four_mom[1] - self._four_mom[2] * 1j) / lambdabar_one
         self._l_sp_d = numpy.array([lambdabar_one, lambdabar_two])
         self._l_sp_d.shape = (1, 2)    # row vector
 
