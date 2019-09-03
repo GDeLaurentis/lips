@@ -565,6 +565,17 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 
+def corners_as_particles(oParticles, corners_as_integers):
+    oKs = Particles(len(corners_as_integers))
+    four_moms = [sum([oParticles[i].four_mom for i in corner_as_integers]) for corner_as_integers in corners_as_integers]
+    for i, iK in enumerate(oKs):
+        iK.four_mom = four_moms[i]
+    return oKs
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+
 def phase_space_points(multiplicity=None, nbr_points=None, small_invs=None, small_invs_exps=None):
     """Returns phase space points (Particles objects) of given multiplicity in collinear limit described by small_invs & small_invs_exps."""
     time_start = time.time()
