@@ -153,6 +153,7 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
             if abs(self.total_mom[i]) > mom_violation:
                 mom_violation = abs(self.total_mom[i])
         if silent is False:
+            mom_violation = gmpTools.RGMP(mom_violation)
             print("The largest momentum violation is {}".format(gmpTools.to_double(mom_violation)))
         if mom_violation > 10 ** -(0.9 * accuracy()):
             myException("Momentum conservation violation.")
