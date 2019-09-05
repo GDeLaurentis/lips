@@ -597,7 +597,7 @@ def phase_space_point(multiplicity, small_invs, small_invs_exps, nbr_point):
     elif len(small_invs) == 1 and len(small_invs_exps) == 1:
         oParticles.set(small_invs[0], 10 ** -int(0.80 * accuracy() / 5))
     elif len(small_invs) == 2 and len(small_invs_exps) == 2:
-        oParticles.set_pair(small_invs[0], 10 ** -int(2 * 0.80 * accuracy() / 5), small_invs[1], 10 ** -int(0.80 * accuracy() / 5))
+        oParticles.set_pair(small_invs[0], 10 ** -int(0.80 * accuracy() / 5), small_invs[1], 10 ** -int(0.80 * accuracy() / 5))
     else:
         raise Exception("Bad format for small_invs and small_invs_exps in phase_space_points.")
     return oParticles
