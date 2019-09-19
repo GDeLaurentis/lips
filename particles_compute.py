@@ -17,7 +17,9 @@ import numpy
 import re
 import mpmath
 
-from antares.core.tools import MinkowskiMetric, pSijk, pd5, pDijk, pOijk, pPijk, pA2, pS2, pNB, ptr5
+from particle import Particle
+
+from antares.core.tools import pSijk, pd5, pDijk, pOijk, pPijk, pA2, pS2, pNB, ptr5
 
 mpmath.mp.dps = 300
 
@@ -29,9 +31,7 @@ class Particles_Compute:
 
     def ldot(self, A, B):
         """Lorentz dot product: P_A^μ * η_μν * P_B^ν."""
-        p_lowered_index = numpy.dot(MinkowskiMetric, self[B].four_mom)
-        p_lowered_index = numpy.transpose(p_lowered_index)
-        return numpy.dot(self[A].four_mom, p_lowered_index)
+        return numpy.dot(self[A].four_mom_d, self[B].four_mom)
 
     def ep(self, i, j):
         if self.helconf[i - 1] == "+":
@@ -139,11 +139,12 @@ class Particles_Compute:
             for i in range(len(bc)):
                 comb_mom = re.sub(r'(\d)', r'self[\1].four_mom', bc[i])
                 comb_mom = eval(comb_mom)
+                clusteredParticle = Particle(comb_mom)
                 if a_or_s == "⟨":
-                    result = numpy.dot(result, self._four_mom_to_r2_sp_bar(comb_mom))
+                    result = numpy.dot(result, clusteredParticle.r2_sp_b)
                     a_or_s = "["                                    # needs to alternate
                 elif a_or_s == "[":
-                    result = numpy.dot(result, self._four_mom_to_r2_sp(comb_mom))
+                    result = numpy.dot(result, clusteredParticle.r2_sp)
                     a_or_s = "⟨"                                    # needs to alternate
             if a_or_s == "⟨":
                 result = numpy.dot(result, self[d].r_sp_d)

@@ -12,11 +12,12 @@ from __future__ import unicode_literals
 
 import os
 import numpy
+import mpmath
 
-from antares.core.bh_patch import abs, accuracy
 from antares.core.tools import flatten, pSijk, pDijk, pA2, pS2, p3B, pNB, myException
 
 local_directory = os.path.dirname(os.path.abspath(__file__))
+mpmath.mp.dps = 300
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
@@ -34,12 +35,12 @@ class Particles_SetPair:
                     break
             actual1, target1 = abs(self.compute(t_s1)), abs(t_v1)
             error1 = abs(100) * abs((actual1 - target1) / target1)
-            compatible_with_zero1 = abs(target1 - actual1) < 10 ** -(0.9 * accuracy())
+            compatible_with_zero1 = abs(target1 - actual1) < 10 ** -(0.9 * 300)
             if compatible_with_zero1 is False:
                 compatible_with_zero1 = str(0) == str(target1)
             actual2, target2 = abs(self.compute(t_s2)), abs(t_v2)
             error2 = abs(100) * abs((actual2 - target2) / target2)
-            compatible_with_zero2 = abs(target2 - actual2) < 10 ** -(0.9 * accuracy())
+            compatible_with_zero2 = abs(target2 - actual2) < 10 ** -(0.9 * 300)
             if compatible_with_zero2 is False:
                 compatible_with_zero2 = str(0) == str(target2)
             mom_cons, on_shell, big_outliers, small_outliers = self.phasespace_consistency_check()

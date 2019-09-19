@@ -25,9 +25,12 @@ mpmath.mp.dps = 300
 class Particle(object):
     """Describes the kinematics of a single particle."""
 
-    def __init__(self):
-        """Initialisation. Calls randomise."""
-        self.randomise()
+    def __init__(self, four_mom=None):
+        """Initialisation. Calls randomise if None, else initialises the four momentum."""
+        if four_mom is None:
+            self.randomise()
+        else:
+            self.four_mom = four_mom
 
     def __eq__(self, other):
         """Equality checks equality of four momenta."""

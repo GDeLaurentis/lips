@@ -15,7 +15,8 @@ import numpy
 import re
 import mpmath
 
-from antares.core.bh_patch import accuracy
+from particle import Particle
+
 from antares.core.tools import flatten, pSijk, pDijk, pOijk, pPijk, pA2, pS2, pNB, myException
 
 mpmath.mp.dps = 300
@@ -32,7 +33,7 @@ class Particles_Set:
                 self.set_inner(temp_string, temp_value, fix_mom, mode)
             actual, target = abs(self.compute(temp_string)), abs(temp_value)
             error = abs(100) * abs((actual - target) / target)
-            compatible_with_zero = abs(target - actual) < 10 ** -(0.9 * accuracy())
+            compatible_with_zero = abs(target - actual) < 10 ** -(0.9 * 300)
             if compatible_with_zero is False:
                 compatible_with_zero = str(abs(0)) == str(target)
             if error < prec or compatible_with_zero is True:  # if error is less than 1 in 1000 or it is compatible with zero
@@ -192,12 +193,13 @@ class Particles_Set:
             for i in range(len(bc)):
                 comb_mom = re.sub(r'(\d)', r'self[\1].four_mom', bc[i])
                 comb_mom = eval(comb_mom)
+                clusteredParticle = Particle(comb_mom)
                 if a_or_s == "⟨":
-                    rest = numpy.dot(rest, self._four_mom_to_r2_sp_bar(comb_mom))
-                    a_or_s = "["                                # needs to alternate the contraction of indices
+                    rest = numpy.dot(rest, clusteredParticle.r2_sp_b)
+                    a_or_s = "["                                    # needs to alternate
                 elif a_or_s == "[":
-                    rest = numpy.dot(rest, self._four_mom_to_r2_sp(comb_mom))
-                    a_or_s = "⟨"                                # needs to alternate the contraction of indices
+                    rest = numpy.dot(rest, clusteredParticle.r2_sp)
+                    a_or_s = "⟨"                                    # needs to alternate
             if a == d and len(lNBms) % 2 == 0:
                 K11, K12, K21, K22 = rest[0, 0], rest[0, 1], rest[1, 0], rest[1, 1]
                 if temp_string[0] == "⟨":

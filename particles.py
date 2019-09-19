@@ -17,16 +17,15 @@ import numpy
 import random
 import re
 import os
+import copy
+import itertools
 
-from copy import deepcopy
-from antares.core.bh_patch import accuracy
-from antares.core.tools import settings, MinkowskiMetric, Pauli, Pauli_bar, flatten, pA2, pS2, pNB, Hyphens, vec_to_str, myException, mapThreads
-from antares.core.invariants import all_strings
-from antares.particles.particle import Particle
-from antares.particles.particles_compute import Particles_Compute
-from antares.particles.particles_set import Particles_Set
-from antares.particles.particles_set_pair import Particles_SetPair
+from particle import Particle
+from particles_compute import Particles_Compute
+from particles_set import Particles_Set
+from particles_set_pair import Particles_SetPair
 
+from antares.core.tools import flatten, pA2, pS2, pNB, myException, mapThreads
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
@@ -68,12 +67,14 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
         self.oRefVec = Particle()
 
     def __eq__(self, other):
+        """Checks equality of each particle in particles."""
         if type(self) == type(other):
             return all(self[i] == other[i] for i in range(1, len(self) + 1))
         else:
             return False
 
     def __hash__(self):
+        """Hash function: hash string of concatenated momenta."""
         return hash("".join(flatten([map(str, oParticle.four_mom) for oParticle in self])))
 
     def randomise_all(self):
@@ -88,7 +89,7 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
 
     def image(self, permutation):
         """Returns the image of self under a given permutation. Remember, this is a passive transformation."""
-        return deepcopy(Particles(sorted(self, key=lambda x: permutation[self.index(x)])))
+        return copy.deepcopy(Particles(sorted(self, key=lambda x: permutation[self.index(x)])))
 
     def fix_mom_cons(self, A=0, B=0, real_momenta=False, axis=1):   # using real momenta changes both |⟩ and |] of A & B
         """Fixes momentum conservation using particles A and B."""
@@ -97,7 +98,7 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
             self.fix_mom_cons(A, B, real_momenta, axis)
 
         elif A != 0 and B != 0 and real_momenta is True:            # the following results in real momenta, but changes both |⟩ and |] of A & B
-            ex = numpy.array([0. + 0j, 0., 0., 0.])                    # excess momentum init. to 0
+            ex = numpy.array([0. + 0j, 0., 0., 0.])                 # excess momentum init. to 0
             for i in range(1, len(self) + 1):
                 if i != A and i != B:
                     ex = ex - self[i].four_mom
@@ -119,8 +120,8 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
             self[B].four_mom = ex
 
         elif A != 0 and B != 0:                                     # the following results in complex momenta, it changes |A⟩&|B⟩ (axis=1) or |A]&|B] (axis=2)
-            K = numpy.array([0. + 0j, 0., 0., 0.])                       # Note: axis here is a meaningless name. It is just used as a switch.
-            for i in range(1, len(self) + 1):                         # minus sum of all other momenta
+            K = numpy.array([0. + 0j, 0., 0., 0.])                  # Note: axis here is a meaningless name. It is just used as a switch.
+            for i in range(1, len(self) + 1):                       # minus sum of all other momenta
                 if i != A and i != B:
                     K = K - self[i].four_mom
             K11 = K[0] + K[3]
@@ -148,27 +149,26 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
 
     def momentum_conservation_check(self, silent=True):
         """Returns true if momentum is conserved."""
-        mom_violation = 0                                           # momentum conservation violation
+        mom_violation = 0
         for i in range(4):
             if abs(self.total_mom[i]) > mom_violation:
                 mom_violation = abs(self.total_mom[i])
         if silent is False:
             print("The largest momentum violation is {}".format(float(mom_violation)))
-        if mom_violation > 10 ** -(0.9 * accuracy()):
+        if mom_violation > 10 ** -(0.9 * 300):
             myException("Momentum conservation violation.")
             return False
         return True
 
     def onshell_relation_check(self, silent=True):
         """Returns true if all on-shell relations are satisfied."""
-        onshell_violation = 0                                       # onshell violation
+        onshell_violation = 0
         for i in range(1, len(self) + 1):
             if abs(self.ldot(i, i)) > onshell_violation:
                 onshell_violation = abs(self.ldot(i, i))
         if silent is False:
             print("The largest on shell violation is {}".format(float(onshell_violation)))
-            # print("{}-------------------{}".format(Hyphens, Hyphens))
-        if onshell_violation > 10 ** -(0.9 * accuracy()):
+        if onshell_violation > 10 ** -(0.9 * 300):
             myException("Onshell relation violation.")
             return False
         return True
@@ -177,7 +177,8 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
         """Runs momentum and onshell checks. Looks for outliers in phase space."""
 
         if invariants == []:
-            _invars = all_strings(len(self), "2")
+            _invars = (["⟨{}|{}⟩".format(i, j) for (i, j) in itertools.combinations(range(1, len(self) + 1), 2)] +
+                       ["[{}|{}]".format(i, j) for (i, j) in itertools.combinations(range(1, len(self) + 1), 2)])
         else:
             _invars = [invariant for invariant in invariants]
 
@@ -251,7 +252,9 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
 
     # MISCELLANEOUS
 
-    def _can_fix_mom_cons(self, t_s1, t_s2):                        # Intended behaviour: returns False if it is impossible, otherwise returns tuple + axis
+    def _can_fix_mom_cons(self, t_s1, t_s2):
+        """Checks if momentum conservation can be restored, without spoiling the collinear limit."""
+        # If possible returns how to fix mom cons (tuple & axis), otherwise returns false.
         if ((pA2.findall(t_s1) != [] or pS2.findall(t_s1) != []) and pNB.findall(t_s2) != []):
             if pA2.findall(t_s1) != []:
                 ab = map(int, list(pA2.findall(t_s1)[0]))
@@ -438,36 +441,6 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
             TotalMomentum += oParticle.four_mom
         return TotalMomentum
 
-    def print_four_momenta(self):
-        print("")
-        print("{}-- Four Momenta ---{}".format(Hyphens, Hyphens))
-        i = 1
-        for oParticle in self:
-            print "Particle {} four mom. is: ".format(i)
-            print vec_to_str(oParticle.four_mom)
-            i = i + 1
-        print("{}-------------------{}".format(Hyphens, Hyphens))
-        print("Total four momentum  is {}".format(vec_to_str(self.total_mom)))
-        print("{}-------------------{}".format(Hyphens, Hyphens))
-
-    def print_r_sp_d(self):
-        print("")
-        print("{}- Right Spinors D -{}".format(Hyphens, Hyphens))
-        i = 1
-        for oParticle in self:
-            print("Particle {} right sp. is {}".format(i, oParticle.r_sp_d))
-            i = i + 1
-        print("{}-------------------{}".format(Hyphens, Hyphens))
-
-    def print_l_sp_d(self):
-        print("")
-        print("{}- Left Spinors D -{}".format(Hyphens, Hyphens))
-        i = 1
-        for oParticle in self:
-            print("Particle {} left sp. is {}".format(i, oParticle.l_sp_d))
-            i = i + 1
-        print("{}-------------------{}".format(Hyphens, Hyphens))
-
     def _r_sp_d_for_mathematica(self):
         msg = ""
         i = 1
@@ -543,43 +516,22 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
             oFile.write(self._r_sp_d_for_mathematica())
             oFile.write(self._l_sp_d_for_mathematica())
 
-    @staticmethod
-    def _four_mom_to_r2_sp_bar(temp_four_mom):                      # this is (P^mu)_alpha,alpha_dot = |A⟩[A|
-        p_lowered_index = numpy.dot(MinkowskiMetric, temp_four_mom)
-        p_lowered_index = numpy.transpose(p_lowered_index)
-        r2_s_b = numpy.array([[0j, 0j], [0j, 0j]])
-        for i in range(4):
-            r2_s_b = r2_s_b + numpy.dot(Pauli_bar[i], p_lowered_index[i])
-        return r2_s_b
-
-    @staticmethod
-    def _four_mom_to_r2_sp(temp_four_mom):                          # this is (P^mu)^alpha_dot,alpha = |A]⟨A|
-        p_lowered_index = numpy.dot(MinkowskiMetric, temp_four_mom)
-        p_lowered_index = numpy.transpose(p_lowered_index)
-        r2_s = numpy.array([[0j, 0j], [0j, 0j]])
-        for i in range(4):
-            r2_s = r2_s + numpy.dot(Pauli[i], p_lowered_index[i])
-        return r2_s
+    def cluster(self, llIntegers):
+        """Returns clustered particle objects according to lists of lists of integers (e.g. corners of one loop diagram)."""
+        oKs = Particles(len(llIntegers))
+        four_moms = [sum([self.four_mom for i in corner_as_integers]) for corner_as_integers in llIntegers]
+        for i, iK in enumerate(oKs):
+            iK.four_mom = four_moms[i]
+        return oKs
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 
-def corners_as_particles(oParticles, corners_as_integers):
-    oKs = Particles(len(corners_as_integers))
-    four_moms = [sum([oParticles[i].four_mom for i in corner_as_integers]) for corner_as_integers in corners_as_integers]
-    for i, iK in enumerate(oKs):
-        iK.four_mom = four_moms[i]
-    return oKs
-
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
-
-
-def phase_space_points(multiplicity=None, nbr_points=None, small_invs=None, small_invs_exps=None):
+def phase_space_points(multiplicity=None, nbr_points=None, small_invs=None, small_invs_exps=None, UseParallelisation=True, Cores=6):
     """Returns phase space points (Particles objects) of given multiplicity in collinear limit described by small_invs & small_invs_exps."""
     time_start = time.time()
-    lParticles = mapThreads(phase_space_point, multiplicity, small_invs, small_invs_exps, range(nbr_points), UseParallelisation=settings.UseParallelisation, Cores=settings.Cores)
+    lParticles = mapThreads(phase_space_point, multiplicity, small_invs, small_invs_exps, range(nbr_points), UseParallelisation=UseParallelisation, Cores=Cores)
     time_end = time.time()
     seconds = time_end - time_start
     m, s = divmod(seconds, 60)
@@ -594,9 +546,9 @@ def phase_space_point(multiplicity, small_invs, small_invs_exps, nbr_point):
     if small_invs is None or len(small_invs) == 0:
         oParticles.fix_mom_cons()
     elif len(small_invs) == 1 and len(small_invs_exps) == 1:
-        oParticles.set(small_invs[0], 10 ** -int(0.80 * accuracy() / 5))
+        oParticles.set(small_invs[0], 10 ** -int(0.80 * 300 / 5))
     elif len(small_invs) == 2 and len(small_invs_exps) == 2:
-        oParticles.set_pair(small_invs[0], 10 ** -int(0.80 * accuracy() / 5), small_invs[1], 10 ** -int(0.80 * accuracy() / 5))
+        oParticles.set_pair(small_invs[0], 10 ** -int(0.80 * 300 / 5), small_invs[1], 10 ** -int(0.80 * 300 / 5))
     else:
         raise Exception("Bad format for small_invs and small_invs_exps in phase_space_points.")
     return oParticles
