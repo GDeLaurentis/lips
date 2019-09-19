@@ -11,13 +11,14 @@
 
 from __future__ import unicode_literals
 
-import numpy as np
+import numpy
 import re
-import gmpTools
+import mpmath
 
 from antares.core.bh_patch import accuracy
 from antares.core.tools import flatten, pSijk, pDijk, pOijk, pPijk, pA2, pS2, pNB, myException
 
+mpmath.mp.dps = 300
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
@@ -89,7 +90,7 @@ class Particles_Set:
         a, b = self[A].r_sp_u[0, 0], self[A].r_sp_u[0, 1]            # ⟨A| = (a, b)
         c, d = self[B].r_sp_d[0, 0], self[B].r_sp_d[1, 0]            # |B⟩ = (c, d)
         c = (X - b * d) / a                                          # c = (X - b * d) / a
-        self[B].r_sp_d = np.array([c, d])                            # set |B⟩
+        self[B].r_sp_d = numpy.array([c, d])                            # set |B⟩
         if fix_mom is True:
             self.fix_mom_cons(plist[0], plist[1], axis=2)
 
@@ -105,7 +106,7 @@ class Particles_Set:
         a, b = self[A].l_sp_d[0, 0], self[A].l_sp_d[0, 1]            # [A| = (a, b)
         c, d = self[B].l_sp_u[0, 0], self[B].l_sp_u[1, 0]            # |B] = (c, d)
         c = (X - b * d) / a                                          # c = (X - b * d) / a
-        self[B].l_sp_u = np.array([c, d])                            # set |B]
+        self[B].l_sp_u = numpy.array([c, d])                            # set |B]
         if fix_mom is True:
             self.fix_mom_cons(plist[0], plist[1], axis=1)
 
@@ -187,42 +188,42 @@ class Particles_Set:
                 temp_string = temp_string.replace("[", "X").replace("]", "[").replace("X", "]")
                 self.set_inner(temp_string, temp_value, fix_mom, mode)
                 return
-            rest = np.array([[1, 0], [0, 1]])                   # initialise the rest to the identity matrix
+            rest = numpy.array([[1, 0], [0, 1]])                   # initialise the rest to the identity matrix
             for i in range(len(bc)):
                 comb_mom = re.sub(r'(\d)', r'self[\1].four_mom', bc[i])
                 comb_mom = eval(comb_mom)
                 if a_or_s == "⟨":
-                    rest = np.dot(rest, self._four_mom_to_r2_sp_bar(comb_mom))
+                    rest = numpy.dot(rest, self._four_mom_to_r2_sp_bar(comb_mom))
                     a_or_s = "["                                # needs to alternate the contraction of indices
                 elif a_or_s == "[":
-                    rest = np.dot(rest, self._four_mom_to_r2_sp(comb_mom))
+                    rest = numpy.dot(rest, self._four_mom_to_r2_sp(comb_mom))
                     a_or_s = "⟨"                                # needs to alternate the contraction of indices
             if a == d and len(lNBms) % 2 == 0:
                 K11, K12, K21, K22 = rest[0, 0], rest[0, 1], rest[1, 0], rest[1, 1]
                 if temp_string[0] == "⟨":
                     B = self[a].r_sp_d[1, 0]
-                    A = (B * K11 - B * K22 + gmpTools.csqrt((B * K11 - B * K22) * (B * K11 - B * K22) + 4 * K21 * (B * B * K12 - temp_value))) / (2 * K21)
-                    self[a].r_sp_d = np.array([A, B])
+                    A = (B * K11 - B * K22 + mpmath.sqrt((B * K11 - B * K22) * (B * K11 - B * K22) + 4 * K21 * (B * B * K12 - temp_value))) / (2 * K21)
+                    self[a].r_sp_d = numpy.array([A, B])
                 else:
                     B = self[a].l_sp_d[0, 1]
-                    A = (B * K11 - B * K22 + gmpTools.csqrt((B * K11 - B * K22) * (B * K11 - B * K22) + 4 * K12 * (B * B * K21 - temp_value))) / (2 * K12)
-                    self[a].l_sp_d = np.array([A, B])
+                    A = (B * K11 - B * K22 + mpmath.sqrt((B * K11 - B * K22) * (B * K11 - B * K22) + 4 * K12 * (B * B * K21 - temp_value))) / (2 * K12)
+                    self[a].l_sp_d = numpy.array([A, B])
             else:
                 if a_or_s == "⟨":
-                    rest = np.dot(rest, self[d].r_sp_d)
+                    rest = numpy.dot(rest, self[d].r_sp_d)
                 elif a_or_s == "[":
-                    rest = np.dot(rest, self[d].l_sp_u)
+                    rest = numpy.dot(rest, self[d].l_sp_u)
                 a_or_s = temp_string[0]                         # reset the angle_or_square bracket variable
                 if a_or_s == "⟨":
                     _a, _b = self[a].r_sp_u[0, 0], self[a].r_sp_u[0, 1]  # ⟨A| = (a, b)
                     _c, _d = rest[0, 0], rest[1, 0]             # |rest⟩ = (c, d)
                     _a = (temp_value - _b * _d) / _c                     # a = (X - b*d)/c
-                    self[a].r_sp_u = np.array([_a, _b])         # set ⟨A|
+                    self[a].r_sp_u = numpy.array([_a, _b])         # set ⟨A|
                 elif a_or_s == "[":
                     _a, _b = self[a].l_sp_d[0, 0], self[a].l_sp_d[0, 1]  # [A| = (a, b)
                     _c, _d = rest[0, 0], rest[1, 0]             # |rest⟩ = (c, d)
                     _a = (temp_value - _b * _d) / _c                     # a = (X - b*d)/c
-                    self[a].l_sp_d = np.array([_a, _b])         # set [A|
+                    self[a].l_sp_d = numpy.array([_a, _b])         # set [A|
 
         elif (unique_extrema_of_middle != []):                  # this sets the unique element in the middle
             _bc = bc[unique_extrema_of_middle[2]]               # start by rearranging the list so that the unique item is at the beginnig
@@ -392,15 +393,15 @@ class Particles_Set:
                   2 * b * c * e * h * m * n * o * p + 4 * e * f * g * h * m * n * o * p - 2 * e * e * g * h * n * n * o * p +
                   b * b * c * c * m * m * p * p + 2 * b * c * f * g * m * m * p * p + f * f * g * g * m * m * p * p -
                   2 * b * c * e * g * m * n * p * p - 2 * e * f * g * g * m * n * p * p + e * e * g * g * n * n * p * p - X)
-            a = (-QB - gmpTools.csqrt(QB**2 - 4 * QA * QC)) / (2 * QA)
+            a = (-QB - mpmath.sqrt(QB**2 - 4 * QA * QC)) / (2 * QA)
             if mode == 1:
-                self[NonOverlappingLists[0][0]].r_sp_d = np.array([a, b])
+                self[NonOverlappingLists[0][0]].r_sp_d = numpy.array([a, b])
             elif mode == 2:
-                self[NonOverlappingLists[0][0]].l_sp_d = np.array([a, b])
+                self[NonOverlappingLists[0][0]].l_sp_d = numpy.array([a, b])
             elif mode == 3:
-                self[NonOverlappingLists[0][1]].r_sp_d = np.array([a, b])
+                self[NonOverlappingLists[0][1]].r_sp_d = numpy.array([a, b])
             elif mode == 4:
-                self[NonOverlappingLists[0][1]].l_sp_d = np.array([a, b])
+                self[NonOverlappingLists[0][1]].l_sp_d = numpy.array([a, b])
 
         else:
             run_me_again = True
@@ -408,13 +409,13 @@ class Particles_Set:
             temp_oParticles = self.ijk_to_3Ks(ijk)              # K1 = Sum_Pi's, K2 = Sum_Pj's, K3 = Sum_Pk's
             K1s = temp_oParticles.ldot(1, 1)
             K10 = temp_oParticles[1].four_mom[0]
-            K1V = np.array([temp_oParticles[1].four_mom[1], temp_oParticles[1].four_mom[2], temp_oParticles[1].four_mom[3]])
-            K2V = np.array([temp_oParticles[2].four_mom[1], temp_oParticles[2].four_mom[2], temp_oParticles[2].four_mom[3]])
+            K1V = numpy.array([temp_oParticles[1].four_mom[1], temp_oParticles[1].four_mom[2], temp_oParticles[1].four_mom[3]])
+            K2V = numpy.array([temp_oParticles[2].four_mom[1], temp_oParticles[2].four_mom[2], temp_oParticles[2].four_mom[3]])
             a = K10**2 - K1s
-            b = -2 * K10 * (np.dot(K1V, K2V))
-            c = np.dot(K1V, K2V)**2 + K1s * np.dot(K2V, K2V) - temp_value
-            K20 = (-b + gmpTools.csqrt(b**2 - 4 * a * c)) / (2 * a)                   # Solve quadratic equation and fix K_2^0
-            temp_oParticles[2].four_mom = np.array([K20, K2V[0], K2V[1], K2V[2]])
+            b = -2 * K10 * (numpy.dot(K1V, K2V))
+            c = numpy.dot(K1V, K2V)**2 + K1s * numpy.dot(K2V, K2V) - temp_value
+            K20 = (-b + mpmath.sqrt(b**2 - 4 * a * c)) / (2 * a)                   # Solve quadratic equation and fix K_2^0
+            temp_oParticles[2].four_mom = numpy.array([K20, K2V[0], K2V[1], K2V[2]])
 
             NonOLLists = self.ijk_to_3NonOverlappingLists(ijk, 2)   # Convert solution from K_2 to Pj's by decaying the last two
             from particles import Particles
@@ -518,9 +519,9 @@ class Particles_Set:
               e**2 * g * h * j * k * n * p + b * c * e * g * i * l * n * p + e * f * g**2 * i * l * n * p -
               e**2 * g**2 * j * l * n * p - X)
 
-        a = (-QB - gmpTools.csqrt(QB**2 - 4 * QA * QC)) / (2 * QA)
+        a = (-QB - mpmath.sqrt(QB**2 - 4 * QA * QC)) / (2 * QA)
 
-        self[A].r_sp_d = np.array([a, b])
+        self[A].r_sp_d = numpy.array([a, b])
         self.fix_mom_cons(E, F)
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -548,7 +549,7 @@ class Particles_Set:
               n * e * h * o - b * d * m * o - f * h * m * o - n * e * g * p + b * c * m * p + f * g * m * p - X) /
              (d * j * k - c * j * l - n * d * o + n * c * p))
 
-        self[A].r_sp_d = np.array([a, b])
+        self[A].r_sp_d = numpy.array([a, b])
         self.fix_mom_cons(E, F)
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #

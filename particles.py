@@ -13,11 +13,10 @@ from __future__ import unicode_literals
 
 import sys
 import time
-import numpy as np
+import numpy
 import random
 import re
 import os
-import gmpTools
 
 from copy import deepcopy
 from antares.core.bh_patch import accuracy
@@ -66,6 +65,7 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
                 self.append(oParticle)
         elif number_of_particles_or_particles is not None:
             raise Exception("Invalid initialisation of Particles instance.")
+        self.oRefVec = Particle()
 
     def __eq__(self, other):
         if type(self) == type(other):
@@ -97,7 +97,7 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
             self.fix_mom_cons(A, B, real_momenta, axis)
 
         elif A != 0 and B != 0 and real_momenta is True:            # the following results in real momenta, but changes both |⟩ and |] of A & B
-            ex = np.array([0. + 0j, 0., 0., 0.])                    # excess momentum init. to 0
+            ex = numpy.array([0. + 0j, 0., 0., 0.])                    # excess momentum init. to 0
             for i in range(1, len(self) + 1):
                 if i != A and i != B:
                     ex = ex - self[i].four_mom
@@ -110,16 +110,16 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
                 denominator = (2 * ex[3] - 2 * ex[0])
             p_fix = numerator / denominator
             if axis == 1:
-                self[A].four_mom = np.array([p_fix, p_fix, 0, 0])
+                self[A].four_mom = numpy.array([p_fix, p_fix, 0, 0])
             elif axis == 2:
-                self[A].four_mom = np.array([p_fix, 0, p_fix, 0])
+                self[A].four_mom = numpy.array([p_fix, 0, p_fix, 0])
             elif axis == 3:
-                self[A].four_mom = np.array([p_fix, 0, 0, p_fix])
+                self[A].four_mom = numpy.array([p_fix, 0, 0, p_fix])
             ex = ex - self[A].four_mom
             self[B].four_mom = ex
 
         elif A != 0 and B != 0:                                     # the following results in complex momenta, it changes |A⟩&|B⟩ (axis=1) or |A]&|B] (axis=2)
-            K = np.array([0. + 0j, 0., 0., 0.])                       # Note: axis here is a meaningless name. It is just used as a switch.
+            K = numpy.array([0. + 0j, 0., 0., 0.])                       # Note: axis here is a meaningless name. It is just used as a switch.
             for i in range(1, len(self) + 1):                         # minus sum of all other momenta
                 if i != A and i != B:
                     K = K - self[i].four_mom
@@ -136,15 +136,15 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
                 b = (g * K22 - h * K21) / (d * g - c * h)
                 e = (d * K11 - c * K12) / (d * g - c * h)
                 f = (d * K21 - c * K22) / (d * g - c * h)
-                self[A].r_sp_d = np.array([a, b])
-                self[B].r_sp_d = np.array([e, f])
+                self[A].r_sp_d = numpy.array([a, b])
+                self[B].r_sp_d = numpy.array([e, f])
             else:                                                   # change |A] and |B]
                 c = (e * K21 - f * K11) / (b * e - a * f)
                 d = (e * K22 - f * K12) / (b * e - a * f)
                 g = (b * K11 - a * K21) / (b * e - a * f)
                 h = (b * K12 - a * K22) / (b * e - a * f)
-                self[A].l_sp_d = np.array([c, d])
-                self[B].l_sp_d = np.array([g, h])
+                self[A].l_sp_d = numpy.array([c, d])
+                self[B].l_sp_d = numpy.array([g, h])
 
     def momentum_conservation_check(self, silent=True):
         """Returns true if momentum is conserved."""
@@ -153,8 +153,7 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
             if abs(self.total_mom[i]) > mom_violation:
                 mom_violation = abs(self.total_mom[i])
         if silent is False:
-            mom_violation = gmpTools.RGMP(mom_violation)
-            print("The largest momentum violation is {}".format(gmpTools.to_double(mom_violation)))
+            print("The largest momentum violation is {}".format(float(mom_violation)))
         if mom_violation > 10 ** -(0.9 * accuracy()):
             myException("Momentum conservation violation.")
             return False
@@ -167,7 +166,7 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
             if abs(self.ldot(i, i)) > onshell_violation:
                 onshell_violation = abs(self.ldot(i, i))
         if silent is False:
-            print("The largest on shell violation is {}".format(gmpTools.to_double(onshell_violation)))
+            print("The largest on shell violation is {}".format(float(onshell_violation)))
             # print("{}-------------------{}".format(Hyphens, Hyphens))
         if onshell_violation > 10 ** -(0.9 * accuracy()):
             myException("Onshell relation violation.")
@@ -215,7 +214,7 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
                 small_outliers += [_invars[i]]
                 small_outliers_values += [values[i]]
                 if silent is False:
-                    print "{} = {}".format(_invars[i], gmpTools.to_double(values[i]))
+                    print "{} = {}".format(_invars[i], float(values[i]))
             if values[i] > 0.0001:
                 break
         if silent is False:
@@ -226,7 +225,7 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
                 big_outliers += [_invars[i]]
                 big_outliers_values += [values[i]]
                 if silent is False:
-                    print "{} = {}".format(_invars[i], gmpTools.to_double(values[i]))
+                    print "{} = {}".format(_invars[i], float(values[i]))
         if silent is False:
             pass
             # print("{}-------------------{}".format(Hyphens, Hyphens))
@@ -364,7 +363,7 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
     def ijk_to_3Ks(self, ijk):                                      # this method is used for Delta computation and setting
         K = [0, 0, 0]
         for i in range(3):
-            K[i] = np.array([0, 0, 0, 0])
+            K[i] = numpy.array([0, 0, 0, 0])
             j = ijk[i]
             while (j != ijk[(i + 1) % 3] and j != ijk[(i + 2) % 3]):
                 K[i] = K[i] + self[j].four_mom
@@ -512,7 +511,7 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
                 P2 = (repr(iParticle.four_mom[2].real) + "+" + repr(iParticle.four_mom[2].imag) + "I").replace("e", "*^").replace("RGMP(", "").replace(")", "")
                 P3 = (repr(iParticle.four_mom[3].real) + "+" + repr(iParticle.four_mom[3].imag) + "I").replace("e", "*^").replace("RGMP(", "").replace(")", "")
                 msg += "DeclareSpinorMomentum[{ind}, [[{P0}, {P1}, {P2}, {P3}]]]".format(
-                    ind=i + 1, P0=P0, P1=P1, P2=P2, P3=P3).replace("[[", "{").replace("]]", "}").replace("+-", "-").replace("gmpTools.", "") + "\n"
+                    ind=i + 1, P0=P0, P1=P1, P2=P2, P3=P3).replace("[[", "{").replace("]]", "}").replace("+-", "-") + "\n"
             msg = msg[:-1]
             return msg
         elif as_spinors is True:
@@ -522,7 +521,7 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
                 Lat0 = (repr(iParticle.l_sp_d[0, 0].real) + "+" + repr(iParticle.l_sp_d[0, 0].imag) + "I").replace("e", "*^").replace("RGMP(", "").replace(")", "")
                 Lat1 = (repr(iParticle.l_sp_d[0, 1].real) + "+" + repr(iParticle.l_sp_d[0, 1].imag) + "I").replace("e", "*^").replace("RGMP(", "").replace(")", "")
                 msg += "DeclareSpinorMomentum[Sp[{ind}], [[[[{La0}]], [[{La1}]]]], [[[[{Lat0}, {Lat1}]]]]]".format(
-                    ind=i + 1, La0=La0, La1=La1, Lat0=Lat0, Lat1=Lat1).replace("[[", "{").replace("]]", "}").replace("+-", "-").replace("gmpTools.", "") + "\n"
+                    ind=i + 1, La0=La0, La1=La1, Lat0=Lat0, Lat1=Lat1).replace("[[", "{").replace("]]", "}").replace("+-", "-") + "\n"
             msg = msg[:-1]
             return msg
 
@@ -546,20 +545,20 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
 
     @staticmethod
     def _four_mom_to_r2_sp_bar(temp_four_mom):                      # this is (P^mu)_alpha,alpha_dot = |A⟩[A|
-        p_lowered_index = np.dot(MinkowskiMetric, temp_four_mom)
-        p_lowered_index = np.transpose(p_lowered_index)
-        r2_s_b = np.array([[0j, 0j], [0j, 0j]])
+        p_lowered_index = numpy.dot(MinkowskiMetric, temp_four_mom)
+        p_lowered_index = numpy.transpose(p_lowered_index)
+        r2_s_b = numpy.array([[0j, 0j], [0j, 0j]])
         for i in range(4):
-            r2_s_b = r2_s_b + np.dot(Pauli_bar[i], p_lowered_index[i])
+            r2_s_b = r2_s_b + numpy.dot(Pauli_bar[i], p_lowered_index[i])
         return r2_s_b
 
     @staticmethod
     def _four_mom_to_r2_sp(temp_four_mom):                          # this is (P^mu)^alpha_dot,alpha = |A]⟨A|
-        p_lowered_index = np.dot(MinkowskiMetric, temp_four_mom)
-        p_lowered_index = np.transpose(p_lowered_index)
-        r2_s = np.array([[0j, 0j], [0j, 0j]])
+        p_lowered_index = numpy.dot(MinkowskiMetric, temp_four_mom)
+        p_lowered_index = numpy.transpose(p_lowered_index)
+        r2_s = numpy.array([[0j, 0j], [0j, 0j]])
         for i in range(4):
-            r2_s = r2_s + np.dot(Pauli[i], p_lowered_index[i])
+            r2_s = r2_s + numpy.dot(Pauli[i], p_lowered_index[i])
         return r2_s
 
 

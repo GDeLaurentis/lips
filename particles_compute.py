@@ -13,10 +13,13 @@
 from __future__ import unicode_literals
 
 import sys
-import numpy as np
+import numpy
 import re
+import mpmath
 
 from antares.core.tools import MinkowskiMetric, pSijk, pd5, pDijk, pOijk, pPijk, pA2, pS2, pNB, ptr5
+
+mpmath.mp.dps = 300
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -26,9 +29,32 @@ class Particles_Compute:
 
     def ldot(self, A, B):
         """Lorentz dot product: P_A^μ * η_μν * P_B^ν."""
-        p_lowered_index = np.dot(MinkowskiMetric, self[B].four_mom)
-        p_lowered_index = np.transpose(p_lowered_index)
-        return np.dot(self[A].four_mom, p_lowered_index)
+        p_lowered_index = numpy.dot(MinkowskiMetric, self[B].four_mom)
+        p_lowered_index = numpy.transpose(p_lowered_index)
+        return numpy.dot(self[A].four_mom, p_lowered_index)
+
+    def ep(self, i, j):
+        if self.helconf[i - 1] == "+":
+            # ε⁺ᵢ⋅pⱼ = ⟨q|j|i] / √2⟨qi⟩
+            return (numpy.dot(numpy.dot(self.oRefVec.r_sp_u, self[j].r2_sp_b), self[i].l_sp_u) /
+                    (mpmath.sqrt(2) * numpy.dot(self.oRefVec.r_sp_u, self[i].r_sp_d)))[0][0]
+        elif self.helconf[i - 1] == "-":
+            # ε⁻ᵢ⋅pⱼ = ⟨i|j|q] / √2[iq]
+            return (numpy.dot(numpy.dot(self[i].r_sp_u, self[j].r2_sp_b), self.oRefVec.l_sp_u) /
+                    (mpmath.sqrt(2) * numpy.dot(self[i].l_sp_d, self.oRefVec.l_sp_u)))[0][0]
+
+    def pe(self, i, j):
+        return self.ep(j, i)
+
+    def ee(self, i, j):
+        if self.helconf[i - 1] == self.helconf[j - 1]:
+            return 0
+        elif self.helconf[i - 1] == "-":
+            # ε⁻ᵢ⋅ε⁺ⱼ = ⟨i|q|j] / ⟨j|q|i]
+            return - (numpy.dot(numpy.dot(self[i].r_sp_u, self.oRefVec.r2_sp_b), self[j].l_sp_u) /
+                      (numpy.dot(numpy.dot(self[j].r_sp_u, self.oRefVec.r2_sp_b), self[i].l_sp_u)))[0][0]
+        else:
+            return self.ee(j, i)
 
     def compute(self, temp_string):
         """Computes spinor strings.\n
@@ -87,11 +113,11 @@ class Particles_Compute:
 
         elif pA2.findall(temp_string) != []:                        # ⟨A|B⟩ -- contraction is up -> down : lambda[A]^alpha.lambda[B]_alpha
             A, B = map(int, pA2.findall(temp_string)[0])
-            return np.dot(self[A].r_sp_u, self[B].r_sp_d)[0, 0]
+            return numpy.dot(self[A].r_sp_u, self[B].r_sp_d)[0, 0]
 
         elif pS2.findall(temp_string) != []:                        # [A|B] -- contraction is down -> up : lambda_bar[A]_alpha_dot.lambda_bar[B]^alpha_dot
             A, B = map(int, pS2.findall(temp_string)[0])
-            return np.dot(self[A].l_sp_d, self[B].l_sp_u)[0, 0]
+            return numpy.dot(self[A].l_sp_d, self[B].l_sp_u)[0, 0]
 
         elif pNB.findall(temp_string) != []:                        # ⟨A|(B+C+..)..|D]
             abcd = pNB.search(temp_string)
@@ -114,15 +140,15 @@ class Particles_Compute:
                 comb_mom = re.sub(r'(\d)', r'self[\1].four_mom', bc[i])
                 comb_mom = eval(comb_mom)
                 if a_or_s == "⟨":
-                    result = np.dot(result, self._four_mom_to_r2_sp_bar(comb_mom))
+                    result = numpy.dot(result, self._four_mom_to_r2_sp_bar(comb_mom))
                     a_or_s = "["                                    # needs to alternate
                 elif a_or_s == "[":
-                    result = np.dot(result, self._four_mom_to_r2_sp(comb_mom))
+                    result = numpy.dot(result, self._four_mom_to_r2_sp(comb_mom))
                     a_or_s = "⟨"                                    # needs to alternate
             if a_or_s == "⟨":
-                result = np.dot(result, self[d].r_sp_d)
+                result = numpy.dot(result, self[d].r_sp_d)
             elif a_or_s == "[":
-                result = np.dot(result, self[d].l_sp_u)
+                result = numpy.dot(result, self[d].l_sp_u)
             return result[0][0]
         else:
             print "Critical error: string {} is not implemented.".format(temp_string)

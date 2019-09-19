@@ -12,9 +12,11 @@
 from __future__ import unicode_literals
 
 import numpy
-import gmpTools
+import mpmath
 
 from antares.core.tools import MinkowskiMetric, LeviCivita, Pauli, Pauli_bar, rand_frac
+
+mpmath.mp.dps = 300
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -168,7 +170,7 @@ class Particle(object):
         while abs(p[0]) == 0 and abs(p[1]) == 0 and p[2].real <= 0 and p[2].imag == 0:     # make sure it is not in the
             p = [rand_frac(), rand_frac(), rand_frac()]                                    # negative z direction or null
         p2 = p[0] * p[0] + p[1] * p[1] + p[2] * p[2]
-        p_zero = gmpTools.csqrt(p2)
+        p_zero = mpmath.sqrt(p2)
         self.four_mom = numpy.array([p_zero] + p)
         self._four_mom_to_four_mom_d()
         self._four_mom_d_to_r2_sp()
@@ -198,7 +200,7 @@ class Particle(object):
         return minus_self
 
     def _four_mom_to_r_sp_d(self):     # r_sp_d is \lambda_\alpha
-        lambda_one = gmpTools.csqrt(self._four_mom[0] + self._four_mom[3])
+        lambda_one = mpmath.sqrt(self._four_mom[0] + self._four_mom[3])
         if abs(lambda_one) == 0:
             if self._four_mom[1] == 0 and self._four_mom[2] == 0:
                 lambda_two = lambda_one  # i.e. zero
@@ -210,7 +212,7 @@ class Particle(object):
         self._r_sp_d.shape = (2, 1)    # column vector
 
     def _four_mom_to_l_sp_d(self):     # l_sp_d is \bar{\lambda}_{\dot\alpha}
-        lambdabar_one = gmpTools.csqrt(self._four_mom[0] + self._four_mom[3])
+        lambdabar_one = mpmath.sqrt(self._four_mom[0] + self._four_mom[3])
         if abs(lambdabar_one) == 0:
             if self._four_mom[1] == 0 and self._four_mom[2] == 0:
                 lambdabar_two = lambdabar_one  # i.e. zero

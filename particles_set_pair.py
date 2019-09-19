@@ -11,8 +11,7 @@
 from __future__ import unicode_literals
 
 import os
-import numpy as np
-import gmpTools                # noqa -- used in eval() from file
+import numpy
 
 from antares.core.bh_patch import abs, accuracy
 from antares.core.tools import flatten, pSijk, pDijk, pA2, pS2, p3B, pNB, myException
@@ -520,7 +519,7 @@ class Particles_SetPair:
                 d * f * h * i * j * k * k - d * e * h * j * j * k * k - d * f * f * g * g * i * l + c * f * f * g * h * i * l +
                 d * e * f * g * g * j * l - c * e * f * g * h * j * l - d * f * g * i * j * k * l - c * f * h * i * j * k * l +
                 d * e * g * j * j * k * l + c * e * h * j * j * k * l + c * f * g * i * j * l * l - c * e * g * j * j * l * l - d * j * k * X + c * j * l * X)
-            self[A].r_sp_d = np.array([a, b])
+            self[A].r_sp_d = numpy.array([a, b])
             free = map(int, free)
             if len(free) >= 2:
                 self.fix_mom_cons(free[0], free[1])
@@ -890,9 +889,9 @@ class Particles_SetPair:
         m, n = self[D].r_sp_d[0, 0], self[D].r_sp_d[1, 0]  # noqa --- used in eval
         o, p = self[D].l_sp_d[0, 0], self[D].l_sp_d[0, 1]  # noqa --- used in eval
         Y, X = t_v1, t_v2                                  # noqa --- used in eval
-        a, e = eval(expression_for_a.replace("sqrt", "gmpTools.csqrt")), eval(expression_for_e.replace("sqrt", "gmpTools.csqrt"))
-        self[A].r_sp_d = np.array([a, b])
-        self[B].r_sp_d = np.array([e, f])
+        a, e = eval(expression_for_a.replace("sqrt", "mpmath.sqrt")), eval(expression_for_e.replace("sqrt", "mpmath.sqrt"))
+        self[A].r_sp_d = numpy.array([a, b])
+        self[B].r_sp_d = numpy.array([e, f])
         self.fix_mom_cons(E, F)
         return
 
