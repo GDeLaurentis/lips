@@ -3,12 +3,13 @@
 
 from __future__ import unicode_literals
 
+import sympy
 import pytest
-from sympy import pprint
+
+from particles import Particles
 
 from antares.core.invariants import Invariants
 from antares.core.tools import mapThreads
-from antares.particles.particles import Particles
 from antares.core.settings import settings
 
 
@@ -36,9 +37,9 @@ def SingleScalingsTestingInner(n, invariants, invariant):
         _, _, _, small_invs = oParticles.phasespace_consistency_check(invariants)
         if len(small_invs) > 1:         # check that only one is set to be small
             error_counter += 1
-            pprint(result)
-            pprint(invariant)
-            pprint(small_invs)
+            sympy.pprint(result)
+            sympy.pprint(invariant)
+            sympy.pprint(small_invs)
             if error_counter == max_error_nbr + 1:
                 return False
         elif result is False:           # if it fails print it

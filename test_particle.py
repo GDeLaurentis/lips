@@ -1,6 +1,8 @@
 import numpy
-from antares.core.tools import MinkowskiMetric, Pauli_bar, flatten
+
 from particle import Particle
+
+from antares.core.tools import MinkowskiMetric, Pauli_bar, flatten
 
 
 def test_rank_two_spinor_setter():
