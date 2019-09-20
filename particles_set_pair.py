@@ -14,9 +14,9 @@ import os
 import numpy
 import mpmath
 
-from antares.core.tools import flatten, pSijk, pDijk, pA2, pS2, p3B, pNB, myException
+from tools import flatten, pSijk, pDijk, pA2, pS2, p3B, pNB, myException
 
-local_directory = os.path.dirname(os.path.abspath(__file__))
+local_directory = os.path.dirname(__file__)
 mpmath.mp.dps = 300
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #

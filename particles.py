@@ -11,8 +11,6 @@
 
 from __future__ import unicode_literals
 
-import sys
-import time
 import numpy
 import random
 import re
@@ -25,7 +23,8 @@ from particles_compute import Particles_Compute
 from particles_set import Particles_Set
 from particles_set_pair import Particles_SetPair
 
-from antares.core.tools import flatten, pA2, pS2, pNB, myException, mapThreads
+from tools import flatten, pA2, pS2, pNB, myException
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
@@ -523,32 +522,3 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
         for i, iK in enumerate(oKs):
             iK.four_mom = four_moms[i]
         return oKs
-
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
-
-
-def phase_space_points(multiplicity=None, nbr_points=None, small_invs=None, small_invs_exps=None, UseParallelisation=True, Cores=6):
-    """Returns phase space points (Particles objects) of given multiplicity in collinear limit described by small_invs & small_invs_exps."""
-    time_start = time.time()
-    lParticles = mapThreads(phase_space_point, multiplicity, small_invs, small_invs_exps, range(nbr_points), UseParallelisation=UseParallelisation, Cores=Cores)
-    time_end = time.time()
-    seconds = time_end - time_start
-    m, s = divmod(seconds, 60)
-    h, m = divmod(m, 60)
-    sys.stdout.write("\rGenrated %i phase space points in %d:%02d:%02d.                                            " % (nbr_points, h, m, s))
-    sys.stdout.flush()
-    return lParticles
-
-
-def phase_space_point(multiplicity, small_invs, small_invs_exps, nbr_point):
-    oParticles = Particles(multiplicity, seed=nbr_point)
-    if small_invs is None or len(small_invs) == 0:
-        oParticles.fix_mom_cons()
-    elif len(small_invs) == 1 and len(small_invs_exps) == 1:
-        oParticles.set(small_invs[0], 10 ** -int(0.80 * 300 / 5))
-    elif len(small_invs) == 2 and len(small_invs_exps) == 2:
-        oParticles.set_pair(small_invs[0], 10 ** -int(0.80 * 300 / 5), small_invs[1], 10 ** -int(0.80 * 300 / 5))
-    else:
-        raise Exception("Bad format for small_invs and small_invs_exps in phase_space_points.")
-    return oParticles

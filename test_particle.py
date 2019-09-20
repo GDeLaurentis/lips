@@ -2,7 +2,7 @@ import numpy
 
 from particle import Particle
 
-from antares.core.tools import flatten
+from tools import flatten
 
 
 def test_rank_two_spinor_setter():

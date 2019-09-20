@@ -17,7 +17,7 @@ import mpmath
 
 from particle import Particle
 
-from antares.core.tools import flatten, pSijk, pDijk, pOijk, pPijk, pA2, pS2, pNB, myException
+from tools import flatten, pSijk, pDijk, pOijk, pPijk, pA2, pS2, pNB, myException
 
 mpmath.mp.dps = 300
 

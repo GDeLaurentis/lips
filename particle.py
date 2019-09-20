@@ -12,8 +12,9 @@
 from __future__ import unicode_literals
 
 import numpy
-import random
 import mpmath
+
+from tools import MinkowskiMetric, LeviCivita, rand_frac, Pauli, Pauli_bar
 
 mpmath.mp.dps = 300
 
@@ -300,23 +301,3 @@ class Particle(object):
         for i in range(4):
             self._four_mom[i] = numpy.trace(numpy.dot(Pauli[i], r_two_spinor)) / 2
         self.four_mom = self._four_mom
-
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
-
-
-LeviCivita = numpy.array([[0, 1], [-1, 0]])
-MinkowskiMetric = numpy.diag([1, -1, -1, -1])
-Pauli_zero = numpy.diag([1, 1])
-Pauli_x = numpy.array([[0, 1], [1, 0]])
-Pauli_y = numpy.array([[0, -1j], [1j, 0]])
-Pauli_z = numpy.array([[1, 0], [0, -1]])
-Pauli = numpy.array([Pauli_zero, Pauli_x, Pauli_y, Pauli_z])
-Pauli_bar = numpy.array([Pauli_zero, -Pauli_x, -Pauli_y, -Pauli_z])
-
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
-
-
-def rand_frac():
-    return mpmath.mpc(random.randrange(-100, 101)) / mpmath.mpc(random.randrange(1, 201))

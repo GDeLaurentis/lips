@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 
-from antares.particles.particles import Particles
+from particles import Particles
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
