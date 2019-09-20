@@ -15,3 +15,7 @@ Particles objects allow to:\n
    oParticles.set(spinor_string, small_value)
    oParticles.set_pair(spinor_string_1, small_value_1, spinor_string_2, small_value_2)
 """
+
+from particle import Particle      # noqa
+from particles import Particles    # noqa
+from tools import myException      # noqa
