@@ -12,14 +12,13 @@
 
 from __future__ import unicode_literals
 
-import sys
 import numpy
 import re
 import mpmath
 
 from particle import Particle
 
-from antares.core.tools import pSijk, pd5, pDijk, pOijk, pPijk, pA2, pS2, pNB, ptr5
+from antares.core.tools import pSijk, pd5, pDijk, pOijk, pPijk, pA2, pS2, pNB, ptr5, myException
 
 mpmath.mp.dps = 300
 
@@ -134,8 +133,7 @@ class Particles_Compute:
             elif a_or_s == '[':
                 result = self[a].l_sp_d
             else:
-                print "Critical error: string must start with ⟨ or [."
-                sys.exit('Invalid string in compute.')
+                myException("Invalid string in compute: string must start with ⟨ or [.")
             for i in range(len(bc)):
                 comb_mom = re.sub(r'(\d)', r'self[\1].four_mom', bc[i])
                 comb_mom = eval(comb_mom)
@@ -152,5 +150,4 @@ class Particles_Compute:
                 result = numpy.dot(result, self[d].l_sp_u)
             return result[0][0]
         else:
-            print "Critical error: string {} is not implemented.".format(temp_string)
-            sys.exit('Invalid string in compute.')
+            myException("Invalid string in compute: string {} is not implemented.".format(temp_string))
