@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import sympy
 import pytest
 
-from particles import Particles
+from lips import Particles
 
 from antares.core.invariants import Invariants
 from antares.core.tools import mapThreads

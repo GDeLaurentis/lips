@@ -1,8 +1,7 @@
 import numpy
 
-from particle import Particle
-
-from tools import flatten
+from lips import Particle
+from lips.tools import flatten
 
 
 def test_rank_two_spinor_setter():

@@ -5,8 +5,8 @@ from __future__ import unicode_literals
 
 import pytest
 
-from particles import Particles
-from tools import myException
+from lips import Particles
+from lips.tools import myException
 
 from antares.core.invariants import Invariants
 from antares.core.tools import mapThreads, retry

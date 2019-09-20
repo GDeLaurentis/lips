@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 
-from particles import Particles
+from lips import Particles
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
