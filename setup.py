@@ -8,5 +8,6 @@ setup(
     author_email='g.dl@hotmail.it',
     description='Lorentz Invariant Phase Space',
     packages=find_packages(),
-    install_requires=['numpy'],
+    install_requires=['numpy==1.14.2',
+                      'mpmath==1.0.0', ],
 )
