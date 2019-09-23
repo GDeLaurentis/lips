@@ -11,7 +11,7 @@ setup(
     include_package_data=True,
     data_files=[('lips', ['lips/DoubleCollinearLimit_D&S_a',
                           'lips/DoubleCollinearLimit_D&S_e', ])],
-    install_requires=['numpy==1.14.2',
-                      'mpmath==1.0.0',
-                      'sympy==1.1.1', ],
+    install_requires=['numpy<1.17',
+                      'mpmath<=1.1.0',
+                      'sympy<=1.4', ],
 )
