@@ -1,0 +1,409 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>lips package &#8212; lips 0.0.1 documentation</title>
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">lips 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="lips-package">
+<h1>lips package<a class="headerlink" href="#lips-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-lips.particle">
+<span id="lips-particle-module"></span><h2>lips.particle module<a class="headerlink" href="#module-lips.particle" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="lips.particle.Particle">
+<em class="property">class </em><code class="descclassname">lips.particle.</code><code class="descname">Particle</code><span class="sig-paren">(</span><em>four_mom=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lips.particle.Particle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Describes the kinematics of a single particle. test</p>
+<dl class="method">
+<dt id="lips.particle.Particle.angles_for_squares">
+<code class="descname">angles_for_squares</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lips.particle.Particle.angles_for_squares" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flips left and right spinors.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="lips.particle.Particle.four_mom">
+<code class="descname">four_mom</code><a class="headerlink" href="#lips.particle.Particle.four_mom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Four Momentum with upper index: P^μ</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="lips.particle.Particle.four_mom_d">
+<code class="descname">four_mom_d</code><a class="headerlink" href="#lips.particle.Particle.four_mom_d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Four Momentum with lower index: P_μ</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="lips.particle.Particle.l_sp_d">
+<code class="descname">l_sp_d</code><a class="headerlink" href="#lips.particle.Particle.l_sp_d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Left spinor with index down: ̅λ_̇α (row_vector).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="lips.particle.Particle.l_sp_u">
+<code class="descname">l_sp_u</code><a class="headerlink" href="#lips.particle.Particle.l_sp_u" title="Permalink to this definition">¶</a></dt>
+<dd><p>Left spinor with index up: ̅λ^̇α (column vector).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="lips.particle.Particle.r2_sp">
+<code class="descname">r2_sp</code><a class="headerlink" href="#lips.particle.Particle.r2_sp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Four Momentum Slashed with upper indices: P^{̇αα}</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="lips.particle.Particle.r2_sp_b">
+<code class="descname">r2_sp_b</code><a class="headerlink" href="#lips.particle.Particle.r2_sp_b" title="Permalink to this definition">¶</a></dt>
+<dd><p>Four Momentum Slashed with lower indices: P̅_{α̇α}</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="lips.particle.Particle.r_sp_d">
+<code class="descname">r_sp_d</code><a class="headerlink" href="#lips.particle.Particle.r_sp_d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Right spinor with index down: λ_α (column vector).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="lips.particle.Particle.r_sp_u">
+<code class="descname">r_sp_u</code><a class="headerlink" href="#lips.particle.Particle.r_sp_u" title="Permalink to this definition">¶</a></dt>
+<dd><p>Right spinor with index up: λ^α (row_vector).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lips.particle.Particle.randomise">
+<code class="descname">randomise</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lips.particle.Particle.randomise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Randomises its momentum. Real values.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-lips.particles">
+<span id="lips-particles-module"></span><h2>lips.particles module<a class="headerlink" href="#module-lips.particles" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="lips.particles.Particles">
+<em class="property">class </em><code class="descclassname">lips.particles.</code><code class="descname">Particles</code><span class="sig-paren">(</span><em>number_of_particles_or_particles=None</em>, <em>seed=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lips.particles.Particles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lips.particles_compute.Particles_Compute" title="lips.particles_compute.Particles_Compute"><code class="xref py py-class docutils literal notranslate"><span class="pre">lips.particles_compute.Particles_Compute</span></code></a>, <a class="reference internal" href="#lips.particles_set.Particles_Set" title="lips.particles_set.Particles_Set"><code class="xref py py-class docutils literal notranslate"><span class="pre">lips.particles_set.Particles_Set</span></code></a>, <a class="reference internal" href="#lips.particles_set_pair.Particles_SetPair" title="lips.particles_set_pair.Particles_SetPair"><code class="xref py py-class docutils literal notranslate"><span class="pre">lips.particles_set_pair.Particles_SetPair</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></p>
+<p>Describes the kinematics of n particles.</p>
+<dl class="method">
+<dt id="lips.particles.Particles.angles_for_squares">
+<code class="descname">angles_for_squares</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lips.particles.Particles.angles_for_squares" title="Permalink to this definition">¶</a></dt>
+<dd><p>Switches all angle brackets for square brackets and viceversa.</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="lips.particles.Particles.check_consistency">
+<em class="property">static </em><code class="descname">check_consistency</code><span class="sig-paren">(</span><em>temp_string</em><span class="sig-paren">)</span><a class="headerlink" href="#lips.particles.Particles.check_consistency" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="lips.particles.Particles.cluster">
+<code class="descname">cluster</code><span class="sig-paren">(</span><em>llIntegers</em><span class="sig-paren">)</span><a class="headerlink" href="#lips.particles.Particles.cluster" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns clustered particle objects according to lists of lists of integers (e.g. corners of one loop diagram).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lips.particles.Particles.fix_mom_cons">
+<code class="descname">fix_mom_cons</code><span class="sig-paren">(</span><em>A=0</em>, <em>B=0</em>, <em>real_momenta=False</em>, <em>axis=1</em><span class="sig-paren">)</span><a class="headerlink" href="#lips.particles.Particles.fix_mom_cons" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fixes momentum conservation using particles A and B.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lips.particles.Particles.four_momenta_for_mathematica">
+<code class="descname">four_momenta_for_mathematica</code><span class="sig-paren">(</span><em>as_spinors=False</em><span class="sig-paren">)</span><a class="headerlink" href="#lips.particles.Particles.four_momenta_for_mathematica" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="lips.particles.Particles.ijk_to_3Ks">
+<code class="descname">ijk_to_3Ks</code><span class="sig-paren">(</span><em>ijk</em><span class="sig-paren">)</span><a class="headerlink" href="#lips.particles.Particles.ijk_to_3Ks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="lips.particles.Particles.ijk_to_3NonOverlappingLists">
+<code class="descname">ijk_to_3NonOverlappingLists</code><span class="sig-paren">(</span><em>ijk</em>, <em>mode=1</em><span class="sig-paren">)</span><a class="headerlink" href="#lips.particles.Particles.ijk_to_3NonOverlappingLists" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="lips.particles.Particles.image">
+<code class="descname">image</code><span class="sig-paren">(</span><em>permutation</em><span class="sig-paren">)</span><a class="headerlink" href="#lips.particles.Particles.image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the image of self under a given permutation. Remember, this is a passive transformation.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lips.particles.Particles.insert">
+<code class="descname">insert</code><span class="sig-paren">(</span><em>index</em>, <em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#lips.particles.Particles.insert" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="lips.particles.Particles.momentum_conservation_check">
+<code class="descname">momentum_conservation_check</code><span class="sig-paren">(</span><em>silent=True</em><span class="sig-paren">)</span><a class="headerlink" href="#lips.particles.Particles.momentum_conservation_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns true if momentum is conserved.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lips.particles.Particles.onshell_relation_check">
+<code class="descname">onshell_relation_check</code><span class="sig-paren">(</span><em>silent=True</em><span class="sig-paren">)</span><a class="headerlink" href="#lips.particles.Particles.onshell_relation_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns true if all on-shell relations are satisfied.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lips.particles.Particles.phasespace_consistency_check">
+<code class="descname">phasespace_consistency_check</code><span class="sig-paren">(</span><em>invariants=[]</em>, <em>silent=True</em><span class="sig-paren">)</span><a class="headerlink" href="#lips.particles.Particles.phasespace_consistency_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs momentum and onshell checks. Looks for outliers in phase space.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lips.particles.Particles.randomise_all">
+<code class="descname">randomise_all</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lips.particles.Particles.randomise_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>Randomises all particles. Breaks momentum conservation.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lips.particles.Particles.save_phase_space_point">
+<code class="descname">save_phase_space_point</code><span class="sig-paren">(</span><em>invariant=u''</em><span class="sig-paren">)</span><a class="headerlink" href="#lips.particles.Particles.save_phase_space_point" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="lips.particles.Particles.total_mom">
+<code class="descname">total_mom</code><a class="headerlink" href="#lips.particles.Particles.total_mom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Total momentum of the given phase space.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="lips.particles.indexing_decorator">
+<code class="descclassname">lips.particles.</code><code class="descname">indexing_decorator</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="headerlink" href="#lips.particles.indexing_decorator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rebases a list to start from index 1.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-lips.particles_compute">
+<span id="lips-particles-compute-module"></span><h2>lips.particles_compute module<a class="headerlink" href="#module-lips.particles_compute" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="lips.particles_compute.Particles_Compute">
+<em class="property">class </em><code class="descclassname">lips.particles_compute.</code><code class="descname">Particles_Compute</code><a class="headerlink" href="#lips.particles_compute.Particles_Compute" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="lips.particles_compute.Particles_Compute.compute">
+<code class="descname">compute</code><span class="sig-paren">(</span><em>temp_string</em><span class="sig-paren">)</span><a class="headerlink" href="#lips.particles_compute.Particles_Compute.compute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes spinor strings.</p>
+<p>Available variables: ⟨a|b⟩, [a|b], ⟨a|b+c|d], ⟨a|b+c|d+e|f], …, s_ijk, Δ_ijk, Ω_ijk, Π_ijk, tr5_ijkl</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lips.particles_compute.Particles_Compute.ee">
+<code class="descname">ee</code><span class="sig-paren">(</span><em>i</em>, <em>j</em><span class="sig-paren">)</span><a class="headerlink" href="#lips.particles_compute.Particles_Compute.ee" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="lips.particles_compute.Particles_Compute.ep">
+<code class="descname">ep</code><span class="sig-paren">(</span><em>i</em>, <em>j</em><span class="sig-paren">)</span><a class="headerlink" href="#lips.particles_compute.Particles_Compute.ep" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="lips.particles_compute.Particles_Compute.ldot">
+<code class="descname">ldot</code><span class="sig-paren">(</span><em>A</em>, <em>B</em><span class="sig-paren">)</span><a class="headerlink" href="#lips.particles_compute.Particles_Compute.ldot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lorentz dot product: P_A^μ * η_μν * P_B^ν.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lips.particles_compute.Particles_Compute.pe">
+<code class="descname">pe</code><span class="sig-paren">(</span><em>i</em>, <em>j</em><span class="sig-paren">)</span><a class="headerlink" href="#lips.particles_compute.Particles_Compute.pe" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-lips.particles_set">
+<span id="lips-particles-set-module"></span><h2>lips.particles_set module<a class="headerlink" href="#module-lips.particles_set" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="lips.particles_set.Particles_Set">
+<em class="property">class </em><code class="descclassname">lips.particles_set.</code><code class="descname">Particles_Set</code><a class="headerlink" href="#lips.particles_set.Particles_Set" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="lips.particles_set.Particles_Set.set">
+<code class="descname">set</code><span class="sig-paren">(</span><em>temp_string</em>, <em>temp_value</em>, <em>fix_mom=True</em>, <em>mode=1</em>, <em>itr=50</em>, <em>prec=0.1</em><span class="sig-paren">)</span><a class="headerlink" href="#lips.particles_set.Particles_Set.set" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a given collinear limit phase space.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lips.particles_set.Particles_Set.set_A2">
+<code class="descname">set_A2</code><span class="sig-paren">(</span><em>temp_string</em>, <em>temp_value</em>, <em>fix_mom=True</em><span class="sig-paren">)</span><a class="headerlink" href="#lips.particles_set.Particles_Set.set_A2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="lips.particles_set.Particles_Set.set_S2">
+<code class="descname">set_S2</code><span class="sig-paren">(</span><em>temp_string</em>, <em>temp_value</em>, <em>fix_mom=True</em><span class="sig-paren">)</span><a class="headerlink" href="#lips.particles_set.Particles_Set.set_S2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="lips.particles_set.Particles_Set.set_inner">
+<code class="descname">set_inner</code><span class="sig-paren">(</span><em>temp_string</em>, <em>temp_value</em>, <em>fix_mom=True</em>, <em>mode=1</em><span class="sig-paren">)</span><a class="headerlink" href="#lips.particles_set.Particles_Set.set_inner" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-lips.particles_set_pair">
+<span id="lips-particles-set-pair-module"></span><h2>lips.particles_set_pair module<a class="headerlink" href="#module-lips.particles_set_pair" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="lips.particles_set_pair.Particles_SetPair">
+<em class="property">class </em><code class="descclassname">lips.particles_set_pair.</code><code class="descname">Particles_SetPair</code><a class="headerlink" href="#lips.particles_set_pair.Particles_SetPair" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="lips.particles_set_pair.Particles_SetPair.set_pair">
+<code class="descname">set_pair</code><span class="sig-paren">(</span><em>t_s1</em>, <em>t_v1</em>, <em>t_s2</em>, <em>t_v2</em>, <em>itr=10</em>, <em>prec=0.1</em><span class="sig-paren">)</span><a class="headerlink" href="#lips.particles_set_pair.Particles_SetPair.set_pair" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a double collinear limit phase space.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lips.particles_set_pair.Particles_SetPair.set_pair_A2_or_S2_and_A2_or_S2">
+<code class="descname">set_pair_A2_or_S2_and_A2_or_S2</code><span class="sig-paren">(</span><em>t_s1</em>, <em>t_v1</em>, <em>t_s2</em>, <em>t_v2</em><span class="sig-paren">)</span><a class="headerlink" href="#lips.particles_set_pair.Particles_SetPair.set_pair_A2_or_S2_and_A2_or_S2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="lips.particles_set_pair.Particles_SetPair.set_pair_inner">
+<code class="descname">set_pair_inner</code><span class="sig-paren">(</span><em>t_s1</em>, <em>t_v1</em>, <em>t_s2</em>, <em>t_v2</em><span class="sig-paren">)</span><a class="headerlink" href="#lips.particles_set_pair.Particles_SetPair.set_pair_inner" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-lips.tools">
+<span id="lips-tools-module"></span><h2>lips.tools module<a class="headerlink" href="#module-lips.tools" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="lips.tools.flatten">
+<code class="descclassname">lips.tools.</code><code class="descname">flatten</code><span class="sig-paren">(</span><em>temp_list</em>, <em>recursion_level=0</em>, <em>treat_list_subclasses_as_list=True</em>, <em>treat_tuples_as_lists=False</em>, <em>max_recursion=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lips.tools.flatten" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="exception">
+<dt id="lips.tools.myException">
+<em class="property">exception </em><code class="descclassname">lips.tools.</code><code class="descname">myException</code><a class="headerlink" href="#lips.tools.myException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">exceptions.Exception</span></code></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="lips.tools.rand_frac">
+<code class="descclassname">lips.tools.</code><code class="descname">rand_frac</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lips.tools.rand_frac" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-lips">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-lips" title="Permalink to this headline">¶</a></h2>
+<p>Defines tools for phase space manipulations.
+Particles objects are base one lists of Particle objects.</p>
+<p>Particles objects allow to:</p>
+<ol class="arabic simple">
+<li>Compute spinor strings, through .compute;</li>
+<li>Construct single collinear limits, through .set;</li>
+<li>Construct double collinear limits, through .set_pair.</li>
+</ol>
+<div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="n">oParticles</span> <span class="o">=</span> <span class="n">Particles</span><span class="p">(</span><span class="n">multiplicity</span><span class="p">)</span>
+<span class="n">oParticles</span><span class="o">.</span><span class="n">randomise_all</span><span class="p">()</span>
+<span class="n">oParticles</span><span class="o">.</span><span class="n">fix_mom_cons</span><span class="p">()</span>
+<span class="n">oParticles</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">spinor_string</span><span class="p">)</span>
+<span class="n">oParticles</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">spinor_string</span><span class="p">,</span> <span class="n">small_value</span><span class="p">)</span>
+<span class="n">oParticles</span><span class="o">.</span><span class="n">set_pair</span><span class="p">(</span><span class="n">spinor_string_1</span><span class="p">,</span> <span class="n">small_value_1</span><span class="p">,</span> <span class="n">spinor_string_2</span><span class="p">,</span> <span class="n">small_value_2</span><span class="p">)</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">lips package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-lips.particle">lips.particle module</a></li>
+<li><a class="reference internal" href="#module-lips.particles">lips.particles module</a></li>
+<li><a class="reference internal" href="#module-lips.particles_compute">lips.particles_compute module</a></li>
+<li><a class="reference internal" href="#module-lips.particles_set">lips.particles_set module</a></li>
+<li><a class="reference internal" href="#module-lips.particles_set_pair">lips.particles_set_pair module</a></li>
+<li><a class="reference internal" href="#module-lips.tools">lips.tools module</a></li>
+<li><a class="reference internal" href="#module-lips">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/lips.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">lips 0.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019, Giuseppe De Laurentis.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.2.
+    </div>
+  </body>
+</html>

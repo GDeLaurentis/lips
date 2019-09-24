@@ -33,11 +33,11 @@ class Particles_Compute:
         return numpy.dot(self[A].four_mom_d, self[B].four_mom)
 
     def ep(self, i, j):
-        if self.helconf[i - 1] == "+":
+        if self.helconf[i - 1] in ["+", "p"]:
             # ε⁺ᵢ⋅pⱼ = ⟨q|j|i] / √2⟨qi⟩
             return (numpy.dot(numpy.dot(self.oRefVec.r_sp_u, self[j].r2_sp_b), self[i].l_sp_u) /
                     (mpmath.sqrt(2) * numpy.dot(self.oRefVec.r_sp_u, self[i].r_sp_d)))[0][0]
-        elif self.helconf[i - 1] == "-":
+        elif self.helconf[i - 1] in ["-", "m"]:
             # ε⁻ᵢ⋅pⱼ = ⟨i|j|q] / √2[iq]
             return (numpy.dot(numpy.dot(self[i].r_sp_u, self[j].r2_sp_b), self.oRefVec.l_sp_u) /
                     (mpmath.sqrt(2) * numpy.dot(self[i].l_sp_d, self.oRefVec.l_sp_u)))[0][0]
@@ -48,7 +48,7 @@ class Particles_Compute:
     def ee(self, i, j):
         if self.helconf[i - 1] == self.helconf[j - 1]:
             return 0
-        elif self.helconf[i - 1] == "-":
+        elif self.helconf[i - 1] == ["-", "m"]:
             # ε⁻ᵢ⋅ε⁺ⱼ = ⟨i|q|j] / ⟨j|q|i]
             return - (numpy.dot(numpy.dot(self[i].r_sp_u, self.oRefVec.r2_sp_b), self[j].l_sp_u) /
                       (numpy.dot(numpy.dot(self[j].r_sp_u, self.oRefVec.r2_sp_b), self[i].l_sp_u)))[0][0]
