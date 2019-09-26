@@ -26,16 +26,14 @@ alternatively the package can be cloned from github at https://github.com/GDeLau
 Quick start
 =================
 
-To get started generating phase space points open an interactive python session and follow this simple example::
+To get started generating phase space points open an interactive python session and follow this simple example:
 
-	$ ipython
-
-	In [1]: import lips
-
-	In [2]: oParticles = lips.Particles(6)
-
-	In [3]: oParticles.fix_mom_cons()
-
+  .. code-block:: python
+		  :linenos:
+		   
+		     import lips
+		     oParticles = lips.Particles(6)
+		     oParticles.fix_mom_cons()
 
 Indices and tables
 ==================
