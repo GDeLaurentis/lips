@@ -72,103 +72,103 @@ class Particles_SetPair:
 
             elif pNB.findall(t_s2) != []:                                        # Second is: ⟨i|(j+k)|...|l⟩
 
-                raise Exception("Not implement in lite-version.")
+                raise Exception("Not implement in alpha version.")
 
             elif pSijk.findall(t_s2) != []:                                      # Second is: S_ijk...
 
-                raise Exception("Not implement in lite-version.")
+                raise Exception("Not implement in alpha version.")
 
             elif pDijk.findall(t_s2) != []:                                      # Second is: Δ_ijk
 
-                raise Exception("Not implement in lite-version.")
+                raise Exception("Not implement in alpha version.")
 
         elif p3B.findall(t_s1) != []:                                  # First: ⟨i|(j+k)|l]
 
             if pA2.findall(t_s2) != [] or pS2.findall(t_s2) != []:               # Second: ⟨A|B⟩ or [A|B]
 
-                raise Exception("Not implement in lite-version.")
+                raise Exception("Not implement in alpha version.")
 
             elif p3B.findall(t_s2) != []:                                        # Second is: ⟨i|(j+k)|l]
 
-                raise Exception("Not implement in lite-version.")
+                raise Exception("Not implement in alpha version.")
 
             elif pNB.findall(t_s2) != []:                                        # Second is: ⟨i|(j+k)|...|l⟩
 
-                raise Exception("Not implement in lite-version.")
+                raise Exception("Not implement in alpha version.")
 
             elif pSijk.findall(t_s2) != []:                                      # Second: S_ijk...
 
-                raise Exception("Not implement in lite-version.")
+                raise Exception("Not implement in alpha version.")
 
             elif pDijk.findall(t_s2) != []:                                      # Second is: Δ_ijk
 
-                raise Exception("Not implement in lite-version.")
+                raise Exception("Not implement in alpha version.")
 
         elif pNB.findall(t_s1) != []:                                  # First: ⟨i|(j+k)|...|l⟩
 
             if pA2.findall(t_s2) != [] or pS2.findall(t_s2) != []:               # Second: ⟨A|B⟩ or [A|B]
 
-                raise Exception("Not implement in lite-version.")
+                raise Exception("Not implement in alpha version.")
 
             elif p3B.findall(t_s2) != []:                                        # Second is: ⟨i|(j+k)|l]
 
-                raise Exception("Not implement in lite-version.")
+                raise Exception("Not implement in alpha version.")
 
             elif pNB.findall(t_s2) != []:                                        # Second is: ⟨i|(j+k)|...|l⟩
 
-                raise Exception("Not implement in lite-version.")
+                raise Exception("Not implement in alpha version.")
 
             elif pSijk.findall(t_s2) != []:                                      # Second: S_ijk...
 
-                raise Exception("Not implement in lite-version.")
+                raise Exception("Not implement in alpha version.")
 
             elif pDijk.findall(t_s2) != []:                                      # Second is: Δ_ijk
 
-                raise Exception("Not implement in lite-version.")
+                raise Exception("Not implement in alpha version.")
 
         elif pSijk.findall(t_s1) != []:                                # First is: S_ijk...
 
             if pA2.findall(t_s2) != [] or pS2.findall(t_s2) != []:               # Second is: ⟨A|B⟩ or [A|B]
 
-                raise Exception("Not implement in lite-version.")
+                raise Exception("Not implement in alpha version.")
 
             elif p3B.findall(t_s2) != []:                                        # Second is: ⟨i|(j+k)|l]
 
-                raise Exception("Not implement in lite-version.")
+                raise Exception("Not implement in alpha version.")
 
             elif pNB.findall(t_s2) != []:                                        # Second is: ⟨i|(j+k)|...|l⟩
 
-                raise Exception("Not implement in lite-version.")
+                raise Exception("Not implement in alpha version.")
 
             elif pSijk.findall(t_s2) != []:                                      # Second is: S_ijk...
 
-                raise Exception("Not implement in lite-version.")
+                raise Exception("Not implement in alpha version.")
 
             elif pDijk.findall(t_s2) != []:                                      # Second is: Δ_ijk
 
-                raise Exception("Not implement in lite-version.")
+                raise Exception("Not implement in alpha version.")
 
         elif pDijk.findall(t_s1) != []:                                # First: Δ_ijk
 
             if pA2.findall(t_s2) != [] or pS2.findall(t_s2) != []:               # Second: ⟨A|B⟩ or [A|B]
 
-                raise Exception("Not implement in lite-version.")
+                raise Exception("Not implement in alpha version.")
 
             elif p3B.findall(t_s2) != []:                                        # Second: ⟨a|(b+c)|d]
 
-                raise Exception("Not implement in lite-version.")
+                raise Exception("Not implement in alpha version.")
 
             elif pNB.findall(t_s2) != []:                                        # Second is: ⟨i|(j+k)|...|l⟩
 
-                raise Exception("Not implement in lite-version.")
+                raise Exception("Not implement in alpha version.")
 
             elif pSijk.findall(t_s2) != []:                                      # Second: S_ijk...
 
-                raise Exception("Not implement in lite-version.")
+                raise Exception("Not implement in alpha version.")
 
             elif pDijk.findall(t_s2) != []:                                      # Second: Δ_ijk
 
-                raise Exception("Not implement in lite-version.")
+                raise Exception("Not implement in alpha version.")
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 

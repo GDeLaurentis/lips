@@ -58,23 +58,23 @@ class Particles_Set:
 
         elif pNB.findall(temp_string) != []:                         # Sets ⟨a|(b+c)|...|d]  --- Changes: ⟨a| (mode=1), |b⟩ (mode=2)
 
-            raise Exception("Not implement in lite-version.")
+            raise Exception("Not implement in alpha version.")
 
         elif pSijk.findall(temp_string) != []:                       # Sets S_ijk  --- Changes: ⟨i| (mode=1) or |i] (mode=2), Don't touch ijk...
 
-            raise Exception("Not implement in lite-version.")
+            raise Exception("Not implement in alpha version.")
 
         elif pDijk.findall(temp_string) != []:                       # Sets Δ_ijk  --- Changes: last two [j] moment, Don't touch [j]'s or [i]'s
 
-            raise Exception("Not implement in lite-version.")
+            raise Exception("Not implement in alpha version.")
 
         elif pOijk.findall(temp_string) != []:
 
-            raise Exception("Not implement in lite-version.")
+            raise Exception("Not implement in alpha version.")
 
         elif pPijk.findall(temp_string) != []:
 
-            raise Exception("Not implement in lite-version.")
+            raise Exception("Not implement in alpha version.")
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
