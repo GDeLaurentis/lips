@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='lips',
-    version='0.0.1',
+    version='0.1.0',
     license='GNU General Public License v3.0',
     description='Lorentz Invariant Phase Space',
     author='Giuseppe De Laurentis',
