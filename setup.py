@@ -9,7 +9,7 @@ setup(
     author='Giuseppe De Laurentis',
     author_email='g.dl@hotmail.it',
     url='https://github.com/GDeLaurentis/lips',
-    download_url='https://github.com/GDeLaurentis/lips/archive/.tar.gz',
+    download_url='https://github.com/GDeLaurentis/lips/releases/v0.1.0.tar.gz',
     keywords=['lips', 'Lorentz Invariant Phase Space', 'Spinor Helicity'],
     packages=find_packages(),
     install_requires=['numpy<1.17',
