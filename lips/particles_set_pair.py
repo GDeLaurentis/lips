@@ -26,7 +26,7 @@ class Particles_SetPair:
     def set_pair(self, t_s1, t_v1, t_s2, t_v2, itr=10, prec=0.1):
         """Constructs a double collinear limit phase space."""
         for i in range(itr):
-            new_invs = self.set_pair_inner(t_s1, t_v1, t_s2, t_v2)     # set it --- note: if a list is returned then switch invariants to those
+            new_invs = self._set_pair_inner(t_s1, t_v1, t_s2, t_v2)     # set it --- note: if a list is returned then switch invariants to those
             if type(new_invs) is list:                                 # used for example for s_123&⟨1|(2+3)|1] ---> s_123&⟨2|3⟩
                 t_s1, t_s2 = new_invs[0], new_invs[1]
             elif type(new_invs) in [unicode, str]:
@@ -62,13 +62,13 @@ class Particles_SetPair:
         raise myException("Failed to set {} to {} and {} to {}. Pair not implemented.".format(t_s1, t_v1, t_s2, t_v2))
         return False
 
-    def set_pair_inner(self, t_s1, t_v1, t_s2, t_v2):                  # Try to take care of all possible combinations
+    def _set_pair_inner(self, t_s1, t_v1, t_s2, t_v2):                  # Try to take care of all possible combinations
 
         if pA2.findall(t_s1) != [] or pS2.findall(t_s1) != []:         # First is: ⟨A|B⟩ or [A|B]
 
             if pA2.findall(t_s2) != [] or pS2.findall(t_s2) != []:               # Second is: ⟨C|D⟩ or [C|D]
 
-                return self.set_pair_A2_or_S2_and_A2_or_S2(t_s1, t_v1, t_s2, t_v2)
+                return self._set_pair_A2_or_S2_and_A2_or_S2(t_s1, t_v1, t_s2, t_v2)
 
             elif pNB.findall(t_s2) != []:                                        # Second is: ⟨i|(j+k)|...|l⟩
 
@@ -172,7 +172,7 @@ class Particles_SetPair:
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
-    def set_pair_A2_or_S2_and_A2_or_S2(self, t_s1, t_v1, t_s2, t_v2):     # Current failed: 0/870 @ 6pt
+    def _set_pair_A2_or_S2_and_A2_or_S2(self, t_s1, t_v1, t_s2, t_v2):     # Current failed: 0/870 @ 6pt
 
         if pA2.findall(t_s1) != []:
             ab = map(int, list(pA2.findall(t_s1)[0]))

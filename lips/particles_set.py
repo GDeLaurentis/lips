@@ -26,8 +26,8 @@ class Particles_Set:
     def set(self, temp_string, temp_value, fix_mom=True, mode=1, itr=50, prec=0.1):
         """Constructs a given collinear limit phase space."""
         for i in range(itr):
-            if self.set_inner(temp_string, temp_value, fix_mom, mode) == "run me again":
-                self.set_inner(temp_string, temp_value, fix_mom, mode)
+            if self._set_inner(temp_string, temp_value, fix_mom, mode) == "run me again":
+                self._set_inner(temp_string, temp_value, fix_mom, mode)
             actual, target = abs(self.compute(temp_string)), abs(temp_value)
             error = abs(100) * abs((actual - target) / target)
             compatible_with_zero = abs(target - actual) < 10 ** -(0.9 * 300)
@@ -45,16 +45,16 @@ class Particles_Set:
         myException("Failed to set {} to {}. The target was {}, the actual value was {}, the error was {}.".format(temp_string, temp_value, target, actual, error))
         return False
 
-    def set_inner(self, temp_string, temp_value, fix_mom=True, mode=1):
+    def _set_inner(self, temp_string, temp_value, fix_mom=True, mode=1):
         self.check_consistency(temp_string)                          # Check consistency of string
 
         if pA2.findall(temp_string) != []:                           # Sets ⟨A|B⟩  --- Changes: |B⟩, Don't touch: ⟨A|
 
-            self.set_A2(temp_string, temp_value, fix_mom)
+            self._set_A2(temp_string, temp_value, fix_mom)
 
         elif pS2.findall(temp_string) != []:                         # Sets [A|B]  --- Changes: |B], Don't touch: [A|
 
-            self.set_S2(temp_string, temp_value, fix_mom)
+            self._set_S2(temp_string, temp_value, fix_mom)
 
         elif pNB.findall(temp_string) != []:                         # Sets ⟨a|(b+c)|...|d]  --- Changes: ⟨a| (mode=1), |b⟩ (mode=2)
 
@@ -78,7 +78,7 @@ class Particles_Set:
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
-    def set_A2(self, temp_string, temp_value, fix_mom=True):       # ⟨A|B⟩ = (a, b).(c, d) = ac+bd = X ----> c = (X - bd)/a
+    def _set_A2(self, temp_string, temp_value, fix_mom=True):       # ⟨A|B⟩ = (a, b).(c, d) = ac+bd = X ----> c = (X - bd)/a
 
         A, B = map(int, pA2.findall(temp_string)[0])
         X = temp_value
@@ -94,7 +94,7 @@ class Particles_Set:
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
-    def set_S2(self, temp_string, temp_value, fix_mom=True):       # [A|B] = (a, b).(c, d) = ac+bd = X ----> c = (X - bd)/a
+    def _set_S2(self, temp_string, temp_value, fix_mom=True):       # [A|B] = (a, b).(c, d) = ac+bd = X ----> c = (X - bd)/a
 
         A, B = map(int, pS2.findall(temp_string)[0])
         X = temp_value

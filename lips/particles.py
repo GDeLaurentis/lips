@@ -49,7 +49,7 @@ def indexing_decorator(func):
 
 
 class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
-    """Describes the kinematics of n particles."""
+    """Describes the kinematics of n particles. Base one list of Particle objects."""
 
     def __init__(self, number_of_particles_or_particles=None, seed=None):
         """Initialisation. Requires either multiplicity of phace space or list of Particle objects."""

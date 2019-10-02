@@ -33,6 +33,7 @@ class Particles_Compute:
         return numpy.dot(self[A].four_mom_d, self[B].four_mom)
 
     def ep(self, i, j):
+        """Contraction of polarization tensor with four momentum. Requires .helconf property to be set."""
         if self.helconf[i - 1] in ["+", "p"]:
             # ε⁺ᵢ⋅pⱼ = ⟨q|j|i] / √2⟨qi⟩
             return (numpy.dot(numpy.dot(self.oRefVec.r_sp_u, self[j].r2_sp_b), self[i].l_sp_u) /
@@ -43,9 +44,11 @@ class Particles_Compute:
                     (mpmath.sqrt(2) * numpy.dot(self[i].l_sp_d, self.oRefVec.l_sp_u)))[0][0]
 
     def pe(self, i, j):
+        """Contraction of four momentum with polarization tensor. Requires .helconf property to be set."""
         return self.ep(j, i)
 
     def ee(self, i, j):
+        """Contraction of two polarization tensors. Requires .helconf property to be set."""
         if self.helconf[i - 1] == self.helconf[j - 1]:
             return 0
         elif self.helconf[i - 1] == ["-", "m"]:
