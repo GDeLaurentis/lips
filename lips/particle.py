@@ -25,10 +25,10 @@ mpmath.mp.dps = 300
 class Particle(object):
     """Describes the kinematics of a single particle."""
 
-    def __init__(self, four_mom=None):
+    def __init__(self, four_mom=None, real_momentum=False):
         """Initialisation. Calls randomise if None, else initialises the four momentum."""
         if four_mom is None:
-            self.randomise()
+            self.randomise(real_momentum=False)
         else:
             self.four_mom = four_mom
 
@@ -58,7 +58,7 @@ class Particle(object):
 
     @property
     def l_sp_d(self):
-        """Left spinor with index down: \u0305λ_\u0307α (row_vector)."""
+        """Left spinor with index down: λ̅_α̇ (row vector)."""
         return self._l_sp_d
 
     @l_sp_d.setter
@@ -73,7 +73,7 @@ class Particle(object):
 
     @property
     def r_sp_u(self):
-        """Right spinor with index up: λ^α (row_vector)."""
+        """Right spinor with index up: λ^α (row vector)."""
         return self._r_sp_u
 
     @r_sp_u.setter
@@ -88,7 +88,7 @@ class Particle(object):
 
     @property
     def l_sp_u(self):
-        """Left spinor with index up: \u0305λ^\u0307α (column vector)."""
+        """Left spinor with index up: λ̅^α̇ (column vector)."""
         return self._l_sp_u
 
     @l_sp_u.setter
@@ -103,7 +103,7 @@ class Particle(object):
 
     @property
     def r2_sp(self):
-        """Four Momentum Slashed with upper indices: P^{\u0307αα}"""
+        """Four Momentum Slashed with upper indices: P^{α̇α}"""
         return self._r2_sp
 
     @r2_sp.setter
@@ -119,7 +119,7 @@ class Particle(object):
 
     @property
     def r2_sp_b(self):
-        """Four Momentum Slashed with lower indices: P\u0305_{α\u0307α}"""
+        """Four Momentum Slashed with lower indices: P̅\u0305_{αα̇}"""
         return self._r2_sp_b
 
     @r2_sp_b.setter
@@ -167,11 +167,15 @@ class Particle(object):
 
     # PUBLIC METHODS
 
-    def randomise(self):   # assumption is that everything is real here.
-        """Randomises its momentum. Real values."""
-        p = [rand_frac(), rand_frac(), rand_frac()]
-        while abs(p[0]) == 0 and abs(p[1]) == 0 and p[2].real <= 0 and p[2].imag == 0:     # make sure it is not in the
-            p = [rand_frac(), rand_frac(), rand_frac()]                                    # negative z direction or null
+    def randomise(self, real_momentum=False):
+        """Randomises its momentum."""
+        while True:
+            if real_momentum is False:
+                p = [rand_frac() + 1j * rand_frac(), rand_frac() + 1j * rand_frac(), rand_frac() + 1j * rand_frac()]
+            else:
+                p = [rand_frac(), rand_frac(), rand_frac()]
+            if not (abs(p[0]) == 0 and abs(p[1]) == 0 and p[2].real <= 0 and p[2].imag == 0):     # make sure it is not in the
+                break                                                                             # negative z direction or null
         p2 = p[0] * p[0] + p[1] * p[1] + p[2] * p[2]
         p_zero = mpmath.sqrt(p2)
         self.four_mom = numpy.array([p_zero] + p)
