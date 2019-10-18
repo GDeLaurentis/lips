@@ -51,7 +51,7 @@ class Particles_Compute:
         """Contraction of two polarization tensors. Requires .helconf property to be set."""
         if self.helconf[i - 1] == self.helconf[j - 1]:
             return 0
-        elif self.helconf[i - 1] == ["-", "m"]:
+        elif self.helconf[i - 1] in ["-", "m"]:
             # ε⁻ᵢ⋅ε⁺ⱼ = ⟨i|q|j] / ⟨j|q|i]
             return - (numpy.dot(numpy.dot(self[i].r_sp_u, self.oRefVec.r2_sp_b), self[j].l_sp_u) /
                       (numpy.dot(numpy.dot(self[j].r_sp_u, self.oRefVec.r2_sp_b), self[i].l_sp_u)))[0][0]
