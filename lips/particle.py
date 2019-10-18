@@ -25,10 +25,10 @@ mpmath.mp.dps = 300
 class Particle(object):
     """Describes the kinematics of a single particle."""
 
-    def __init__(self, four_mom=None):
+    def __init__(self, four_mom=None, real_momentum=False):
         """Initialisation. Calls randomise if None, else initialises the four momentum."""
         if four_mom is None:
-            self.randomise()
+            self.randomise(real_momentum=False)
         else:
             self.four_mom = four_mom
 
@@ -167,11 +167,15 @@ class Particle(object):
 
     # PUBLIC METHODS
 
-    def randomise(self):   # assumption is that everything is real here.
-        """Randomises its momentum. Real values."""
-        p = [rand_frac(), rand_frac(), rand_frac()]
-        while abs(p[0]) == 0 and abs(p[1]) == 0 and p[2].real <= 0 and p[2].imag == 0:     # make sure it is not in the
-            p = [rand_frac(), rand_frac(), rand_frac()]                                    # negative z direction or null
+    def randomise(self, real_momentum=False):
+        """Randomises its momentum."""
+        while True:
+            if real_momentum is False:
+                p = [rand_frac() + 1j * rand_frac(), rand_frac() + 1j * rand_frac(), rand_frac() + 1j * rand_frac()]
+            else:
+                p = [rand_frac(), rand_frac(), rand_frac()]
+            if not (abs(p[0]) == 0 and abs(p[1]) == 0 and p[2].real <= 0 and p[2].imag == 0):     # make sure it is not in the
+                break                                                                             # negative z direction or null
         p2 = p[0] * p[0] + p[1] * p[1] + p[2] * p[2]
         p_zero = mpmath.sqrt(p2)
         self.four_mom = numpy.array([p_zero] + p)
