@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>lips &#8212; lips v0.1.0 documentation</title>
+    <title>lips &#8212; lips v0.1.1 documentation</title>
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
@@ -27,7 +27,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="#">lips v0.1.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="#">lips v0.1.1 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -52,16 +52,25 @@
 </div>
 <div class="section" id="quick-start">
 <h1>Quick start<a class="headerlink" href="#quick-start" title="Permalink to this headline">¶</a></h1>
-<p>To get started generating phase space points open an interactive python session and follow this simple example:</p>
+<p>To generate a phase space point follow this very simple example:</p>
 <blockquote>
 <div><div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
-2
-3</pre></div></td><td class="code"><div class="highlight"><pre><span></span>   <span class="kn">import</span> <span class="nn">lips</span>
+2</pre></div></td><td class="code"><div class="highlight"><pre><span></span>   <span class="kn">import</span> <span class="nn">lips</span>
    <span class="n">oParticles</span> <span class="o">=</span> <span class="n">lips</span><span class="o">.</span><span class="n">Particles</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
-   <span class="n">oParticles</span><span class="o">.</span><span class="n">fix_mom_cons</span><span class="p">()</span>
 </pre></div>
 </td></tr></table></div>
 </div></blockquote>
+<p>this is a six-point phase space point, with complex momenta, satisfying both momentum conservation and massless on-shell relations.
+For a real phase space point pass an optional argument:</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2</pre></div></td><td class="code"><div class="highlight"><pre><span></span>   <span class="kn">import</span> <span class="nn">lips</span>
+   <span class="n">oParticles</span> <span class="o">=</span> <span class="n">lips</span><span class="o">.</span><span class="n">Particles</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="n">real_momenta</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+</td></tr></table></div>
+</div></blockquote>
+<p>Particle objects have several attributes, corresponding to the different representations of the Lorentz group. For a full list check <a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a>.
+Changing an attribute, for instance oParticles[1].four_mom, automatically updates all other representations, such as the rank two spinor oParticles[1].r2_sp.</p>
 </div>
 <div class="section" id="indices-and-tables">
 <h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
@@ -118,7 +127,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="#">lips v0.1.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="#">lips v0.1.1 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
