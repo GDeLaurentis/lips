@@ -28,7 +28,7 @@ class Particle(object):
     def __init__(self, four_mom=None, real_momentum=False):
         """Initialisation. Calls randomise if None, else initialises the four momentum."""
         if four_mom is None:
-            self.randomise(real_momentum=False)
+            self.randomise(real_momentum=real_momentum)
         else:
             self.four_mom = four_mom
 
