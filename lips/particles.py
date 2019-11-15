@@ -490,10 +490,10 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
             return msg
         elif as_spinors is True:
             for i, iParticle in enumerate(self):
-                La0 = (repr(iParticle.r_sp_d[0, 0].real) + "+" + repr(iParticle.r_sp_d[0, 0].imag) + "I").replace("e", "*^").replace("RGMP(", "").replace(")", "")
-                La1 = (repr(iParticle.r_sp_d[1, 0].real) + "+" + repr(iParticle.r_sp_d[1, 0].imag) + "I").replace("e", "*^").replace("RGMP(", "").replace(")", "")
-                Lat0 = (repr(iParticle.l_sp_d[0, 0].real) + "+" + repr(iParticle.l_sp_d[0, 0].imag) + "I").replace("e", "*^").replace("RGMP(", "").replace(")", "")
-                Lat1 = (repr(iParticle.l_sp_d[0, 1].real) + "+" + repr(iParticle.l_sp_d[0, 1].imag) + "I").replace("e", "*^").replace("RGMP(", "").replace(")", "")
+                La0 = str(complex(iParticle.r_sp_d[0, 0])).replace("j", "I").replace("e", "*^")
+                La1 = str(complex(iParticle.r_sp_d[1, 0])).replace("j", "I").replace("e", "*^")
+                Lat0 = str(complex(iParticle.l_sp_d[0, 0])).replace("j", "I").replace("e", "*^")
+                Lat1 = str(complex(iParticle.l_sp_d[0, 1])).replace("j", "I").replace("e", "*^")
                 msg += "DeclareSpinorMomentum[Sp[{ind}], [[[[{La0}]], [[{La1}]]]], [[[[{Lat0}, {Lat1}]]]]]".format(
                     ind=i + 1, La0=La0, La1=La1, Lat0=Lat0, Lat1=Lat1).replace("[[", "{").replace("]]", "}").replace("+-", "-") + "\n"
             msg = msg[:-1]

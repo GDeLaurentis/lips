@@ -521,9 +521,11 @@ class Particles_SetPair:
                 d * e * f * g * g * j * l - c * e * f * g * h * j * l - d * f * g * i * j * k * l - c * f * h * i * j * k * l +
                 d * e * g * j * j * k * l + c * e * h * j * j * k * l + c * f * g * i * j * l * l - c * e * g * j * j * l * l - d * j * k * X + c * j * l * X)
             self[A].r_sp_d = numpy.array([a, b])
-            free = map(int, free)
-            if len(free) >= 2:
-                self.fix_mom_cons(free[0], free[1])
+            # free = map(int, free)
+            # if len(free) >= 2:
+            #     self.fix_mom_cons(free[0], free[1])
+            if can_fix_mom_cons(t_s1, t_s2):
+                self.fix_mom_cons(*how_to_fix_mom_cons(t_s1, t_s2))
             else:
                 raise myException("Not supposed to happen --- custom double set for two l3Bs.")
             return

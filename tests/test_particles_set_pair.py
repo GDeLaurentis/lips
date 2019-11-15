@@ -21,7 +21,7 @@ from antares.core.settings import settings
     [
         (5, "invs_2", "invs_2", 0, 380),
         (5, "invs_2", "invs_N", 24, 320),
-        (5, "invs_3", "invs_3", 76, 90),
+        (5, "invs_3", "invs_3", 60, 90),
         (6, "invs_2", "invs_2", 0, 870),
         (6, "invs_2", "invs_N", 48, 4950),
         (6, "invs_2", "invs_s", 0, 300),
