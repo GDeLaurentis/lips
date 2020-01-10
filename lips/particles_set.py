@@ -17,7 +17,7 @@ import mpmath
 
 from particle import Particle
 
-from tools import flatten, pSijk, pDijk, pOijk, pPijk, pA2, pS2, pNB, myException
+from tools import flatten, pSijk, pDijk, pOijk, pPijk, pA2, pS2, pNB, ptr5, myException
 
 mpmath.mp.dps = 300
 
@@ -78,6 +78,10 @@ class Particles_Set:
         elif pPijk.findall(temp_string) != []:
 
             self.set_Pijk(temp_string, temp_value, fix_mom)
+
+        elif ptr5.findall(temp_string) != []:
+
+            self.set_tr5(temp_string, temp_value, fix_mom)
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
@@ -555,3 +559,26 @@ class Particles_Set:
         self.fix_mom_cons(E, F)
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+    def set_tr5(self, temp_string, temp_value, fix_mom=True):       # ⟨A|B⟩ = (a, b).(c, d) = ac+bd = X ----> c = (X - bd)/a
+
+        a, b, c, d = [int(entry) for entry in ptr5.findall(temp_string)[0]]
+        plist = map(int, self._complementary(map(unicode, [a, b, c, d])))  # free momenta
+        if len(plist) < 2:
+            myException("Set_tr5 called with less than 6 particles. Cound't fix momentum conservation.")
+
+        x = temp_value
+        a1, b1 = self[a].r_sp_d[0, 0], self[a].r_sp_d[1, 0]
+        c1, d1 = self[a].l_sp_d[0, 0], self[a].l_sp_d[0, 1]
+        a2, b2 = self[b].r_sp_d[0, 0], self[b].r_sp_d[1, 0]
+        c2, d2 = self[b].l_sp_d[0, 0], self[b].l_sp_d[0, 1]
+        a3, b3 = self[c].r_sp_d[0, 0], self[c].r_sp_d[1, 0]
+        c3, d3 = self[c].l_sp_d[0, 0], self[c].l_sp_d[0, 1]
+        a4, b4 = self[d].r_sp_d[0, 0], self[d].r_sp_d[1, 0]
+        c4, d4 = self[d].l_sp_d[0, 0], self[d].l_sp_d[0, 1]
+
+        a1 = (-a2*a3*b1*b4*c1*c2*d3*d4 + a2*a3*b1*b4*c1*c3*d2*d4 + a2*a3*b1*b4*c2*c4*d1*d3 - a2*a3*b1*b4*c3*c4*d1*d2 + a2*a4*b1*b3*c1*c2*d3*d4 - a2*a4*b1*b3*c1*c4*d2*d3 - a2*a4*b1*b3*c2*c3*d1*d4 + a2*a4*b1*b3*c3*c4*d1*d2 - a3*a4*b1*b2*c1*c3*d2*d4 + a3*a4*b1*b2*c1*c4*d2*d3 + a3*a4*b1*b2*c2*c3*d1*d4 - a3*a4*b1*b2*c2*c4*d1*d3 - x)/(a2*b3*b4*c1*c3*d2*d4 - a2*b3*b4*c1*c4*d2*d3 - a2*b3*b4*c2*c3*d1*d4 + a2*b3*b4*c2*c4*d1*d3 - a3*b2*b4*c1*c2*d3*d4 + a3*b2*b4*c1*c4*d2*d3 + a3*b2*b4*c2*c3*d1*d4 - a3*b2*b4*c3*c4*d1*d2 + a4*b2*b3*c1*c2*d3*d4 - a4*b2*b3*c1*c3*d2*d4 - a4*b2*b3*c2*c4*d1*d3 + a4*b2*b3*c3*c4*d1*d2)
+
+        self[a].r_sp_d = numpy.array([[a1], [b1]])
+        if fix_mom is True:
+            self.fix_mom_cons(plist[0], plist[1], axis=1)
