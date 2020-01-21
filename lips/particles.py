@@ -18,6 +18,7 @@ import os
 import copy
 import itertools
 
+from tools import MinkowskiMetric
 from particle import Particle
 from particles_compute import Particles_Compute
 from particles_set import Particles_Set
@@ -100,54 +101,18 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
             self.fix_mom_cons(A, B, real_momenta, axis)
 
         elif A != 0 and B != 0 and real_momenta is True:            # the following results in real momenta, but changes both |⟩ and |] of A & B
-            ex = numpy.array([0. + 0j, 0., 0., 0.])                 # excess momentum init. to 0
-            for i in range(1, len(self) + 1):
-                if i != A and i != B:
-                    ex = ex - self[i].four_mom
-            numerator = (ex[1] * ex[1] + ex[2] * ex[2] + ex[3] * ex[3] - ex[0] * ex[0])
-            if axis == 1:
-                denominator = (2 * ex[1] - 2 * ex[0])
-            elif axis == 2:
-                denominator = (2 * ex[2] - 2 * ex[0])
-            elif axis == 3:
-                denominator = (2 * ex[3] - 2 * ex[0])
-            p_fix = numerator / denominator
-            if axis == 1:
-                self[A].four_mom = numpy.array([p_fix, p_fix, 0, 0])
-            elif axis == 2:
-                self[A].four_mom = numpy.array([p_fix, 0, p_fix, 0])
-            elif axis == 3:
-                self[A].four_mom = numpy.array([p_fix, 0, 0, p_fix])
-            ex = ex - self[A].four_mom
-            self[B].four_mom = ex
+            K = sum([self[k].four_mom for k in range(1, len(self) + 1) if k not in [A, B]])
+            self[A].four_mom = numpy.array([- numpy.dot(K, numpy.dot(MinkowskiMetric, K)) / (2 * (K[0] - K[axis])) if k in [0, axis] else 0 for k in range(4)])
+            self[B].four_mom = - self[A].four_mom - K
 
         elif A != 0 and B != 0:                                     # the following results in complex momenta, it changes |A⟩&|B⟩ (axis=1) or |A]&|B] (axis=2)
-            K = numpy.array([0. + 0j, 0., 0., 0.])                  # Note: axis here is a meaningless name. It is just used as a switch.
-            for i in range(1, len(self) + 1):                       # minus sum of all other momenta
-                if i != A and i != B:
-                    K = K - self[i].four_mom
-            K11 = K[0] + K[3]
-            K12 = K[1] - 1j * K[2]
-            K21 = K[1] + 1j * K[2]
-            K22 = K[0] - K[3]
-            a, b = self[A].r_sp_d[0, 0], self[A].r_sp_d[1, 0]
-            c, d = self[A].l_sp_d[0, 0], self[A].l_sp_d[0, 1]
-            e, f = self[B].r_sp_d[0, 0], self[B].r_sp_d[1, 0]
-            g, h = self[B].l_sp_d[0, 0], self[B].l_sp_d[0, 1]
+            K = sum([self[k].r2_sp for k in range(1, len(self) + 1) if k not in [A, B]])
             if axis == 1:                                           # change |A⟩ and |B⟩
-                a = (g * K12 - h * K11) / (d * g - c * h)
-                b = (g * K22 - h * K21) / (d * g - c * h)
-                e = (d * K11 - c * K12) / (d * g - c * h)
-                f = (d * K21 - c * K22) / (d * g - c * h)
-                self[A].r_sp_d = numpy.array([a, b])
-                self[B].r_sp_d = numpy.array([e, f])
+                self[A].r_sp_u = numpy.dot(self[B].l_sp_d, K) / self.compute("[%d|%d]" % (A, B))
+                self[B].r_sp_u = - numpy.dot(self[A].l_sp_d, K) / self.compute("[%d|%d]" % (A, B))
             else:                                                   # change |A] and |B]
-                c = (e * K21 - f * K11) / (b * e - a * f)
-                d = (e * K22 - f * K12) / (b * e - a * f)
-                g = (b * K11 - a * K21) / (b * e - a * f)
-                h = (b * K12 - a * K22) / (b * e - a * f)
-                self[A].l_sp_d = numpy.array([c, d])
-                self[B].l_sp_d = numpy.array([g, h])
+                self[A].l_sp_u = - numpy.dot(K, self[B].r_sp_d) / self.compute("⟨%d|%d⟩" % (A, B))
+                self[B].l_sp_u = numpy.dot(K, self[A].r_sp_d) / self.compute("⟨%d|%d⟩" % (A, B))
 
     def momentum_conservation_check(self, silent=True):
         """Returns true if momentum is conserved."""
@@ -176,7 +141,7 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
         return True
 
     def phasespace_consistency_check(self, invariants=[], silent=True):
-        """Runs momentum and onshell checks. Looks for outliers in phase space."""
+        """Runs momentum and onshell checks. Looks for outliers in phase space. Returns: mom_cons, on_shell, big_outliers, small_outliers."""
 
         if invariants == []:
             _invars = (["⟨{}|{}⟩".format(i, j) for (i, j) in itertools.combinations(range(1, len(self) + 1), 2)] +
