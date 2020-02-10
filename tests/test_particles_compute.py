@@ -5,12 +5,20 @@ from __future__ import unicode_literals
 
 import mpmath
 import sympy
+import numpy
 
 from sympy.functions.special.tensor_functions import LeviCivita
 
 from lips import Particles
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+
+def test_particles_compute_ldot():
+
+    oParticles = Particles(5)
+
+    assert(abs(oParticles.ldot(1, 2) - numpy.trace(numpy.dot(oParticles[1].r2_sp, oParticles[2].r2_sp_b)) / 2) < 10 ** -290)
 
 
 def test_particles_compute_lNB():

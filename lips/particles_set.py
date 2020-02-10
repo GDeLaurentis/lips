@@ -577,7 +577,13 @@ class Particles_Set:
         a4, b4 = self[d].r_sp_d[0, 0], self[d].r_sp_d[1, 0]
         c4, d4 = self[d].l_sp_d[0, 0], self[d].l_sp_d[0, 1]
 
-        a1 = (-a2*a3*b1*b4*c1*c2*d3*d4 + a2*a3*b1*b4*c1*c3*d2*d4 + a2*a3*b1*b4*c2*c4*d1*d3 - a2*a3*b1*b4*c3*c4*d1*d2 + a2*a4*b1*b3*c1*c2*d3*d4 - a2*a4*b1*b3*c1*c4*d2*d3 - a2*a4*b1*b3*c2*c3*d1*d4 + a2*a4*b1*b3*c3*c4*d1*d2 - a3*a4*b1*b2*c1*c3*d2*d4 + a3*a4*b1*b2*c1*c4*d2*d3 + a3*a4*b1*b2*c2*c3*d1*d4 - a3*a4*b1*b2*c2*c4*d1*d3 - x)/(a2*b3*b4*c1*c3*d2*d4 - a2*b3*b4*c1*c4*d2*d3 - a2*b3*b4*c2*c3*d1*d4 + a2*b3*b4*c2*c4*d1*d3 - a3*b2*b4*c1*c2*d3*d4 + a3*b2*b4*c1*c4*d2*d3 + a3*b2*b4*c2*c3*d1*d4 - a3*b2*b4*c3*c4*d1*d2 + a4*b2*b3*c1*c2*d3*d4 - a4*b2*b3*c1*c3*d2*d4 - a4*b2*b3*c2*c4*d1*d3 + a4*b2*b3*c3*c4*d1*d2)
+        a1 = (-a2 * a3 * b1 * b4 * c1 * c2 * d3 * d4 + a2 * a3 * b1 * b4 * c1 * c3 * d2 * d4 + a2 * a3 * b1 * b4 * c2 * c4 * d1 * d3 -
+              a2 * a3 * b1 * b4 * c3 * c4 * d1 * d2 + a2 * a4 * b1 * b3 * c1 * c2 * d3 * d4 - a2 * a4 * b1 * b3 * c1 * c4 * d2 * d3 -
+              a2 * a4 * b1 * b3 * c2 * c3 * d1 * d4 + a2 * a4 * b1 * b3 * c3 * c4 * d1 * d2 - a3 * a4 * b1 * b2 * c1 * c3 * d2 * d4 +
+              a3 * a4 * b1 * b2 * c1 * c4 * d2 * d3 + a3 * a4 * b1 * b2 * c2 * c3 * d1 * d4 - a3 * a4 * b1 * b2 * c2 * c4 * d1 * d3 - x) / (
+                  a2 * b3 * b4 * c1 * c3 * d2 * d4 - a2 * b3 * b4 * c1 * c4 * d2 * d3 - a2 * b3 * b4 * c2 * c3 * d1 * d4 + a2 * b3 * b4 * c2 * c4 * d1 * d3 -
+                  a3 * b2 * b4 * c1 * c2 * d3 * d4 + a3 * b2 * b4 * c1 * c4 * d2 * d3 + a3 * b2 * b4 * c2 * c3 * d1 * d4 - a3 * b2 * b4 * c3 * c4 * d1 * d2 +
+                  a4 * b2 * b3 * c1 * c2 * d3 * d4 - a4 * b2 * b3 * c1 * c3 * d2 * d4 - a4 * b2 * b3 * c2 * c4 * d1 * d3 + a4 * b2 * b3 * c3 * c4 * d1 * d2)
 
         self[a].r_sp_d = numpy.array([[a1], [b1]])
         if fix_mom is True:
