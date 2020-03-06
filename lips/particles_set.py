@@ -322,134 +322,43 @@ class Particles_Set:
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
-    def set_Dijk(self, temp_string, temp_value, fix_mom=True, mode=1):                  # Sets Δ_ijk  --- Changes: last two [j] moment, Don't touch [j]'s or [i]'s
+    def set_Dijk(self, temp_string, temp_value, fix_mom=True, mode=1):  # Set Dijk, change angle bracket (odd mode) or square bracket (even mode)
 
         ijk = map(int, pDijk.findall(temp_string)[0])
         NonOverlappingLists = self.ijk_to_3NonOverlappingLists(ijk)
-        run_me_again = False
 
-        if len(NonOverlappingLists[0]) == 2 and len(NonOverlappingLists[1]) == 2:    # Hard solution for |i⟩ (mode=1) or |i] (mode=2)
-            a, b = self[NonOverlappingLists[0][0]].r_sp_d[0, 0], self[NonOverlappingLists[0][0]].r_sp_d[1, 0]
-            c, d = self[NonOverlappingLists[0][0]].l_sp_d[0, 0], self[NonOverlappingLists[0][0]].l_sp_d[0, 1]
-            e, f = self[NonOverlappingLists[0][1]].r_sp_d[0, 0], self[NonOverlappingLists[0][1]].r_sp_d[1, 0]
-            g, h = self[NonOverlappingLists[0][1]].l_sp_d[0, 0], self[NonOverlappingLists[0][1]].l_sp_d[0, 1]
-            i, j = self[NonOverlappingLists[1][0]].r_sp_d[0, 0], self[NonOverlappingLists[1][0]].r_sp_d[1, 0]
-            k, l = self[NonOverlappingLists[1][0]].l_sp_d[0, 0], self[NonOverlappingLists[1][0]].l_sp_d[0, 1]
-            m, n = self[NonOverlappingLists[1][1]].r_sp_d[0, 0], self[NonOverlappingLists[1][1]].r_sp_d[1, 0]
-            o, p = self[NonOverlappingLists[1][1]].l_sp_d[0, 0], self[NonOverlappingLists[1][1]].l_sp_d[0, 1]
-            X = 4 * temp_value
-            if mode == 2:
-                a, b, c, d = c, d, a, b
-                e, f, g, h = g, h, e, f
-                i, j, k, l = k, l, i, j
-                m, n, o, p = o, p, m, n
-            elif mode == 3:
-                a, b, c, d, e, f, g, h = e, f, g, h, a, b, c, d
-                i, j, k, l, m, n, o, p = m, n, o, p, i, j, k, l
-            elif mode == 4:               # combine mode 2 and mode 3
-                a, b, c, d = c, d, a, b
-                e, f, g, h = g, h, e, f
-                i, j, k, l = k, l, i, j
-                m, n, o, p = o, p, m, n
-                a, b, c, d, e, f, g, h = e, f, g, h, a, b, c, d
-                i, j, k, l, m, n, o, p = m, n, o, p, i, j, k, l
-            QB = (-2 * b * d * d * i * j * k * k - 2 * d * f * h * i * j * k * k +
-                  2 * d * e * h * j * j * k * k + 4 * b * c * d * i * j * k * l + 2 * d * f * g * i * j * k * l +
-                  2 * c * f * h * i * j * k * l - 2 * d * e * g * j * j * k * l - 2 * c * e * h * j * j * k * l -
-                  2 * b * c * c * i * j * l * l - 2 * c * f * g * i * j * l * l + 2 * c * e * g * j * j * l * l -
-                  2 * b * d * d * j * k * m * o - 2 * d * f * h * j * k * m * o + 2 * b * c * d * j * l * m * o +
-                  4 * d * f * g * j * l * m * o - 2 * c * f * h * j * l * m * o - 2 * b * d * d * i * k * n * o -
-                  2 * d * f * h * i * k * n * o + 4 * d * e * h * j * k * n * o + 2 * b * c * d * i * l * n * o -
-                  2 * d * f * g * i * l * n * o + 4 * c * f * h * i * l * n * o - 2 * d * e * g * j * l * n * o -
-                  2 * c * e * h * j * l * n * o - 2 * b * d * d * m * n * o * o - 2 * d * f * h * m * n * o * o +
-                  2 * d * e * h * n * n * o * o + 2 * b * c * d * j * k * m * p - 2 * d * f * g * j * k * m * p +
-                  4 * c * f * h * j * k * m * p - 2 * b * c * c * j * l * m * p - 2 * c * f * g * j * l * m * p +
-                  2 * b * c * d * i * k * n * p + 4 * d * f * g * i * k * n * p - 2 * c * f * h * i * k * n * p -
-                  2 * d * e * g * j * k * n * p - 2 * c * e * h * j * k * n * p - 2 * b * c * c * i * l * n * p -
-                  2 * c * f * g * i * l * n * p + 4 * c * e * g * j * l * n * p + 4 * b * c * d * m * n * o * p +
-                  2 * d * f * g * m * n * o * p + 2 * c * f * h * m * n * o * p - 2 * d * e * g * n * n * o * p -
-                  2 * c * e * h * n * n * o * p - 2 * b * c * c * m * n * p * p - 2 * c * f * g * m * n * p * p +
-                  2 * c * e * g * n * n * p * p)
-            QA = (d * d * j * j * k * k - 2 * c * d * j * j * k * l + c * c * j * j * l * l + 2 * d * d * j * k * n * o -
-                  2 * c * d * j * l * n * o + d * d * n * n * o * o - 2 * c * d * j * k * n * p +
-                  2 * c * c * j * l * n * p - 2 * c * d * n * n * o * p + c * c * n * n * p * p)
-            QC = (b * b * d * d * i * i * k * k + 2 * b * d * f * h * i * i * k * k + f * f * h * h * i * i * k * k -
-                  2 * b * d * e * h * i * j * k * k - 2 * e * f * h * h * i * j * k * k + e * e * h * h * j * j * k * k -
-                  2 * b * b * c * d * i * i * k * l - 2 * b * d * f * g * i * i * k * l - 2 * b * c * f * h * i * i * k * l -
-                  2 * f * f * g * h * i * i * k * l + 2 * b * d * e * g * i * j * k * l + 2 * b * c * e * h * i * j * k * l +
-                  4 * e * f * g * h * i * j * k * l - 2 * e * e * g * h * j * j * k * l + b * b * c * c * i * i * l * l +
-                  2 * b * c * f * g * i * i * l * l + f * f * g * g * i * i * l * l - 2 * b * c * e * g * i * j * l * l -
-                  2 * e * f * g * g * i * j * l * l + e * e * g * g * j * j * l * l + 2 * b * b * d * d * i * k * m * o +
-                  4 * b * d * f * h * i * k * m * o + 2 * f * f * h * h * i * k * m * o - 2 * b * d * e * h * j * k * m * o -
-                  2 * e * f * h * h * j * k * m * o - 2 * b * b * c * d * i * l * m * o - 2 * b * d * f * g * i * l * m * o -
-                  2 * b * c * f * h * i * l * m * o - 2 * f * f * g * h * i * l * m * o - 2 * b * d * e * g * j * l * m * o +
-                  4 * b * c * e * h * j * l * m * o + 2 * e * f * g * h * j * l * m * o - 2 * b * d * e * h * i * k * n * o -
-                  2 * e * f * h * h * i * k * n * o + 2 * e * e * h * h * j * k * n * o + 4 * b * d * e * g * i * l * n * o -
-                  2 * b * c * e * h * i * l * n * o + 2 * e * f * g * h * i * l * n * o - 2 * e * e * g * h * j * l * n * o +
-                  b * b * d * d * m * m * o * o + 2 * b * d * f * h * m * m * o * o + f * f * h * h * m * m * o * o -
-                  2 * b * d * e * h * m * n * o * o - 2 * e * f * h * h * m * n * o * o + e * e * h * h * n * n * o * o -
-                  2 * b * b * c * d * i * k * m * p - 2 * b * d * f * g * i * k * m * p - 2 * b * c * f * h * i * k * m * p -
-                  2 * f * f * g * h * i * k * m * p + 4 * b * d * e * g * j * k * m * p - 2 * b * c * e * h * j * k * m * p +
-                  2 * e * f * g * h * j * k * m * p + 2 * b * b * c * c * i * l * m * p + 4 * b * c * f * g * i * l * m * p +
-                  2 * f * f * g * g * i * l * m * p - 2 * b * c * e * g * j * l * m * p - 2 * e * f * g * g * j * l * m * p -
-                  2 * b * d * e * g * i * k * n * p + 4 * b * c * e * h * i * k * n * p + 2 * e * f * g * h * i * k * n * p -
-                  2 * e * e * g * h * j * k * n * p - 2 * b * c * e * g * i * l * n * p - 2 * e * f * g * g * i * l * n * p +
-                  2 * e * e * g * g * j * l * n * p - 2 * b * b * c * d * m * m * o * p - 2 * b * d * f * g * m * m * o * p -
-                  2 * b * c * f * h * m * m * o * p - 2 * f * f * g * h * m * m * o * p + 2 * b * d * e * g * m * n * o * p +
-                  2 * b * c * e * h * m * n * o * p + 4 * e * f * g * h * m * n * o * p - 2 * e * e * g * h * n * n * o * p +
-                  b * b * c * c * m * m * p * p + 2 * b * c * f * g * m * m * p * p + f * f * g * g * m * m * p * p -
-                  2 * b * c * e * g * m * n * p * p - 2 * e * f * g * g * m * n * p * p + e * e * g * g * n * n * p * p - X)
-            a = (-QB - mpmath.sqrt(QB**2 - 4 * QA * QC)) / (2 * QA)
-            if mode == 1:
-                self[NonOverlappingLists[0][0]].r_sp_d = numpy.array([a, b])
-            elif mode == 2:
-                self[NonOverlappingLists[0][0]].l_sp_d = numpy.array([a, b])
-            elif mode == 3:
-                self[NonOverlappingLists[0][1]].r_sp_d = numpy.array([a, b])
-            elif mode == 4:
-                self[NonOverlappingLists[0][1]].l_sp_d = numpy.array([a, b])
+        if mode == 1 or mode == 2:
+            to_be_changed = NonOverlappingLists[0].pop(0)
+        elif mode == 3 or mode == 4:
+            to_be_changed = NonOverlappingLists[0].pop(1)
 
-        else:
-            run_me_again = True
-            ijk = map(int, pDijk.findall(temp_string)[0])       # First work in phase space with 3 massive momenta K1, K2, K3
-            temp_oParticles = self.ijk_to_3Ks(ijk)              # K1 = Sum_Pi's, K2 = Sum_Pj's, K3 = Sum_Pk's
-            K1s = temp_oParticles.ldot(1, 1)
-            K10 = temp_oParticles[1].four_mom[0]
-            K1V = numpy.array([temp_oParticles[1].four_mom[1], temp_oParticles[1].four_mom[2], temp_oParticles[1].four_mom[3]])
-            K2V = numpy.array([temp_oParticles[2].four_mom[1], temp_oParticles[2].four_mom[2], temp_oParticles[2].four_mom[3]])
-            a = K10**2 - K1s
-            b = -2 * K10 * (numpy.dot(K1V, K2V))
-            c = numpy.dot(K1V, K2V)**2 + K1s * numpy.dot(K2V, K2V) - temp_value
-            K20 = (-b + mpmath.sqrt(b**2 - 4 * a * c)) / (2 * a)                   # Solve quadratic equation and fix K_2^0
-            temp_oParticles[2].four_mom = numpy.array([K20, K2V[0], K2V[1], K2V[2]])
+        o0 = self[to_be_changed]
+        oQs = self.cluster(NonOverlappingLists)
 
-            NonOLLists = self.ijk_to_3NonOverlappingLists(ijk, 2)   # Convert solution from K_2 to Pj's by decaying the last two
-            from particles import Particles
-            FakeoParticles2 = Particles(len(NonOLLists[1]) + 1)
-            FakeoParticles2[1] = temp_oParticles[2]
-            for i, particle in enumerate(NonOLLists[1]):
-                FakeoParticles2[i + 2] = particle
-            FakeoParticles2.fix_mom_cons(len(FakeoParticles2) - 1, len(FakeoParticles2), real_momenta=False, axis=mode)
-            for i, particle in enumerate(FakeoParticles2):
-                if i == 0:
-                    continue
-                else:
-                    index = (ijk[1] - 1 + i) % len(self)
-                    if index == 0:
-                        index = len(self)
-                    self[index] = particle
+        X = temp_value
 
-        if fix_mom is True:                                     # Fix_mom_cons by changing last two Pk's
-            NonOverlappingLists = self.ijk_to_3NonOverlappingLists(ijk)
-            ultima = NonOverlappingLists[2][len(NonOverlappingLists[2]) - 1]
-            penultima = NonOverlappingLists[2][len(NonOverlappingLists[2]) - 2]
-            if ultima == 0:
-                ultima = len(self)
-            if penultima == 0:
-                penultima = len(self)
-            self.fix_mom_cons(penultima, ultima)
-        if run_me_again is True:
-            return "run me again"
+        if mode == 1 or mode == 3:
+            [[a, b]] = o0.r_sp_u
+            [[alpha], [beta]] = numpy.dot(oQs[2].r2_sp_b, o0.l_sp_u)
+            [[gamma], [delta]] = numpy.dot(oQs[1].r2_sp_b, o0.l_sp_u)
+        elif mode == 2 or mode == 4:
+            [[a], [b]] = o0.l_sp_u
+            [[alpha, beta]] = numpy.dot(o0.r_sp_u, oQs[2].r2_sp_b)
+            [[gamma, delta]] = numpy.dot(o0.r_sp_u, oQs[1].r2_sp_b)
+
+        QA = alpha ** 2 / 4
+        QB = alpha * b * beta / 2 + alpha * oQs.ldot(1, 2) - gamma * oQs.ldot(2, 2)
+        QC = b ** 2 * beta ** 2 / 4 + b * beta * oQs.ldot(1, 2) - b * delta * oQs.ldot(2, 2) + oQs.ldot(1, 2) ** 2 - oQs.ldot(1, 1) * oQs.ldot(2, 2) - X
+
+        a = (-QB + mpmath.sqrt(QB**2 - 4 * QA * QC)) / (2 * QA)
+
+        if mode == 1 or mode == 3:
+            self[to_be_changed].r_sp_u = numpy.array([[a, b]])
+        elif mode == 2 or mode == 4:
+            self[to_be_changed].l_sp_u = numpy.array([[a], [b]])
+
+        if fix_mom is True:  # Fix_mom_cons by changing last two Pk's
+            self.fix_mom_cons(NonOverlappingLists[2][-1], NonOverlappingLists[2][-2])
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
