@@ -153,4 +153,11 @@ class Particles_Compute:
                 result = numpy.dot(result, self[d].l_sp_u)
             return result[0][0]
         else:
-            myException("Invalid string in compute: string {} is not implemented.".format(temp_string))
+            if temp_string == "(⟨1|(3+4)|(5+6)|2⟩-⟨1|(5+6)|(3+4)|2⟩)":
+                return self.compute("⟨1|(3+4)|(5+6)|2⟩") - self.compute("⟨1|(5+6)|(3+4)|2⟩")
+            elif temp_string == "(⟨1|(3+4)|(5+6)|2⟩+⟨1|(5+6)|(3+4)|2⟩)":
+                return self.compute("⟨1|(3+4)|(5+6)|2⟩") + self.compute("⟨1|(5+6)|(3+4)|2⟩")
+            elif temp_string == "(⟨1|(3+4)|(5+6)|7⟩-⟨1|(5+6)|(3+4)|7⟩)":
+                return self.compute("⟨1|(3+4)|(5+6)|7⟩") - self.compute("⟨1|(5+6)|(3+4)|7⟩")
+            else:
+                myException("Invalid string in compute: string {} is not implemented.".format(temp_string))

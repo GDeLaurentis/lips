@@ -26,7 +26,7 @@ mpmath.mp.dps = 300
 
 class Particles_Set:
 
-    def set(self, temp_string, temp_value, fix_mom=True, mode=1, itr=50, prec=0.1):
+    def set(self, temp_string, temp_value, fix_mom=True, mode=1, itr=2, prec=0.1):
         """Constructs a given collinear limit phase space."""
         for i in range(itr):
             if self.set_inner(temp_string, temp_value, fix_mom, mode) == "run me again":
@@ -327,21 +327,18 @@ class Particles_Set:
         ijk = map(int, pDijk.findall(temp_string)[0])
         NonOverlappingLists = self.ijk_to_3NonOverlappingLists(ijk)
 
-        if mode == 1 or mode == 2:
-            to_be_changed = NonOverlappingLists[0].pop(0)
-        elif mode == 3 or mode == 4:
-            to_be_changed = NonOverlappingLists[0].pop(1)
+        to_be_changed = NonOverlappingLists[0].pop((mode - 1) / 2)
 
         o0 = self[to_be_changed]
         oQs = self.cluster(NonOverlappingLists)
 
         X = temp_value
 
-        if mode == 1 or mode == 3:
+        if mode % 2 == 1:
             [[a, b]] = o0.r_sp_u
             [[alpha], [beta]] = numpy.dot(oQs[2].r2_sp_b, o0.l_sp_u)
             [[gamma], [delta]] = numpy.dot(oQs[1].r2_sp_b, o0.l_sp_u)
-        elif mode == 2 or mode == 4:
+        elif mode % 2 == 0:
             [[a], [b]] = o0.l_sp_u
             [[alpha, beta]] = numpy.dot(o0.r_sp_u, oQs[2].r2_sp_b)
             [[gamma, delta]] = numpy.dot(o0.r_sp_u, oQs[1].r2_sp_b)
@@ -352,9 +349,9 @@ class Particles_Set:
 
         a = (-QB + mpmath.sqrt(QB**2 - 4 * QA * QC)) / (2 * QA)
 
-        if mode == 1 or mode == 3:
+        if mode % 2 == 1:
             self[to_be_changed].r_sp_u = numpy.array([[a, b]])
-        elif mode == 2 or mode == 4:
+        elif mode % 2 == 0:
             self[to_be_changed].l_sp_u = numpy.array([[a], [b]])
 
         if fix_mom is True:  # Fix_mom_cons by changing last two Pk's

@@ -65,7 +65,7 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
         elif number_of_particles_or_particles is not None:
             raise Exception("Invalid initialisation of Particles instance.")
         self.oRefVec = Particle(real_momentum=real_momenta)
-        if fix_mom_cons is True:
+        if fix_mom_cons is True and max(map(abs, self.total_mom)) > 10 ** -(0.9 * 300):
             self.fix_mom_cons(real_momenta=real_momenta)
 
     def __eq__(self, other):
@@ -84,6 +84,14 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
         for oParticle in self:
             oParticle.randomise(real_momentum=real_momenta)
         self.fix_mom_cons(real_momenta=real_momenta)
+
+    def randomise_twistor(self):
+        for i, iParticle in enumerate(self):
+            iParticle.randomise_twist()
+        for i, iParticle in enumerate(self):
+            iParticle.comp_twist_x(self[(i + 1) % len(self) + 1])
+        for i, iParticle in enumerate(self):
+            iParticle.twist_x_to_mom(self[(i + 1) % len(self) + 1])
 
     def angles_for_squares(self):
         """Switches all angle brackets for square brackets and viceversa."""

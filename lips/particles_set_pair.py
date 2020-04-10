@@ -24,7 +24,7 @@ mpmath.mp.dps = 300
 
 class Particles_SetPair:
 
-    def set_pair(self, t_s1, t_v1, t_s2, t_v2, itr=10, prec=0.1):
+    def set_pair(self, t_s1, t_v1, t_s2, t_v2, itr=2, prec=0.1):
         """Constructs a double collinear limit phase space."""
         for i in range(itr):
             new_invs = self.set_pair_inner(t_s1, t_v1, t_s2, t_v2)     # set it --- note: if a list is returned then switch invariants to those
@@ -125,7 +125,7 @@ class Particles_SetPair:
 
             elif pDijk.findall(t_s2) != []:                                      # Second is: Δ_ijk
 
-                return "Not implemented."
+                return self.set_pair_NB_and_Dijk(t_s1, t_v1, t_s2, t_v2)
 
         elif pSijk.findall(t_s1) != []:                                # First is: S_ijk...
 
@@ -161,7 +161,7 @@ class Particles_SetPair:
 
             elif pNB.findall(t_s2) != []:                                        # Second is: ⟨i|(j+k)|...|l⟩
 
-                return "Not implemented."
+                return self.set_pair_NB_and_Dijk(t_s2, t_v2, t_s1, t_v1)
 
             elif pSijk.findall(t_s2) != []:                                      # Second: S_ijk...
 
@@ -899,3 +899,12 @@ class Particles_SetPair:
         return
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+    def set_pair_NB_and_Dijk(self, t_s1, t_v1, t_s2, t_v2):  # Current failed: 8/20 @ 6pt
+
+        if t_s1 == "⟨2|(1+7)|(3+4)|2⟩" and t_s2 == "Δ_735":
+            self.set("⟨2|(1+7)|(3+4)|2⟩", t_v1, fix_mom=False)
+            self.set("Δ_735", t_v2, mode=6, fix_mom=False)
+            self.fix_mom_cons(5, 6)
+        else:
+            return "Not implemented."
