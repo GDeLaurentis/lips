@@ -15,8 +15,6 @@ import numpy
 import re
 import mpmath
 
-from particle import Particle
-
 from tools import flatten, pSijk, pDijk, pOijk, pPijk, pA2, pS2, pNB, ptr5, myException
 
 mpmath.mp.dps = 300
@@ -193,17 +191,16 @@ class Particles_Set:
                 temp_string = temp_string.replace("[", "X").replace("]", "[").replace("X", "]")
                 self.set_inner(temp_string, temp_value, fix_mom, mode)
                 return
-            rest = numpy.array([[1, 0], [0, 1]])                   # initialise the rest to the identity matrix
-            for i in range(len(bc)):
-                comb_mom = re.sub(r'(\d)', r'self[\1].four_mom', bc[i])
-                comb_mom = eval(comb_mom)
-                clusteredParticle = Particle(comb_mom)
-                if a_or_s == "⟨":
-                    rest = numpy.dot(rest, clusteredParticle.r2_sp_b)
-                    a_or_s = "["                                    # needs to alternate
-                elif a_or_s == "[":
-                    rest = numpy.dot(rest, clusteredParticle.r2_sp)
-                    a_or_s = "⟨"                                    # needs to alternate
+            rest = numpy.array([[1, 0], [0, 1]])
+            if temp_string[0] == "⟨":
+                rest = ["(" + re.sub(r'(\d)', r'self[\1].r2_sp_b', entry) + ")" if i % 2 == 0 else
+                        "(" + re.sub(r'(\d)', r'self[\1].r2_sp', entry) + ")" for i, entry in enumerate(bc)]
+                rest = ".dot(".join(rest) + ")" * (len(rest) - 1)
+            elif a_or_s == "[":
+                rest = ["(" + re.sub(r'(\d)', r'self[\1].r2_sp', entry) + ")" if i % 2 == 0 else
+                        "(" + re.sub(r'(\d)', r'self[\1].r2_sp_b', entry) + ")" for i, entry in enumerate(bc)]
+                rest = ".dot(".join(rest) + ")" * (len(rest) - 1)
+            rest = eval(rest)
             if a == d and len(lNBms) % 2 == 0:
                 K11, K12, K21, K22 = rest[0, 0], rest[0, 1], rest[1, 0], rest[1, 1]
                 if temp_string[0] == "⟨":
@@ -215,17 +212,16 @@ class Particles_Set:
                     A = (B * K11 - B * K22 + mpmath.sqrt((B * K11 - B * K22) * (B * K11 - B * K22) + 4 * K12 * (B * B * K21 - temp_value))) / (2 * K12)
                     self[a].l_sp_d = numpy.array([A, B])
             else:
-                if a_or_s == "⟨":
+                if temp_string[-1] == "⟩":
                     rest = numpy.dot(rest, self[d].r_sp_d)
-                elif a_or_s == "[":
+                else:
                     rest = numpy.dot(rest, self[d].l_sp_u)
-                a_or_s = temp_string[0]                         # reset the angle_or_square bracket variable
-                if a_or_s == "⟨":
+                if temp_string[0] == "⟨":
                     _a, _b = self[a].r_sp_u[0, 0], self[a].r_sp_u[0, 1]  # ⟨A| = (a, b)
                     _c, _d = rest[0, 0], rest[1, 0]             # |rest⟩ = (c, d)
                     _a = (temp_value - _b * _d) / _c                     # a = (X - b*d)/c
                     self[a].r_sp_u = numpy.array([_a, _b])         # set ⟨A|
-                elif a_or_s == "[":
+                else:
                     _a, _b = self[a].l_sp_d[0, 0], self[a].l_sp_d[0, 1]  # [A| = (a, b)
                     _c, _d = rest[0, 0], rest[1, 0]             # |rest⟩ = (c, d)
                     _a = (temp_value - _b * _d) / _c                     # a = (X - b*d)/c

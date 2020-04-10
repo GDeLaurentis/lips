@@ -124,34 +124,25 @@ class Particles_Compute:
         elif pNB.findall(temp_string) != []:                        # ⟨A|(B+C+..)..|D]
             abcd = pNB.search(temp_string)
             a = int(abcd.group('start'))
-            bc = abcd.group('middle')
+            bc = abcd.group('middle').replace("(", "").replace(")", "").split("|")
             d = int(abcd.group('end'))
-            bc = re.split('[\)|\|]', bc)
-            bc = [entry.replace('|', '') for entry in bc]
-            bc = [entry.replace('(', '') for entry in bc]
-            bc = [entry for entry in bc if entry != '']
-            a_or_s = temp_string[0]
-            if a_or_s == '⟨':
-                result = self[a].r_sp_u
-            elif a_or_s == '[':
-                result = self[a].l_sp_d
+
+            if temp_string[0] == "⟨":
+                middle = ["(" + re.sub(r'(\d)', r'self[\1].r2_sp_b', entry) + ")" if i % 2 == 0 else
+                          "(" + re.sub(r'(\d)', r'self[\1].r2_sp', entry) + ")" for i, entry in enumerate(bc)]
+                middle = ".dot(".join(middle) + ")" * (len(middle) - 1)
+                result = self[a].r_sp_u.dot(eval(middle))
             else:
-                myException("Invalid string in compute: string must start with ⟨ or [.")
-            for i in range(len(bc)):
-                comb_mom = re.sub(r'(\d)', r'self[\1].four_mom', bc[i])
-                comb_mom = eval(comb_mom)
-                clusteredParticle = Particle(comb_mom)
-                if a_or_s == "⟨":
-                    result = numpy.dot(result, clusteredParticle.r2_sp_b)
-                    a_or_s = "["                                    # needs to alternate
-                elif a_or_s == "[":
-                    result = numpy.dot(result, clusteredParticle.r2_sp)
-                    a_or_s = "⟨"                                    # needs to alternate
-            if a_or_s == "⟨":
-                result = numpy.dot(result, self[d].r_sp_d)
-            elif a_or_s == "[":
-                result = numpy.dot(result, self[d].l_sp_u)
-            return result[0][0]
+                middle = ["(" + re.sub(r'(\d)', r'self[\1].r2_sp', entry) + ")" if i % 2 == 0 else
+                          "(" + re.sub(r'(\d)', r'self[\1].r2_sp_b', entry) + ")" for i, entry in enumerate(bc)]
+                middle = ".dot(".join(middle) + ")" * (len(middle) - 1)
+                result = self[a].l_sp_d.dot(eval(middle))
+
+            if temp_string[-1] == "⟩":
+                return result.dot(self[d].r_sp_d)[0][0]
+            else:
+                return result.dot(self[d].l_sp_u)[0][0]
+
         else:
             if temp_string == "(⟨1|(3+4)|(5+6)|2⟩-⟨1|(5+6)|(3+4)|2⟩)":
                 return self.compute("⟨1|(3+4)|(5+6)|2⟩") - self.compute("⟨1|(5+6)|(3+4)|2⟩")
