@@ -52,19 +52,19 @@ def indexing_decorator(func):
 class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
     """Describes the kinematics of n particles. Base one list of Particle objects."""
 
-    def __init__(self, number_of_particles_or_particles=None, seed=None, real_momenta=False, fix_mom_cons=True):
+    def __init__(self, number_of_particles_or_particles=None, seed=None, real_momenta=False, rational=False, fix_mom_cons=True):
         """Initialisation. Requires either multiplicity of phace space or list of Particle objects."""
         list.__init__(self)
         if isinstance(number_of_particles_or_particles, int):
             random.seed(seed) if seed is not None else random.seed()
             for i in range(number_of_particles_or_particles):
-                self.append(Particle(real_momentum=real_momenta))
+                self.append(Particle(real_momentum=real_momenta, rational=rational))
         elif isinstance(number_of_particles_or_particles, list):
             for oParticle in number_of_particles_or_particles:
                 self.append(oParticle)
         elif number_of_particles_or_particles is not None:
             raise Exception("Invalid initialisation of Particles instance.")
-        self.oRefVec = Particle(real_momentum=real_momenta)
+        self.oRefVec = Particle(real_momentum=real_momenta, rational=rational)
         if fix_mom_cons is True and max(map(abs, self.total_mom)) > 10 ** -(0.9 * 300):
             self.fix_mom_cons(real_momenta=real_momenta)
 

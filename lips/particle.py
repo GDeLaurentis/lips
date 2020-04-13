@@ -15,6 +15,7 @@ import numpy
 import mpmath
 
 from tools import MinkowskiMetric, LeviCivita, rand_frac, Pauli, Pauli_bar
+from gaussian_rationals import GaussianRational, rand_rat_frac
 
 mpmath.mp.dps = 300
 
@@ -25,10 +26,12 @@ mpmath.mp.dps = 300
 class Particle(object):
     """Describes the kinematics of a single particle."""
 
-    def __init__(self, four_mom=None, real_momentum=False):
+    def __init__(self, four_mom=None, real_momentum=False, rational=False):
         """Initialisation. Calls randomise if None, else initialises the four momentum."""
-        if four_mom is None:
+        if four_mom is None and rational is False:
             self.randomise(real_momentum=real_momentum)
+        elif four_mom is None and rational is True:
+            self.randomise_rational()
         else:
             self.four_mom = four_mom
 
@@ -179,19 +182,19 @@ class Particle(object):
         p2 = p[0] * p[0] + p[1] * p[1] + p[2] * p[2]
         p_zero = mpmath.sqrt(p2)
         self.four_mom = numpy.array([p_zero] + p)
-        self._four_mom_to_four_mom_d()
-        self._four_mom_d_to_r2_sp()
-        self._four_mom_d_to_r2_sp_b()
-        self._four_mom_to_r_sp_d()
+
+    def randomise_rational(self):
+        self._r_sp_d = numpy.array([GaussianRational(rand_rat_frac(), rand_rat_frac()), GaussianRational(rand_rat_frac(), rand_rat_frac())])
+        self._r_sp_d.shape = (2, 1)
         self._r_sp_d_to_r_sp_u()
-        self._four_mom_to_l_sp_d()
-        self._l_sp_d_to_l_sp_u()
+        self._four_mom = numpy.array([None, None, None, None])
+        self.l_sp_d = numpy.array([rand_rat_frac(), rand_rat_frac()])
 
     def angles_for_squares(self):
         """Flips left and right spinors."""
         self._l_sp_u, self._r_sp_u = self._r_sp_u, self._l_sp_u
-        self._l_sp_u.shape = (2, 1)    # column vector
-        self._r_sp_u.shape = (1, 2)    # column vector
+        self._l_sp_u.shape = (2, 1)
+        self._r_sp_u.shape = (1, 2)
         self._l_sp_u_to_l_sp_d()
         self._r_sp_u_to_r_sp_d()
         self._r1_sp_to_r2_sp()
