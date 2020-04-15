@@ -16,8 +16,6 @@ import numpy
 import re
 import mpmath
 
-from particle import Particle
-
 from tools import pSijk, pd5, pDijk, pOijk, pPijk, pA2, pS2, pNB, ptr5, myException
 
 mpmath.mp.dps = 300
@@ -29,8 +27,8 @@ mpmath.mp.dps = 300
 class Particles_Compute:
 
     def ldot(self, A, B):
-        """Lorentz dot product: P_A^μ * η_μν * P_B^ν."""
-        return numpy.dot(self[A].four_mom_d, self[B].four_mom)
+        """Lorentz dot product: trace(P^{α̇α}P̅\u0305_{αα̇}) = P_A^μ * η_μν * P_B^ν."""
+        return numpy.trace(numpy.dot(self[A].r2_sp, self[B].r2_sp_b)) / 2
 
     def ep(self, i, j):
         """Contraction of polarization tensor with four momentum. Requires .helconf property to be set."""

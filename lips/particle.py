@@ -112,9 +112,10 @@ class Particle(object):
     @r2_sp.setter
     def r2_sp(self, temp_r2_sp):
         self._r2_sp = temp_r2_sp
+        self._r2_sp_to_r2_sp_b()
         self._r2_sp_to_four_momentum()
         self._four_mom_to_four_mom_d()
-        self._four_mom_d_to_r2_sp_b()
+        # should I check for masslessness?
         self._four_mom_to_r_sp_d()
         self._r_sp_d_to_r_sp_u()
         self._four_mom_to_l_sp_d()
@@ -128,9 +129,10 @@ class Particle(object):
     @r2_sp_b.setter
     def r2_sp_b(self, temp_r2_sp_b):
         self._r2_sp_b = temp_r2_sp_b
+        self._r2_sp_b_to_r2_sp()
         self._r2_sp_b_to_four_momentum()
         self._four_mom_to_four_mom_d()
-        self._four_mom_d_to_r2_sp()
+        # should I check for masslessness?
         self._four_mom_to_r_sp_d()
         self._r_sp_d_to_r_sp_u()
         self._four_mom_to_l_sp_d()
@@ -147,6 +149,7 @@ class Particle(object):
         self._four_mom_to_four_mom_d()
         self._four_mom_d_to_r2_sp()
         self._four_mom_d_to_r2_sp_b()
+        # should I check for masslessness?
         self._four_mom_to_r_sp_d()
         self._r_sp_d_to_r_sp_u()
         self._four_mom_to_l_sp_d()
@@ -163,6 +166,7 @@ class Particle(object):
         self._four_mom_d_to_four_mom()
         self._four_mom_d_to_r2_sp()
         self._four_mom_d_to_r2_sp_b()
+        # should I check for masslessness?
         self._four_mom_to_r_sp_d()
         self._r_sp_d_to_r_sp_u()
         self._four_mom_to_l_sp_d()
@@ -188,7 +192,7 @@ class Particle(object):
         self._r_sp_d.shape = (2, 1)
         self._r_sp_d_to_r_sp_u()
         self._four_mom = numpy.array([None, None, None, None])
-        self.l_sp_d = numpy.array([rand_rat_frac(), rand_rat_frac()])
+        self.l_sp_d = numpy.array([GaussianRational(rand_rat_frac(), rand_rat_frac()), GaussianRational(rand_rat_frac(), rand_rat_frac())])
 
     def angles_for_squares(self):
         """Flips left and right spinors."""
@@ -232,6 +236,12 @@ class Particle(object):
             lambdabar_two = (self._four_mom[1] - self._four_mom[2] * 1j) / lambdabar_one
         self._l_sp_d = numpy.array([lambdabar_one, lambdabar_two])
         self._l_sp_d.shape = (1, 2)    # row vector
+
+    def _r2_sp_to_r2_sp_b(self):
+        self._r2_sp_b = (LeviCivita.dot(self.r2_sp.dot(LeviCivita.T))).T
+
+    def _r2_sp_b_to_r2_sp(self):
+        self._r2_sp = (LeviCivita.dot(self.r2_sp_b.dot(LeviCivita.T))).T
 
     def _r2_sp_to_four_momentum(self):
         for i in range(4):

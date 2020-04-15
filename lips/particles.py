@@ -65,7 +65,7 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
         elif number_of_particles_or_particles is not None:
             raise Exception("Invalid initialisation of Particles instance.")
         self.oRefVec = Particle(real_momentum=real_momenta, rational=rational)
-        if fix_mom_cons is True and max(map(abs, self.total_mom)) > 10 ** -(0.9 * 300):
+        if fix_mom_cons is True and max(map(abs, flatten(self.total_mom))) > 10 ** -(0.9 * 300):
             self.fix_mom_cons(real_momenta=real_momenta)
 
     def __eq__(self, other):
@@ -126,8 +126,8 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
         """Returns true if momentum is conserved."""
         mom_violation = 0
         for i in range(4):
-            if abs(self.total_mom[i]) > mom_violation:
-                mom_violation = abs(self.total_mom[i])
+            if abs(flatten(self.total_mom)[i]) > mom_violation:
+                mom_violation = abs(flatten(self.total_mom)[i])
         if silent is False:
             print("The largest momentum violation is {}".format(float(mom_violation)))
         if mom_violation > 10 ** -(0.9 * 300):
@@ -339,21 +339,7 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
         return c_list
 
     def ijk_to_3Ks(self, ijk):                                      # this method is used for Delta computation and setting
-        K = [0, 0, 0]
-        for i in range(3):
-            K[i] = numpy.array([0, 0, 0, 0])
-            j = ijk[i]
-            while (j != ijk[(i + 1) % 3] and j != ijk[(i + 2) % 3]):
-                K[i] = K[i] + self[j].four_mom
-                j = j + 1
-                j = j % len(self)
-                if j == 0:
-                    j = len(self)
-        temp_oParticles = Particles(3)
-        temp_oParticles[1].four_mom = K[0]
-        temp_oParticles[2].four_mom = K[1]
-        temp_oParticles[3].four_mom = K[2]
-        return temp_oParticles
+        return self.cluster(self.ijk_to_3NonOverlappingLists(ijk))
 
     def ijk_to_3NonOverlappingLists(self, ijk, mode=1):             # this method is used for Delta computation and setting
         NonOverlappingLists = [[ijk[0]], [ijk[1]], [ijk[2]]]
@@ -410,11 +396,8 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
 
     @property
     def total_mom(self):
-        """Total momentum of the given phase space."""
-        TotalMomentum = [0j, 0, 0, 0]
-        for oParticle in self:
-            TotalMomentum += oParticle.four_mom
-        return TotalMomentum
+        """Total momentum of the given phase space as a rank two spinor."""
+        return sum([oParticle.r2_sp for oParticle in self])
 
     def _r_sp_d_for_mathematica(self):
         msg = ""
@@ -494,7 +477,7 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
     def cluster(self, llIntegers):
         """Returns clustered particle objects according to lists of lists of integers (e.g. corners of one loop diagram)."""
         oKs = Particles(len(llIntegers))
-        four_moms = [sum([self[i].four_mom for i in corner_as_integers]) for corner_as_integers in llIntegers]
+        r2_spinors = [sum([self[i].r2_sp for i in corner_as_integers]) for corner_as_integers in llIntegers]
         for i, iK in enumerate(oKs):
-            iK.four_mom = four_moms[i]
+            iK.r2_sp = r2_spinors[i]
         return oKs
