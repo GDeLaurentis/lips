@@ -93,7 +93,7 @@ class Particles_Set:
         a, b = self[A].r_sp_u[0, 0], self[A].r_sp_u[0, 1]            # ⟨A| = (a, b)
         c, d = self[B].r_sp_d[0, 0], self[B].r_sp_d[1, 0]            # |B⟩ = (c, d)
         c = (X - b * d) / a                                          # c = (X - b * d) / a
-        self[B].r_sp_d = numpy.array([c, d])                            # set |B⟩
+        self[B].r_sp_d = numpy.array([c, d], dtype=type(c))          # set |B⟩
         if fix_mom is True:
             self.fix_mom_cons(plist[0], plist[1], axis=2)
 
@@ -109,7 +109,7 @@ class Particles_Set:
         a, b = self[A].l_sp_d[0, 0], self[A].l_sp_d[0, 1]            # [A| = (a, b)
         c, d = self[B].l_sp_u[0, 0], self[B].l_sp_u[1, 0]            # |B] = (c, d)
         c = (X - b * d) / a                                          # c = (X - b * d) / a
-        self[B].l_sp_u = numpy.array([c, d])                            # set |B]
+        self[B].l_sp_u = numpy.array([c, d], dtype=type(c))          # set |B]
         if fix_mom is True:
             self.fix_mom_cons(plist[0], plist[1], axis=1)
 
