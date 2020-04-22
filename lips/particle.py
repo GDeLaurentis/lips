@@ -13,11 +13,18 @@ from __future__ import unicode_literals
 
 import numpy
 import mpmath
+import random
 
 from tools import MinkowskiMetric, LeviCivita, rand_frac, Pauli, Pauli_bar
+
 from gaussian_rationals import GaussianRational, rand_rat_frac
+from finite_field import ModP
+from padic import PAdic
 
 mpmath.mp.dps = 300
+
+p = 7919   # 2 ** 31 - 1
+k = 4
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -26,12 +33,16 @@ mpmath.mp.dps = 300
 class Particle(object):
     """Describes the kinematics of a single particle."""
 
-    def __init__(self, four_mom=None, real_momentum=False, rational=False):
+    def __init__(self, four_mom=None, real_momentum=False, dtype="mpc"):
         """Initialisation. Calls randomise if None, else initialises the four momentum."""
-        if four_mom is None and rational is False:
+        if four_mom is None and dtype == "mpc":
             self.randomise(real_momentum=real_momentum)
-        elif four_mom is None and rational is True:
+        elif four_mom is None and dtype == "gaussian rational":
             self.randomise_rational()
+        elif four_mom is None and dtype == "finite field":
+            self.randomise_finite_field()
+        elif four_mom is None and dtype == "padic":
+            self.randomise_padic()
         else:
             self.four_mom = four_mom
 
@@ -193,6 +204,20 @@ class Particle(object):
         self._r_sp_d_to_r_sp_u()
         self._four_mom = numpy.array([None, None, None, None])
         self.l_sp_d = numpy.array([GaussianRational(rand_rat_frac(), rand_rat_frac()), GaussianRational(rand_rat_frac(), rand_rat_frac())])
+
+    def randomise_finite_field(self):
+        self._r_sp_d = numpy.array([ModP(random.randrange(0, p), p), ModP(random.randrange(0, p), p)], dtype=ModP)
+        self._r_sp_d.shape = (2, 1)
+        self._r_sp_d_to_r_sp_u()
+        self._four_mom = numpy.array([None, None, None, None])
+        self.l_sp_d = numpy.array([ModP(random.randrange(0, p), p), ModP(random.randrange(0, p), p)], dtype=ModP)
+
+    def randomise_padic(self):
+        self._r_sp_d = numpy.array([PAdic(random.randrange(0, p ** k), p, k), PAdic(random.randrange(0, p ** k), p, k)], dtype=PAdic)
+        self._r_sp_d.shape = (2, 1)
+        self._r_sp_d_to_r_sp_u()
+        self._four_mom = numpy.array([None, None, None, None])
+        self.l_sp_d = numpy.array([PAdic(random.randrange(0, p ** k), p, k), PAdic(random.randrange(0, p ** k), p, k)], dtype=PAdic)
 
     def angles_for_squares(self):
         """Flips left and right spinors."""
