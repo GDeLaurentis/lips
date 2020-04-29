@@ -11,11 +11,22 @@ from __future__ import unicode_literals
 class ModP(int):
     'Integers modulus p, with p prime.'
 
-    def __new__(cls, num, p):
-        assert type(num) in [int, long] and type(p) in [int, long], "Non integer modulus."
-        self = int.__new__(cls, int(num) % int(p))
-        self.p = int(p)
-        return self
+    __slots__ = ["p"]
+
+    def __new__(cls, *args, **kwargs):
+        if len(args) == 2:  # usually this should get called
+            return int.__new__(cls, args[0] % args[1])
+        elif len(args) == 1:  # this is needed for pickling
+            return int.__new__(cls, args[0])
+
+    def __init__(self, *args, **kwargs):
+        self.p = args[1]
+
+    def __getstate__(self):
+        return (int(self), self.p)
+
+    def __setstate__(self, state):
+        self.p = state[1]
 
     def __str__(self):
         return "%d %% %d" % (self, self.p)

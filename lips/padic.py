@@ -44,19 +44,32 @@ class PAdic(int):
 
     """PAdic Integers, with p prime."""
 
-    def __new__(cls, num, p, k, n=0, from_addition=False, recover_precision_from_powers_of_p=True):
+    def __new__(cls, num, p=None, k=None, n=0, from_addition=False, recover_precision_from_powers_of_p=True):
         """0 ≤ num ≤ p ^ k; p: prime; k: significant digits; n: power of prefactors of p."""
-        factors_of_p = next((i for i, j in enumerate(to_base(num, p)) if j != 0), 0)
-        self = int.__new__(cls, int(num / p ** factors_of_p) % int(p ** k))
-        self.p = int(p)
-        if from_addition is False or (recover_precision_from_powers_of_p and self == 1 and factors_of_p > 0):
-            if from_addition is True:
-                print("!Warning! recovering a digit.")
-            self.k = int(k)
+        if p is not None and k is not None:
+            factors_of_p = next((i for i, j in enumerate(to_base(num, p)) if j != 0), 0)
+            self = int.__new__(cls, int(num / p ** factors_of_p) % int(p ** k))
+            self.p = int(p)
+            if from_addition is False or (recover_precision_from_powers_of_p and self == 1 and factors_of_p > 0):
+                if from_addition is True:
+                    print("!Warning! recovering a digit.")
+                self.k = int(k)
+            else:
+                self.k = int(k) - from_addition * factors_of_p
+            self.n = int(factors_of_p) + n
+            return self
+        elif p is None and k is None:
+            return int.__new__(cls, num)
         else:
-            self.k = int(k) - from_addition * factors_of_p
-        self.n = int(factors_of_p) + n
-        return self
+            raise Exception("Invalid p-adic initialisation")
+
+    def __getstate__(self):
+        return (int(self), self.p, self.k, self.n)
+
+    def __setstate__(self, state):
+        self.p = state[1]
+        self.k = state[2]
+        self.n = state[3]
 
     @property
     def as_tuple(self):

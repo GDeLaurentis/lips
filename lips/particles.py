@@ -17,6 +17,7 @@ import re
 import os
 import copy
 import itertools
+import mpmath
 
 from tools import MinkowskiMetric
 from particle import Particle
@@ -437,12 +438,12 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
         msg = ""
         if as_spinors is False:
             for i, iParticle in enumerate(self):
-                P0 = (repr(iParticle.four_mom[0].real) + "+" + repr(iParticle.four_mom[0].imag) + "I").replace("e", "*^").replace("RGMP(", "").replace(")", "")
-                P1 = (repr(iParticle.four_mom[1].real) + "+" + repr(iParticle.four_mom[1].imag) + "I").replace("e", "*^").replace("RGMP(", "").replace(")", "")
-                P2 = (repr(iParticle.four_mom[2].real) + "+" + repr(iParticle.four_mom[2].imag) + "I").replace("e", "*^").replace("RGMP(", "").replace(")", "")
-                P3 = (repr(iParticle.four_mom[3].real) + "+" + repr(iParticle.four_mom[3].imag) + "I").replace("e", "*^").replace("RGMP(", "").replace(")", "")
-                msg += "DeclareSpinorMomentum[{ind}, [[{P0}, {P1}, {P2}, {P3}]]]".format(
-                    ind=i + 1, P0=P0, P1=P1, P2=P2, P3=P3).replace("[[", "{").replace("]]", "}").replace("+-", "-") + "\n"
+                P0 = (repr(iParticle.four_mom[0].real) + "+" + repr(iParticle.four_mom[0].imag) + "I").replace("e", "*^").replace("mpf(", "").replace(")", "")
+                P1 = (repr(iParticle.four_mom[1].real) + "+" + repr(iParticle.four_mom[1].imag) + "I").replace("e", "*^").replace("mpf(", "").replace(")", "")
+                P2 = (repr(iParticle.four_mom[2].real) + "+" + repr(iParticle.four_mom[2].imag) + "I").replace("e", "*^").replace("mpf(", "").replace(")", "")
+                P3 = (repr(iParticle.four_mom[3].real) + "+" + repr(iParticle.four_mom[3].imag) + "I").replace("e", "*^").replace("mpf(", "").replace(")", "")
+                msg += "DeclareSpinorMomentum[{ind}, [[SetPrecision[{P0}, {PR}], SetPrecision[{P1}, {PR}], SetPrecision[{P2}, {PR}], SetPrecision[{P3}, {PR}] ]]]".format(
+                    ind=i + 1, P0=P0, P1=P1, P2=P2, P3=P3, PR=mpmath.mp.dps).replace("[[", "{").replace("]]", "}").replace("+-", "-").replace("'", "") + "\n"
             msg = msg[:-1]
             return msg
         elif as_spinors is True:
