@@ -213,11 +213,11 @@ class Particle(object):
         self.l_sp_d = numpy.array([ModP(random.randrange(0, p), p), ModP(random.randrange(0, p), p)], dtype=ModP)
 
     def randomise_padic(self):
-        self._r_sp_d = numpy.array([PAdic(random.randrange(0, p ** k), p, k), PAdic(random.randrange(0, p ** k), p, k)], dtype=PAdic)
+        self._r_sp_d = numpy.array([PAdic(random.randrange(0, p ** k - 1), p, k), PAdic(random.randrange(0, p ** k - 1), p, k)], dtype=PAdic)
         self._r_sp_d.shape = (2, 1)
         self._r_sp_d_to_r_sp_u()
         self._four_mom = numpy.array([None, None, None, None])
-        self.l_sp_d = numpy.array([PAdic(random.randrange(0, p ** k), p, k), PAdic(random.randrange(0, p ** k), p, k)], dtype=PAdic)
+        self.l_sp_d = numpy.array([PAdic(random.randrange(0, p ** k - 1), p, k), PAdic(random.randrange(0, p ** k - 1), p, k)], dtype=PAdic)
 
     def angles_for_squares(self):
         """Flips left and right spinors."""

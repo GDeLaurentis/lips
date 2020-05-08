@@ -477,7 +477,7 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
 
     def cluster(self, llIntegers):
         """Returns clustered particle objects according to lists of lists of integers (e.g. corners of one loop diagram)."""
-        oKs = Particles(len(llIntegers))
+        oKs = Particles(len(llIntegers), fix_mom_cons=False)
         r2_spinors = [sum([self[i].r2_sp for i in corner_as_integers]) for corner_as_integers in llIntegers]
         for i, iK in enumerate(oKs):
             iK.r2_sp = r2_spinors[i]

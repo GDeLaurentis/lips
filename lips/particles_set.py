@@ -27,23 +27,20 @@ class Particles_Set:
     def set(self, temp_string, temp_value, fix_mom=True, mode=1, itr=2, prec=0.1):
         """Constructs a given collinear limit phase space."""
         for i in range(itr):
-            if self.set_inner(temp_string, temp_value, fix_mom, mode) == "run me again":
-                self.set_inner(temp_string, temp_value, fix_mom, mode)
-            actual, target = abs(self.compute(temp_string)), abs(temp_value)
-            error = abs(100) * abs((actual - target) / target)
-            compatible_with_zero = abs(target - actual) < 10 ** -(0.9 * 300)
-            if compatible_with_zero is False:
-                compatible_with_zero = str(abs(0)) == str(target)
-            if error < prec or compatible_with_zero is True:  # if error is less than 1 in 1000 or it is compatible with zero
+            self.set_inner(temp_string, temp_value, fix_mom, mode)
+            # check it worked
+            abs_diff = abs(self.compute(temp_string) - temp_value)
+            error = abs(100) * abs(abs_diff / temp_value)
+            if error < prec:   # if error is less than 1 in 1000 or it is compatible with zero
                 if i == 0:
                     return True
                 else:
                     print("Succeded to set {} to {} but in {} tries.".format(temp_string, temp_value, i + 1))
                     return True
-            if "nan" in str(actual):
+            if "nan" in str(self.compute(temp_string)):
                 myException("NaN encountered in set!")
                 break
-        myException("Failed to set {} to {}. The target was {}, the actual value was {}, the error was {}.".format(temp_string, temp_value, target, actual, error))
+        myException("Failed to set {} to {}. The target was {}, the actual value was {}, the error was {}.".format(temp_string, temp_value, temp_value, self.compute(temp_string), error))
         return False
 
     def set_inner(self, temp_string, temp_value, fix_mom=True, mode=1):
