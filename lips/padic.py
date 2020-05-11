@@ -29,7 +29,7 @@ def padicfy(func):
         if type(other) is PAdic:
             return func(self, other)
         elif type(other) in [int, long, ModP, numpy.int64]:
-            return func(self, PAdic(other, self.p, self.k))
+            return func(self, PAdic(other, self.p, (self.k + self.n) if (self.k + self.n) > 0 else 0))
         else:
             print(type(self), ", ", type(other))
             print(self, ", ", other)
@@ -71,6 +71,9 @@ class PAdic(int):
         self.k = state[2]
         self.n = state[3]
 
+    # def __abs__(self):
+    #     return -self.n
+
     @property
     def as_tuple(self):
         return (to_base(int(self), self.p) + tuple([0 for i in range(self.k)]))[:self.k]
@@ -93,7 +96,8 @@ class PAdic(int):
         if self.n > other.n:
             return other + self
         else:
-            return PAdic((int(self) + int(other) * self.p ** (other.n - self.n)) % self.p ** self.k, self.p, min([self.k, other.k]), self.n, from_addition=True)
+            return PAdic((int(self) + int(other) * self.p ** (other.n - self.n)) % self.p ** self.k, self.p,  # min([self.k, other.k]),
+                         ((self.k + self.n) if (self.k + self.n) < (other.k + other.n) else (other.k + other.n)) - self.n, self.n, from_addition=True)
 
     @padicfy
     def __radd__(self, other):
