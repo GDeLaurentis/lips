@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 #   ___          _   _    _          ___      _   ___      _
@@ -8,13 +7,16 @@
 
 # Author: Giuseppe
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 from __future__ import unicode_literals
 
 import os
 import numpy
 import mpmath
 
-from tools import flatten, pSijk, pDijk, pA2, pS2, p3B, pNB, myException
+from .tools import flatten, pSijk, pDijk, pA2, pS2, p3B, pNB, myException
 
 local_directory = os.path.dirname(__file__)
 mpmath.mp.dps = 300
@@ -30,7 +32,7 @@ class Particles_SetPair:
             new_invs = self.set_pair_inner(t_s1, t_v1, t_s2, t_v2)     # set it --- note: if a list is returned then switch invariants to those
             if type(new_invs) is list:                                 # used for example for s_123&⟨1|(2+3)|1] ---> s_123&⟨2|3⟩
                 t_s1, t_s2 = new_invs[0], new_invs[1]
-            elif type(new_invs) in [unicode, str]:
+            elif type(new_invs) is str:
                 if new_invs == "Not implemented.":
                     break
             actual1, target1 = abs(self.compute(t_s1)), abs(t_v1)
@@ -205,7 +207,7 @@ class Particles_SetPair:
                 t_s2 = "[{}|{}]".format(overlap[0], cd_only)
         self.set(t_s1, t_v1, fix_mom=False)                    # set it
         self.set(t_s2, t_v2, fix_mom=False)
-        plist = map(int, self._complementary(list(set([unicode(ab[0]), unicode(ab[1]), unicode(cd[0]), unicode(cd[1])]))))
+        plist = map(int, self._complementary(list(set([str(ab[0]), str(ab[1]), str(cd[0]), str(cd[1])]))))
         if len(plist) >= 2:
             self.fix_mom_cons(plist[0], plist[1])
         elif len(plist) == 1:
@@ -248,7 +250,7 @@ class Particles_SetPair:
                     t_s2 = t_s2_new
         lNB, lNBs, lNBms, lNBe = self._get_lNB(t_s2)
         plist = self._complementary(ab + lNB)
-        # print lNBs, lNBms, lNBe
+        # print(lNBs, lNBms, lNBe)
         if ((t_s1[0] == "⟨" and t_s2[0] == "⟨" and (t_s2[-1] != "⟩" or (t_s1[1] == t_s2[1] and t_s1[1] != t_s2[-2]))) or
            (t_s1[0] == "[" and t_s2[0] == "[" and (t_s2[-1] != "]" or (t_s1[1] == t_s2[1] and t_s1[1] != t_s2[-2])))):
             # or (lNBs == lNBe and set(lNBms[0]) == set(ab))):               # old statement
@@ -281,7 +283,7 @@ class Particles_SetPair:
                         break
         lNB, lNBs, lNBms, lNBe = self._get_lNB(t_s2)
         _tuple, use_axis = self._can_fix_mom_cons(t_s1, t_s2)
-        # print _tuple, use_axis, t_s1, t_s2, use_mode                   # debugging tool
+        # print(_tuple, use_axis, t_s1, t_s2, use_mode)                   # debugging tool
         self.set(t_s1, t_v1, fix_mom=False)
         self.set(t_s2, t_v2, fix_mom=False, mode=use_mode)
         if _tuple is not False:
@@ -312,7 +314,7 @@ class Particles_SetPair:
             t_s2 = str1
         elif ab[0] not in ijk and ab[1] not in ijk:             # disjoint
             if len(self) == 6 and len(ijk) == 3:                # six particles -> disjoint = overlapping
-                compl = self._complementary(map(unicode, ijk))
+                compl = self._complementary(map(str, ijk))
                 t_s2 = 's_{}{}{}'.format(compl[0], compl[1], compl[2])
                 self.set_pair_inner(t_s1, t_v1, t_s2, t_v2)
                 return
@@ -326,7 +328,7 @@ class Particles_SetPair:
         elif t_s1[0] == "[":                                    # set it using mode 1 (this reduces the number of invariants that go to zero)
             self.set(t_s1, t_v1, fix_mom=False)
             self.set(t_s2, t_v2, fix_mom=False, mode=1)
-        plist = map(int, self._complementary(list(set([unicode(entry) for entry in ijk + ab]))))
+        plist = map(int, self._complementary(list(set([str(entry) for entry in ijk + ab]))))
         if len(plist) >= 2:
             self.fix_mom_cons(plist[0], plist[1])
         elif len(plist) == 1:
@@ -457,7 +459,7 @@ class Particles_SetPair:
             return t_s
 
         if "-" in t_s1 or "-" in t_s2:                    # a minus sign would mess up inversion
-            print "Error: Detected - in string. Not implemented."
+            print("Error: Detected - in string. Not implemented.")
 
         l3B_0, l3Bs_0, l3Bm_0, l3Be_0, a_or_s_0, l3Bc_0 = unpack(t_s1)
         l3B_1, l3Bs_1, l3Bm_1, l3Be_1, a_or_s_1, l3Bc_1 = unpack(t_s2)
@@ -595,10 +597,10 @@ class Particles_SetPair:
         l3B[1] = l3B[1].split("+")
         l3Bs, l3Bm, l3Be = int(l3B[0]), map(int, l3B[1]), int(l3B[2])
         l3B = map(int, [item for sublist in l3B for item in sublist])
-        free = map(int, self._complementary(map(unicode, list(set(ijk + l3B)))))
-        free_first_flipped = map(int, self._complementary(map(unicode, list(set(l3B + map(int, self._complementary(map(unicode, ijk))))))))
+        free = map(int, self._complementary(map(str, list(set(ijk + l3B)))))
+        free_first_flipped = map(int, self._complementary(map(str, list(set(l3B + map(int, self._complementary(map(str, ijk))))))))
         free_second_flipped = map(
-            int, self._complementary(map(unicode, list(set(ijk + [l3Bs] + [l3Be] + map(int, self._complementary(list(set(map(unicode, l3B))))))))))
+            int, self._complementary(map(str, list(set(ijk + [l3Bs] + [l3Be] + map(int, self._complementary(list(set(map(str, l3B))))))))))
         if len(free) >= 2 or (len(free_first_flipped) < 2 and len(free_second_flipped) < 2):
             l3Bm_only, l3Bs_only, l3Be_only = None, False, False
             for i in l3Bm:
@@ -638,10 +640,10 @@ class Particles_SetPair:
                 self.set_pair_inner(t_s2, t_v2, t_s1, t_v1)
                 return [t_s2, t_s1]                       # cheeky fix
         elif len(free_first_flipped) >= 2:                # flip it and try again
-            t_s2 = 's_{}'.format(''.join(self._complementary(map(unicode, ijk))))
+            t_s2 = 's_{}'.format(''.join(self._complementary(map(str, ijk))))
             return self.set_pair_inner(t_s2, t_v2, t_s1, t_v1)
         elif len(free_second_flipped) >= 2:               # flip it and try again
-            comp = map(int, self._complementary(map(unicode, list(set(l3B)))))
+            comp = map(int, self._complementary(map(str, list(set(l3B)))))
             l3Bc = ""
             for i in range(len(comp)):
                 l3Bc += "{}+".format(comp[i])
@@ -655,7 +657,7 @@ class Particles_SetPair:
         l3B[1] = l3B[1].split("+")
         l3Bs, l3Bm, l3Be = int(l3B[0]), map(int, l3B[1]), int(l3B[2])
         l3B = map(int, [item for sublist in l3B for item in sublist])
-        free = map(int, self._complementary(map(unicode, list(set(ijk + l3B)))))
+        free = map(int, self._complementary(map(str, list(set(ijk + l3B)))))
         self.set(t_s2, t_v2, fix_mom=False)               # set it
         self.set(t_s1, t_v1, fix_mom=False, mode=use_mode)
         if len(free) >= 2:
@@ -796,7 +798,7 @@ class Particles_SetPair:
                 pass
             else:
                 lmno += [l]
-        plist = map(int, self._complementary(map(unicode, ovrlap + ijko + lmno)))
+        plist = map(int, self._complementary(map(str, ovrlap + ijko + lmno)))
         if len(plist) >= 2:                               # if there are at least two free particles then
             t_s1 = 's_'                                   # just make sure the overlap is at the end
             for i in range(len(ijko)):                    # and use mode=1/mode=2 for the first/second respectively
@@ -811,7 +813,7 @@ class Particles_SetPair:
         else:                                             # otherwise if there are not enough free particles flip the longest
             if len(ijk) > len(lmn):                       # make sure lmn is the longest
                 lmn, ijk, t_s1 = ijk, lmn, t_s2
-            lmn = map(int, self._complementary(map(unicode, lmn)))
+            lmn = map(int, self._complementary(map(str, lmn)))
             t_s2 = 's_'
             for i in range(len(lmn)):
                 t_s2 += '{}'.format(lmn[i])

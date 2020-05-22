@@ -1,6 +1,7 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
@@ -93,12 +94,12 @@ class GaussianRational(object):
         return other * self
 
     @gaussian_rational
-    def __div__(self, other):
+    def __truediv__(self, other):
         mod_other = other * other.conjugate()
         return self * other.conjugate() * (1 / mod_other.real)
 
     @gaussian_rational
-    def __rdiv__(self, other):
+    def __rtruediv__(self, other):
         return other / self
 
     def __neg__(self):
@@ -118,7 +119,9 @@ class GaussianRational(object):
         return complex(self.real, self.imag)
 
     def __abs__(self):
-        return self * self.conjugate()
+        abs_self = self * self.conjugate()
+        assert abs_self.imag == 0
+        return abs_self.real
 
     def conjugate(self):
         return GaussianRational(self.real, - self.imag)

@@ -1,9 +1,9 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
-
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
@@ -11,7 +11,7 @@ from __future__ import unicode_literals
 class ModP(int):
     'Integers modulus p, with p prime.'
 
-    __slots__ = ["p"]
+    # __slots__ = ["p"]
 
     def __new__(cls, *args, **kwargs):
         if len(args) == 2:  # usually this should get called
@@ -55,12 +55,12 @@ class ModP(int):
     def __rmul__(self, other):
         return ModP(int(other) * int(self), self.p)
 
-    def __div__(self, other):
+    def __truediv__(self, other):
         if not isinstance(other, ModP):
             other = ModP(other, self.p)
         return self * other._inv()
 
-    def __rdiv__(self, other):
+    def __rtruediv__(self, other):
         return other * self._inv()
 
     def __pow__(self, other):

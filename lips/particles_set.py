@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 #   ___          _   _    _          ___      _
@@ -8,14 +7,16 @@
 
 # Author: Giuseppe
 
-
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 from __future__ import unicode_literals
 
 import numpy
 import re
 import mpmath
 
-from tools import flatten, pSijk, pDijk, pOijk, pPijk, pA2, pS2, pNB, ptr5, myException
+from .tools import flatten, pSijk, pDijk, pOijk, pPijk, pA2, pS2, pNB, ptr5, myException
 
 mpmath.mp.dps = 300
 
@@ -84,7 +85,7 @@ class Particles_Set:
 
         A, B = map(int, pA2.findall(temp_string)[0])
         X = temp_value
-        plist = map(int, self._complementary(map(unicode, [A, B])))  # free momenta
+        plist = map(int, self._complementary(map(str, [A, B])))  # free momenta
         if len(plist) < 2:                                           # need at least 4 particles to fix mom cons (i.e. two free ones)
             myException("Set_A2 called with less than 4 particles. Cound't fix momentum conservation.")
         a, b = self[A].r_sp_u[0, 0], self[A].r_sp_u[0, 1]            # ⟨A| = (a, b)
@@ -100,7 +101,7 @@ class Particles_Set:
 
         A, B = map(int, pS2.findall(temp_string)[0])
         X = temp_value
-        plist = map(int, self._complementary(map(unicode, [A, B])))  # free momenta
+        plist = map(int, self._complementary(map(str, [A, B])))  # free momenta
         if len(plist) < 2:                                           # need at least 4 particles to fix mom cons (i.e. two free ones)
             myException("Set_S2 called with less than 4 particles. Cound't fix momentum conservation.")
         a, b = self[A].l_sp_d[0, 0], self[A].l_sp_d[0, 1]            # [A| = (a, b)
@@ -132,9 +133,9 @@ class Particles_Set:
                 plist = self._complementary([lNBs] + _lNBms + [lNBe])
                 if len(plist) >= 2:                             # if this fixes it then reconstruct bc and temp_string
                     lNBms = _lNBms
-                    start = temp_string[0] + unicode(lNBs) + "|"
-                    end = "|" + unicode(lNBe) + temp_string[len(temp_string) - 1]
-                    middle = "".join(string + "|" for string in ["(" + "".join(unicode(entry) + "+" for entry in item)[:-1] + ")" for item in lNBms])
+                    start = temp_string[0] + str(lNBs) + "|"
+                    end = "|" + str(lNBe) + temp_string[len(temp_string) - 1]
+                    middle = "".join(string + "|" for string in ["(" + "".join(str(entry) + "+" for entry in item)[:-1] + ")" for item in lNBms])
                     middle = middle[:-1]
                     temp_string = start + middle + end
                     break
@@ -172,10 +173,10 @@ class Particles_Set:
                 break
 
         a_or_s = temp_string[0]
-        bc = ["".join(unicode(entry) + "+" for entry in item)[:-1] for item in lNBms]
+        bc = ["".join(str(entry) + "+" for entry in item)[:-1] for item in lNBms]
         a, d = lNBs, lNBe
 
-        # print temp_string, unique_head_or_tail                # debugging tool
+        # print(temp_string, unique_head_or_tail)                # debugging tool
 
         if (((unique_head_or_tail != [] or                      # this sets the head (or tail) leaving middle unchanged
               (lNBs == lNBe and lNBs not in flatten(lNBms) and
@@ -230,19 +231,19 @@ class Particles_Set:
                 _bc = _bc[2 * unique_extrema_of_middle[1]] + _bc[1:2 * unique_extrema_of_middle[1]] + _bc[0] + _bc[2 * unique_extrema_of_middle[1] + 1:]
             bc[unique_extrema_of_middle[2]] = _bc
             if unique_extrema_of_middle[2] == 0:                # rewrite the string representing the invariant
-                start = temp_string[0] + unicode(a) + "|"
-                end = "|" + unicode(d) + temp_string[len(temp_string) - 1]
+                start = temp_string[0] + str(a) + "|"
+                end = "|" + str(d) + temp_string[len(temp_string) - 1]
                 middle = "".join(["(" + item + ")|" for item in bc])
                 middle = middle[:-1]
             elif unique_extrema_of_middle[2] == len(bc) - 1:
                 if temp_string[len(temp_string) - 1] == "⟩":
-                    start = "⟨" + unicode(d) + "|"
+                    start = "⟨" + str(d) + "|"
                 elif temp_string[len(temp_string) - 1] == "]":
-                    start = "[" + unicode(d) + "|"
+                    start = "[" + str(d) + "|"
                 if temp_string[0] == "⟨":
-                    end = "|" + unicode(a) + "⟩"
+                    end = "|" + str(a) + "⟩"
                 elif temp_string[0] == "[":
-                    end = "|" + unicode(a) + "]"
+                    end = "|" + str(a) + "]"
                 a, d = d, a
                 bc.reverse()
                 middle = "".join(["(" + item + ")|" for item in bc])
@@ -293,7 +294,7 @@ class Particles_Set:
 
     def set_Sijk(self, temp_string, temp_value, fix_mom=True, mode=1):
 
-        ijk = map(int, pSijk.findall(temp_string)[0])
+        ijk = list(map(int, pSijk.findall(temp_string)[0]))
         if len(ijk) == 2:
             print("Warning: You are not supposed to call set with s_ij. Call set either ⟨i|j⟩ or [i|j] instead.")
             return
@@ -320,7 +321,7 @@ class Particles_Set:
         ijk = map(int, pDijk.findall(temp_string)[0])
         NonOverlappingLists = self.ijk_to_3NonOverlappingLists(ijk)
 
-        to_be_changed = NonOverlappingLists[0].pop((mode - 1) / 2)
+        to_be_changed = NonOverlappingLists[0].pop((mode - 1) // 2)
 
         o0 = self[to_be_changed]
         oQs = self.cluster(NonOverlappingLists)
@@ -462,7 +463,7 @@ class Particles_Set:
     def set_tr5(self, temp_string, temp_value, fix_mom=True):       # ⟨A|B⟩ = (a, b).(c, d) = ac+bd = X ----> c = (X - bd)/a
 
         a, b, c, d = [int(entry) for entry in ptr5.findall(temp_string)[0]]
-        plist = map(int, self._complementary(map(unicode, [a, b, c, d])))  # free momenta
+        plist = map(int, self._complementary(map(str, [a, b, c, d])))  # free momenta
         if len(plist) < 2:
             myException("Set_tr5 called with less than 6 particles. Cound't fix momentum conservation.")
 

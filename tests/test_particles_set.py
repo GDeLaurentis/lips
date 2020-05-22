@@ -1,6 +1,8 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 from __future__ import unicode_literals
 
 import sympy
@@ -10,8 +12,9 @@ from lips import Particles
 
 from antares.core.invariants import Invariants
 from antares.core.tools import mapThreads
-from antares.core.settings import settings
 
+UseParallelisation = True
+Cores = 6
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
@@ -19,10 +22,10 @@ from antares.core.settings import settings
 @pytest.mark.parametrize("multiplicity", range(4, 7))
 def test_particles_set(multiplicity):
     invariants = Invariants(multiplicity, no_cached=True).full
-    TrueOrFalseList = mapThreads(SingleScalingsTestingInner, multiplicity, invariants, invariants, UseParallelisation=settings.UseParallelisation, Cores=settings.Cores)
+    TrueOrFalseList = mapThreads(SingleScalingsTestingInner, multiplicity, invariants, invariants, UseParallelisation=UseParallelisation, Cores=Cores)
     failed_counter = sum(1 for entry in TrueOrFalseList if entry is False)
     assert(failed_counter == 0)
-    # print "\r{}/{} single collinear limits failed to be constructed.                                  \n".format(failed_counter, len(invariants))
+    # print("\r{}/{} single collinear limits failed to be constructed.                                  \n".format(failed_counter, len(invariants)))
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -44,7 +47,7 @@ def SingleScalingsTestingInner(n, invariants, invariant):
                 return False
         elif result is False:           # if it fails print it
             error_counter += 1
-            print "\r", result, invariant
+            print("\r", result, invariant)
             if error_counter == max_error_nbr + 1:
                 return False
         else:

@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 #   ___          _   _    _
@@ -8,7 +7,9 @@
 
 # Author: Giuseppe
 
-
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 from __future__ import unicode_literals
 
 import numpy
@@ -19,13 +20,11 @@ import copy
 import itertools
 import mpmath
 
-from tools import MinkowskiMetric
-from particle import Particle
-from particles_compute import Particles_Compute
-from particles_set import Particles_Set
-from particles_set_pair import Particles_SetPair
-
-from tools import flatten, pA2, pS2, pNB, myException
+from .tools import MinkowskiMetric, flatten, pA2, pS2, pNB, myException
+from .particle import Particle
+from .particles_compute import Particles_Compute
+from .particles_set import Particles_Set
+from .particles_set_pair import Particles_SetPair
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -159,7 +158,7 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
             _invars = [invariant for invariant in invariants]
 
         if silent is False:
-            print "Consistency check:"
+            print("Consistency check:")
             # print("{} Consistency check {}".format(Hyphens, Hyphens))
 
         mom_cons = self.momentum_conservation_check(silent)         # momentum conservation violation
@@ -168,8 +167,8 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
         values = []                                                 # smallest and biggest invariants
         for _invar in _invars:
             values += [abs(self.compute(_invar))]
-            if "n" in unicode(values[len(values) - 1]) and silent is False:
-                print "not a number!", values[len(values) - 1], "invariant", _invar
+            if "n" in str(values[len(values) - 1]) and silent is False:
+                print("not a number!", values[len(values) - 1], "invariant", _invar)
                 return False, False, [], []
         while True:
             Break = True
@@ -191,18 +190,18 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
                 small_outliers += [_invars[i]]
                 small_outliers_values += [values[i]]
                 if silent is False:
-                    print "{} = {}".format(_invars[i], float(values[i]))
+                    print("{} = {}".format(_invars[i], float(values[i])))
             if values[i] > 0.0001:
                 break
         if silent is False:
-            print "..."
+            print("...")
         for i in range(len(_invars)):
             if values[i] > 100000:
                 myException("Outliers are big!")
                 big_outliers += [_invars[i]]
                 big_outliers_values += [values[i]]
                 if silent is False:
-                    print "{} = {}".format(_invars[i], float(values[i]))
+                    print("{} = {}".format(_invars[i], float(values[i])))
         if silent is False:
             pass
             # print("{}-------------------{}".format(Hyphens, Hyphens))
@@ -306,9 +305,9 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
 
     @staticmethod
     def _lNB_to_string(start, lNBs, lNBms, lNBe, end):
-        start = start + unicode(lNBs) + "|"
-        end = "|" + unicode(lNBe) + end
-        middle = "".join(string + "|" for string in ["(" + "".join(unicode(entry) + "+" for entry in item)[:-1] + ")" for item in lNBms])
+        start = start + str(lNBs) + "|"
+        end = "|" + str(lNBe) + end
+        middle = "".join(string + "|" for string in ["(" + "".join(str(entry) + "+" for entry in item)[:-1] + ")" for item in lNBms])
         middle = middle[:-1]
         t_s_new = start + middle + end
         return t_s_new
@@ -317,8 +316,8 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
     def _get_lNB(temp_string):                                      # usage: lNB, lNBs, lNBms, lNBe = _get_lNB(temp_string)
         lNB = list(pNB.findall(temp_string)[0])
         lNB[1] = [entry.replace("(", "").replace(")", "").split("+") for entry in lNB[1].split("|")]
-        lNBs, lNBms, lNBe = int(lNB[0]), [map(int, entry) for entry in lNB[1]], int(lNB[2])
-        lNB = map(int, [lNBs] + [entry for sublist in lNB[1] for entry in sublist] + [lNBe])
+        lNBs, lNBms, lNBe = int(lNB[0]), [list(map(int, entry)) for entry in lNB[1]], int(lNB[2])
+        lNB = list(map(int, [lNBs] + [entry for sublist in lNB[1] for entry in sublist] + [lNBe]))
         return lNB, lNBs, lNBms, lNBe
 
     def _complementary(self, temp_list):                            # returns the list obtained by using momentum conservation
@@ -326,7 +325,7 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
         if type(temp_list) == list:                                 # make sure it is a set (no double entries)
             temp_list = set(temp_list)
         original_type = type(list(temp_list)[0])
-        if type(list(temp_list)[0]) == unicode:                         # make sure entries are integers (representing particle #)
+        if type(list(temp_list)[0]) is not int:                         # make sure entries are integers (representing particle #)
             temp_list = set(map(int, temp_list))
         temp_list = list(temp_list)
         n = len(self)
@@ -336,7 +335,7 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
         for element in temp_list:
             if element in c_list:
                 c_list.remove(element)
-        c_list = map(original_type, c_list)
+        c_list = list(map(original_type, c_list))
         return c_list
 
     def ijk_to_3Ks(self, ijk):                                      # this method is used for Delta computation and setting
@@ -367,7 +366,7 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
         clos = temp_string[len(temp_string) - 1]
 
         relist = re.split('[\(\)⟨⟩|\]\[]', temp_string)
-        relist = filter(None, relist)
+        relist = list(filter(None, relist))
 
         # consistency of s_ijk "Δ", "Ω", "Π"
         if init in ["s", "S", "Δ", "Ω", "Π", "δ"] or temp_string[0:3] == "tr5":

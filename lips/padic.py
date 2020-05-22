@@ -1,13 +1,14 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
 import functools
 import numpy
 
-from finite_field import ModP
+from .finite_field import ModP
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -28,7 +29,7 @@ def padicfy(func):
     def wrapper_padicfy(self, other):
         if type(other) is PAdic:
             return func(self, other)
-        elif type(other) in [int, long, ModP, numpy.int64]:
+        elif type(other) in [int, ModP, numpy.int64] or str(type(other)) == "long":
             return func(self, PAdic(other, self.p, (self.k + self.n) if (self.k + self.n) > 0 else 0))
         else:
             print(type(self), ", ", type(other))
@@ -48,7 +49,7 @@ class PAdic(int):
         """0 ≤ num ≤ p ^ k; p: prime; k: significant digits; n: power of prefactors of p."""
         if p is not None and k is not None:
             factors_of_p = next((i for i, j in enumerate(to_base(num, p)) if j != 0), 0)
-            self = int.__new__(cls, int(num / p ** factors_of_p) % int(p ** k))
+            self = int.__new__(cls, int(num // p ** factors_of_p) % int(p ** k))
             self.p = int(p)
             if from_addition is False or (recover_precision_from_powers_of_p and self == 1 and factors_of_p > 0):
                 if from_addition is True:
@@ -120,12 +121,20 @@ class PAdic(int):
         return self * other
 
     @padicfy
-    def __div__(self, other):
+    def __truediv__(self, other):
         return PAdic((int(self) * ModP(int(other), other.p ** other.k)._inv()) % self.p ** self.k, self.p, min([self.k, other.k]), self.n - other.n)
 
     @padicfy
-    def __rdiv__(self, other):
+    def __div__(self, other):
+        return self.__truediv__(other)
+
+    @padicfy
+    def __rtruediv__(self, other):
         return other / self
+
+    @padicfy
+    def __rdiv__(self, other):
+        return self.__rtruediv__(other)
 
     def __neg__(self):
         return PAdic((-1 * int(self)) % self.p ** self.k, self.p, self.k, self.n)

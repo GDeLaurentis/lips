@@ -9,14 +9,16 @@
 
 # Author: Giuseppe
 
-
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 from __future__ import unicode_literals
 
 import numpy
 import re
 import mpmath
 
-from tools import pSijk, pd5, pDijk, pOijk, pPijk, pA2, pS2, pNB, ptr5, myException
+from .tools import pSijk, pd5, pDijk, pOijk, pPijk, pA2, pS2, pNB, ptr5, myException
 
 mpmath.mp.dps = 300
 
@@ -104,7 +106,7 @@ class Particles_Compute:
                     1 * self.compute("s_45") * self.compute("s_45") * self.compute("s_51") * self.compute("s_51"))
 
         elif pSijk.findall(temp_string) != []:                      # S_ijk...
-            ijk = map(int, pSijk.findall(temp_string)[0])
+            ijk = list(map(int, pSijk.findall(temp_string)[0]))
             s = 0
             for i in range(len(ijk)):
                 for j in range(i + 1, len(ijk)):
@@ -144,6 +146,10 @@ class Particles_Compute:
         else:
             if temp_string == "(⟨1|(3+4)|(5+6)|2⟩-⟨1|(5+6)|(3+4)|2⟩)":
                 return self.compute("⟨1|(3+4)|(5+6)|2⟩") - self.compute("⟨1|(5+6)|(3+4)|2⟩")
+            elif temp_string == "(⟨1|(5+6)|(3+4)|2⟩-⟨1|(3+4)|(5+6)|2⟩)":
+                return self.compute("⟨1|(5+6)|(3+4)|2⟩") - self.compute("⟨1|(3+4)|(5+6)|2⟩")
+            elif temp_string == "(⟨3|(5+6)|3]+⟨4|(5+6)|4])" or temp_string == "(⟨4|(5+6)|4]+⟨3|(5+6)|3])":
+                return self.compute("⟨3|(5+6)|3]") + self.compute("⟨4|(5+6)|4]")
             elif temp_string == "(⟨1|(3+4)|(5+6)|2⟩+⟨1|(5+6)|(3+4)|2⟩)":
                 return self.compute("⟨1|(3+4)|(5+6)|2⟩") + self.compute("⟨1|(5+6)|(3+4)|2⟩")
             elif temp_string == "(⟨1|(3+4)|(5+6)|7⟩-⟨1|(5+6)|(3+4)|7⟩)":

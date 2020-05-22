@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 #   ___          _   _    _
@@ -8,18 +7,20 @@
 
 # Author: Giuseppe
 
-
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 from __future__ import unicode_literals
 
 import numpy
 import mpmath
 import random
 
-from tools import MinkowskiMetric, LeviCivita, rand_frac, Pauli, Pauli_bar
+from .tools import MinkowskiMetric, LeviCivita, rand_frac, Pauli, Pauli_bar
 
-from gaussian_rationals import GaussianRational, rand_rat_frac
-from finite_field import ModP
-from padic import PAdic
+from .gaussian_rationals import GaussianRational, rand_rat_frac
+from .finite_field import ModP
+from .padic import PAdic
 
 mpmath.mp.dps = 300
 
