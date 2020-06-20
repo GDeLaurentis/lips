@@ -17,8 +17,12 @@ from __future__ import unicode_literals
 import numpy
 import re
 import mpmath
+import sys
 
 from .tools import pSijk, pd5, pDijk, pOijk, pPijk, pA2, pS2, pNB, ptr5, myException
+
+if sys.version_info[0] > 2:
+    unicode = str
 
 mpmath.mp.dps = 300
 
@@ -128,13 +132,13 @@ class Particles_Compute:
             d = int(abcd.group('end'))
 
             if temp_string[0] == "⟨":
-                middle = ["(" + re.sub(r'(\d)', r'self[\1].r2_sp_b', entry) + ")" if i % 2 == 0 else
-                          "(" + re.sub(r'(\d)', r'self[\1].r2_sp', entry) + ")" for i, entry in enumerate(bc)]
+                middle = ["(" + re.sub(r'(\d+)', r'self[\1].r2_sp_b', entry) + ")" if i % 2 == 0 else
+                          "(" + re.sub(r'(\d+)', r'self[\1].r2_sp', entry) + ")" for i, entry in enumerate(bc)]
                 middle = ".dot(".join(middle) + ")" * (len(middle) - 1)
                 result = self[a].r_sp_u.dot(eval(middle))
             else:
-                middle = ["(" + re.sub(r'(\d)', r'self[\1].r2_sp', entry) + ")" if i % 2 == 0 else
-                          "(" + re.sub(r'(\d)', r'self[\1].r2_sp_b', entry) + ")" for i, entry in enumerate(bc)]
+                middle = ["(" + re.sub(r'(\d+)', r'self[\1].r2_sp', entry) + ")" if i % 2 == 0 else
+                          "(" + re.sub(r'(\d+)', r'self[\1].r2_sp_b', entry) + ")" for i, entry in enumerate(bc)]
                 middle = ".dot(".join(middle) + ")" * (len(middle) - 1)
                 result = self[a].l_sp_d.dot(eval(middle))
 
