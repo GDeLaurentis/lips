@@ -29,7 +29,7 @@ mpmath.mp.dps = 300
 class Particles_Compute:
 
     def ldot(self, A, B):
-        """Lorentz dot product: trace(P^{α̇α}P̅\u0305_{αα̇}) = P_A^μ * η_μν * P_B^ν."""
+        """Lorentz dot product: 2 trace(P^{α̇α}P̅\u0305_{αα̇}) = P_A^μ * η_μν * P_B^ν."""
         return numpy.trace(numpy.dot(self[A].r2_sp, self[B].r2_sp_b)) / 2
 
     def ep(self, i, j):

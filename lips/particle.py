@@ -47,12 +47,50 @@ class Particle(object):
         else:
             self.four_mom = four_mom
 
+    # ALGEBRA
+
     def __eq__(self, other):
-        """Equality checks equality of four momenta."""
+        """Equality: checks equality of four momenta."""
         if type(self) == type(other):
             return all(self.four_mom == other.four_mom)
         else:
             return False
+
+    def __neg__(self):
+        minus_self = Particle()
+        minus_self.four_mom = -1 * self.four_mom
+        return minus_self
+
+    def __add__(self, other):
+        """Sum: summs the four momenta."""
+        if other == 0:
+            return self
+        assert isinstance(other, Particle)
+        return Particle(self.four_mom + other.four_mom)
+
+    def __radd__(self, other):
+        """Sum: summs the four momenta."""
+        if other == 0:
+            return self
+        assert isinstance(other, Particle)
+        return Particle(self.four_mom + other.four_mom)
+
+    def __sub__(self, other):
+        """Sub: subtract the four momenta."""
+        assert isinstance(other, Particle)
+        return Particle(self.four_mom - other.four_mom)
+
+    def __mul__(self, other):
+        """Mul: multiply momentum by number."""
+        return Particle(self.four_mom * other)
+
+    def __div__(self, other):
+        """Div: divide momentum by number."""
+        return Particle(self.four_mom / other)
+
+    def __truediv__(self, other):
+        """Div: divide momentum by number."""
+        return Particle(self.four_mom / other)
 
     # GETTERS and SETTERS
 
@@ -233,11 +271,6 @@ class Particle(object):
         self._four_mom_to_four_mom_d()
 
     # PRIVATE METHODS
-
-    def __neg__(self):
-        minus_self = Particle()
-        minus_self.four_mom = -1 * self.four_mom
-        return minus_self
 
     def _four_mom_to_r_sp_d(self):     # r_sp_d is \lambda_\alpha
         lambda_one = mpmath.sqrt(self._four_mom[0] + self._four_mom[3])

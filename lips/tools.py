@@ -74,5 +74,12 @@ def flatten(temp_list, recursion_level=0, treat_list_subclasses_as_list=True, tr
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 
+def ldot(oP1, oP2):
+    return numpy.trace(numpy.dot(oP1.r2_sp, oP2.r2_sp_b)) / 2
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+
 class myException(Exception):
     pass
