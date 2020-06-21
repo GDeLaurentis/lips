@@ -84,6 +84,10 @@ class Particle(object):
         """Mul: multiply momentum by number."""
         return Particle(self.four_mom * other)
 
+    def __rmul__(self, other):
+        """Mul: multiply momentum by number."""
+        return Particle(self.four_mom * other)
+
     def __div__(self, other):
         """Div: divide momentum by number."""
         return Particle(self.four_mom / other)
