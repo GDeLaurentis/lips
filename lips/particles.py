@@ -8,7 +8,9 @@
 
 # Author: Giuseppe
 
-
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 from __future__ import unicode_literals
 
 import numpy
@@ -17,13 +19,13 @@ import re
 import os
 import copy
 import itertools
+import mpmath
 
-from particle import Particle
-from particles_compute import Particles_Compute
-from particles_set import Particles_Set
-from particles_set_pair import Particles_SetPair
-
-from tools import flatten, pA2, pS2, pNB, myException
+from .tools import MinkowskiMetric, flatten, pA2, pS2, pNB, myException
+from .particle import Particle
+from .particles_compute import Particles_Compute
+from .particles_set import Particles_Set
+from .particles_set_pair import Particles_SetPair
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -51,7 +53,7 @@ def indexing_decorator(func):
 class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
     """Describes the kinematics of n particles. Base one list of Particle objects."""
 
-    def __init__(self, number_of_particles_or_particles=None, seed=None, real_momenta=False):
+    def __init__(self, number_of_particles_or_particles=None, seed=None, real_momenta=False, fix_mom_cons=True):
         """Initialisation. Requires either multiplicity of phace space or list of Particle objects."""
         list.__init__(self)
         if isinstance(number_of_particles_or_particles, int):
@@ -64,7 +66,8 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
         elif number_of_particles_or_particles is not None:
             raise Exception("Invalid initialisation of Particles instance.")
         self.oRefVec = Particle(real_momentum=real_momenta)
-        self.fix_mom_cons(real_momenta=real_momenta)
+        if fix_mom_cons is True and max(map(abs, flatten(self.total_mom))) > 10 ** -(0.9 * 300):
+            self.fix_mom_cons(real_momenta=real_momenta)
 
     def __eq__(self, other):
         """Checks equality of each particle in particles."""
@@ -83,6 +86,14 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
             oParticle.randomise(real_momentum=real_momenta)
         self.fix_mom_cons(real_momenta=real_momenta)
 
+    def randomise_twistor(self):
+        for i, iParticle in enumerate(self):
+            iParticle.randomise_twist()
+        for i, iParticle in enumerate(self):
+            iParticle.comp_twist_x(self[(i + 1) % len(self) + 1])
+        for i, iParticle in enumerate(self):
+            iParticle.twist_x_to_mom(self[(i + 1) % len(self) + 1])
+
     def angles_for_squares(self):
         """Switches all angle brackets for square brackets and viceversa."""
         for oParticle in self:
@@ -99,61 +110,25 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
             self.fix_mom_cons(A, B, real_momenta, axis)
 
         elif A != 0 and B != 0 and real_momenta is True:            # the following results in real momenta, but changes both |⟩ and |] of A & B
-            ex = numpy.array([0. + 0j, 0., 0., 0.])                 # excess momentum init. to 0
-            for i in range(1, len(self) + 1):
-                if i != A and i != B:
-                    ex = ex - self[i].four_mom
-            numerator = (ex[1] * ex[1] + ex[2] * ex[2] + ex[3] * ex[3] - ex[0] * ex[0])
-            if axis == 1:
-                denominator = (2 * ex[1] - 2 * ex[0])
-            elif axis == 2:
-                denominator = (2 * ex[2] - 2 * ex[0])
-            elif axis == 3:
-                denominator = (2 * ex[3] - 2 * ex[0])
-            p_fix = numerator / denominator
-            if axis == 1:
-                self[A].four_mom = numpy.array([p_fix, p_fix, 0, 0])
-            elif axis == 2:
-                self[A].four_mom = numpy.array([p_fix, 0, p_fix, 0])
-            elif axis == 3:
-                self[A].four_mom = numpy.array([p_fix, 0, 0, p_fix])
-            ex = ex - self[A].four_mom
-            self[B].four_mom = ex
+            K = sum([self[k].four_mom for k in range(1, len(self) + 1) if k not in [A, B]])
+            self[A].four_mom = numpy.array([- numpy.dot(K, numpy.dot(MinkowskiMetric, K)) / (2 * (K[0] - K[axis])) if k in [0, axis] else 0 for k in range(4)])
+            self[B].four_mom = - self[A].four_mom - K
 
         elif A != 0 and B != 0:                                     # the following results in complex momenta, it changes |A⟩&|B⟩ (axis=1) or |A]&|B] (axis=2)
-            K = numpy.array([0. + 0j, 0., 0., 0.])                  # Note: axis here is a meaningless name. It is just used as a switch.
-            for i in range(1, len(self) + 1):                       # minus sum of all other momenta
-                if i != A and i != B:
-                    K = K - self[i].four_mom
-            K11 = K[0] + K[3]
-            K12 = K[1] - 1j * K[2]
-            K21 = K[1] + 1j * K[2]
-            K22 = K[0] - K[3]
-            a, b = self[A].r_sp_d[0, 0], self[A].r_sp_d[1, 0]
-            c, d = self[A].l_sp_d[0, 0], self[A].l_sp_d[0, 1]
-            e, f = self[B].r_sp_d[0, 0], self[B].r_sp_d[1, 0]
-            g, h = self[B].l_sp_d[0, 0], self[B].l_sp_d[0, 1]
+            K = sum([self[k].r2_sp for k in range(1, len(self) + 1) if k not in [A, B]])
             if axis == 1:                                           # change |A⟩ and |B⟩
-                a = (g * K12 - h * K11) / (d * g - c * h)
-                b = (g * K22 - h * K21) / (d * g - c * h)
-                e = (d * K11 - c * K12) / (d * g - c * h)
-                f = (d * K21 - c * K22) / (d * g - c * h)
-                self[A].r_sp_d = numpy.array([a, b])
-                self[B].r_sp_d = numpy.array([e, f])
+                self[A].r_sp_u = numpy.dot(self[B].l_sp_d, K) / self.compute("[%d|%d]" % (A, B))
+                self[B].r_sp_u = - numpy.dot(self[A].l_sp_d, K) / self.compute("[%d|%d]" % (A, B))
             else:                                                   # change |A] and |B]
-                c = (e * K21 - f * K11) / (b * e - a * f)
-                d = (e * K22 - f * K12) / (b * e - a * f)
-                g = (b * K11 - a * K21) / (b * e - a * f)
-                h = (b * K12 - a * K22) / (b * e - a * f)
-                self[A].l_sp_d = numpy.array([c, d])
-                self[B].l_sp_d = numpy.array([g, h])
+                self[A].l_sp_u = - numpy.dot(K, self[B].r_sp_d) / self.compute("⟨%d|%d⟩" % (A, B))
+                self[B].l_sp_u = numpy.dot(K, self[A].r_sp_d) / self.compute("⟨%d|%d⟩" % (A, B))
 
     def momentum_conservation_check(self, silent=True):
         """Returns true if momentum is conserved."""
         mom_violation = 0
         for i in range(4):
-            if abs(self.total_mom[i]) > mom_violation:
-                mom_violation = abs(self.total_mom[i])
+            if abs(flatten(self.total_mom)[i]) > mom_violation:
+                mom_violation = abs(flatten(self.total_mom)[i])
         if silent is False:
             print("The largest momentum violation is {}".format(float(mom_violation)))
         if mom_violation > 10 ** -(0.9 * 300):
@@ -175,7 +150,7 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
         return True
 
     def phasespace_consistency_check(self, invariants=[], silent=True):
-        """Runs momentum and onshell checks. Looks for outliers in phase space."""
+        """Runs momentum and onshell checks. Looks for outliers in phase space. Returns: mom_cons, on_shell, big_outliers, small_outliers."""
 
         if invariants == []:
             _invars = (["⟨{}|{}⟩".format(i, j) for (i, j) in itertools.combinations(range(1, len(self) + 1), 2)] +
@@ -184,7 +159,7 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
             _invars = [invariant for invariant in invariants]
 
         if silent is False:
-            print "Consistency check:"
+            print("Consistency check:")
             # print("{} Consistency check {}".format(Hyphens, Hyphens))
 
         mom_cons = self.momentum_conservation_check(silent)         # momentum conservation violation
@@ -193,8 +168,8 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
         values = []                                                 # smallest and biggest invariants
         for _invar in _invars:
             values += [abs(self.compute(_invar))]
-            if "n" in unicode(values[len(values) - 1]) and silent is False:
-                print "not a number!", values[len(values) - 1], "invariant", _invar
+            if "n" in str(values[len(values) - 1]) and silent is False:
+                print("not a number!", values[len(values) - 1], "invariant", _invar)
                 return False, False, [], []
         while True:
             Break = True
@@ -216,18 +191,18 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
                 small_outliers += [_invars[i]]
                 small_outliers_values += [values[i]]
                 if silent is False:
-                    print "{} = {}".format(_invars[i], float(values[i]))
+                    print("{} = {}".format(_invars[i], float(values[i])))
             if values[i] > 0.0001:
                 break
         if silent is False:
-            print "..."
+            print("...")
         for i in range(len(_invars)):
             if values[i] > 100000:
                 myException("Outliers are big!")
                 big_outliers += [_invars[i]]
                 big_outliers_values += [values[i]]
                 if silent is False:
-                    print "{} = {}".format(_invars[i], float(values[i]))
+                    print("{} = {}".format(_invars[i], float(values[i])))
         if silent is False:
             pass
             # print("{}-------------------{}".format(Hyphens, Hyphens))
@@ -331,9 +306,9 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
 
     @staticmethod
     def _lNB_to_string(start, lNBs, lNBms, lNBe, end):
-        start = start + unicode(lNBs) + "|"
-        end = "|" + unicode(lNBe) + end
-        middle = "".join(string + "|" for string in ["(" + "".join(unicode(entry) + "+" for entry in item)[:-1] + ")" for item in lNBms])
+        start = start + str(lNBs) + "|"
+        end = "|" + str(lNBe) + end
+        middle = "".join(string + "|" for string in ["(" + "".join(str(entry) + "+" for entry in item)[:-1] + ")" for item in lNBms])
         middle = middle[:-1]
         t_s_new = start + middle + end
         return t_s_new
@@ -342,8 +317,8 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
     def _get_lNB(temp_string):                                      # usage: lNB, lNBs, lNBms, lNBe = _get_lNB(temp_string)
         lNB = list(pNB.findall(temp_string)[0])
         lNB[1] = [entry.replace("(", "").replace(")", "").split("+") for entry in lNB[1].split("|")]
-        lNBs, lNBms, lNBe = int(lNB[0]), [map(int, entry) for entry in lNB[1]], int(lNB[2])
-        lNB = map(int, [lNBs] + [entry for sublist in lNB[1] for entry in sublist] + [lNBe])
+        lNBs, lNBms, lNBe = int(lNB[0]), [list(map(int, entry)) for entry in lNB[1]], int(lNB[2])
+        lNB = list(map(int, [lNBs] + [entry for sublist in lNB[1] for entry in sublist] + [lNBe]))
         return lNB, lNBs, lNBms, lNBe
 
     def _complementary(self, temp_list):                            # returns the list obtained by using momentum conservation
@@ -351,7 +326,7 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
         if type(temp_list) == list:                                 # make sure it is a set (no double entries)
             temp_list = set(temp_list)
         original_type = type(list(temp_list)[0])
-        if type(list(temp_list)[0]) == unicode:                         # make sure entries are integers (representing particle #)
+        if type(list(temp_list)[0]) is not int:                         # make sure entries are integers (representing particle #)
             temp_list = set(map(int, temp_list))
         temp_list = list(temp_list)
         n = len(self)
@@ -361,25 +336,11 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
         for element in temp_list:
             if element in c_list:
                 c_list.remove(element)
-        c_list = map(original_type, c_list)
+        c_list = list(map(original_type, c_list))
         return c_list
 
     def ijk_to_3Ks(self, ijk):                                      # this method is used for Delta computation and setting
-        K = [0, 0, 0]
-        for i in range(3):
-            K[i] = numpy.array([0, 0, 0, 0])
-            j = ijk[i]
-            while (j != ijk[(i + 1) % 3] and j != ijk[(i + 2) % 3]):
-                K[i] = K[i] + self[j].four_mom
-                j = j + 1
-                j = j % len(self)
-                if j == 0:
-                    j = len(self)
-        temp_oParticles = Particles(3)
-        temp_oParticles[1].four_mom = K[0]
-        temp_oParticles[2].four_mom = K[1]
-        temp_oParticles[3].four_mom = K[2]
-        return temp_oParticles
+        return self.cluster(self.ijk_to_3NonOverlappingLists(ijk))
 
     def ijk_to_3NonOverlappingLists(self, ijk, mode=1):             # this method is used for Delta computation and setting
         NonOverlappingLists = [[ijk[0]], [ijk[1]], [ijk[2]]]
@@ -406,7 +367,7 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
         clos = temp_string[len(temp_string) - 1]
 
         relist = re.split('[\(\)⟨⟩|\]\[]', temp_string)
-        relist = filter(None, relist)
+        relist = list(filter(None, relist))
 
         # consistency of s_ijk "Δ", "Ω", "Π"
         if init in ["s", "S", "Δ", "Ω", "Π", "δ"] or temp_string[0:3] == "tr5":
@@ -436,11 +397,8 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
 
     @property
     def total_mom(self):
-        """Total momentum of the given phase space."""
-        TotalMomentum = [0j, 0, 0, 0]
-        for oParticle in self:
-            TotalMomentum += oParticle.four_mom
-        return TotalMomentum
+        """Total momentum of the given phase space as a rank two spinor."""
+        return sum([oParticle.r2_sp for oParticle in self])
 
     def _r_sp_d_for_mathematica(self):
         msg = ""
@@ -519,8 +477,8 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
 
     def cluster(self, llIntegers):
         """Returns clustered particle objects according to lists of lists of integers (e.g. corners of one loop diagram)."""
-        oKs = Particles(len(llIntegers))
-        four_moms = [sum([self[i].four_mom for i in corner_as_integers]) for corner_as_integers in llIntegers]
+        oKs = Particles(len(llIntegers), fix_mom_cons=False)
+        r2_spinors = [sum([self[i].r2_sp for i in corner_as_integers]) for corner_as_integers in llIntegers]
         for i, iK in enumerate(oKs):
-            iK.four_mom = four_moms[i]
+            iK.r2_sp = r2_spinors[i]
         return oKs

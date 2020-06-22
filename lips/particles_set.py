@@ -8,13 +8,16 @@
 
 # Author: Giuseppe
 
-
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 from __future__ import unicode_literals
 
 import numpy
+import re
 import mpmath
 
-from tools import pSijk, pDijk, pOijk, pPijk, pA2, pS2, pNB, myException
+from .tools import flatten, pSijk, pDijk, pOijk, pPijk, pA2, pS2, pNB, ptr5, myException
 
 mpmath.mp.dps = 300
 
@@ -23,26 +26,23 @@ mpmath.mp.dps = 300
 
 class Particles_Set:
 
-    def set(self, temp_string, temp_value, fix_mom=True, mode=1, itr=50, prec=0.1):
+    def set(self, temp_string, temp_value, fix_mom=True, mode=1, itr=2, prec=0.1):
         """Constructs a given collinear limit phase space."""
         for i in range(itr):
-            if self._set_inner(temp_string, temp_value, fix_mom, mode) == "run me again":
-                self._set_inner(temp_string, temp_value, fix_mom, mode)
-            actual, target = abs(self.compute(temp_string)), abs(temp_value)
-            error = abs(100) * abs((actual - target) / target)
-            compatible_with_zero = abs(target - actual) < 10 ** -(0.9 * 300)
-            if compatible_with_zero is False:
-                compatible_with_zero = str(abs(0)) == str(target)
-            if error < prec or compatible_with_zero is True:  # if error is less than 1 in 1000 or it is compatible with zero
+            self._set_inner(temp_string, temp_value, fix_mom, mode)
+            # check it worked
+            abs_diff = abs(self.compute(temp_string) - temp_value)
+            error = abs(100) * abs(abs_diff / temp_value)
+            if error < prec:   # if error is less than 1 in 1000 or it is compatible with zero
                 if i == 0:
                     return True
                 else:
                     print("Succeded to set {} to {} but in {} tries.".format(temp_string, temp_value, i + 1))
                     return True
-            if "nan" in str(actual):
+            if "nan" in str(self.compute(temp_string)):
                 myException("NaN encountered in set!")
                 break
-        myException("Failed to set {} to {}. The target was {}, the actual value was {}, the error was {}.".format(temp_string, temp_value, target, actual, error))
+        myException("Failed to set {} to {}. The target was {}, the actual value was {}, the error was {}.".format(temp_string, temp_value, temp_value, self.compute(temp_string), error))
         return False
 
     def _set_inner(self, temp_string, temp_value, fix_mom=True, mode=1):
@@ -82,13 +82,13 @@ class Particles_Set:
 
         A, B = map(int, pA2.findall(temp_string)[0])
         X = temp_value
-        plist = map(int, self._complementary(map(unicode, [A, B])))  # free momenta
+        plist = map(int, self._complementary(map(str, [A, B])))  # free momenta
         if len(plist) < 2:                                           # need at least 4 particles to fix mom cons (i.e. two free ones)
             myException("Set_A2 called with less than 4 particles. Cound't fix momentum conservation.")
         a, b = self[A].r_sp_u[0, 0], self[A].r_sp_u[0, 1]            # ⟨A| = (a, b)
         c, d = self[B].r_sp_d[0, 0], self[B].r_sp_d[1, 0]            # |B⟩ = (c, d)
         c = (X - b * d) / a                                          # c = (X - b * d) / a
-        self[B].r_sp_d = numpy.array([c, d])                            # set |B⟩
+        self[B].r_sp_d = numpy.array([c, d], dtype=type(c))          # set |B⟩
         if fix_mom is True:
             self.fix_mom_cons(plist[0], plist[1], axis=2)
 
@@ -98,13 +98,13 @@ class Particles_Set:
 
         A, B = map(int, pS2.findall(temp_string)[0])
         X = temp_value
-        plist = map(int, self._complementary(map(unicode, [A, B])))  # free momenta
+        plist = map(int, self._complementary(map(str, [A, B])))  # free momenta
         if len(plist) < 2:                                           # need at least 4 particles to fix mom cons (i.e. two free ones)
             myException("Set_S2 called with less than 4 particles. Cound't fix momentum conservation.")
         a, b = self[A].l_sp_d[0, 0], self[A].l_sp_d[0, 1]            # [A| = (a, b)
         c, d = self[B].l_sp_u[0, 0], self[B].l_sp_u[1, 0]            # |B] = (c, d)
         c = (X - b * d) / a                                          # c = (X - b * d) / a
-        self[B].l_sp_u = numpy.array([c, d])                            # set |B]
+        self[B].l_sp_u = numpy.array([c, d], dtype=type(c))          # set |B]
         if fix_mom is True:
             self.fix_mom_cons(plist[0], plist[1], axis=1)
 

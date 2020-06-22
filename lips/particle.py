@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 #   ___          _   _    _
@@ -8,13 +7,16 @@
 
 # Author: Giuseppe
 
-
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 from __future__ import unicode_literals
 
 import numpy
 import mpmath
+import random
 
-from tools import MinkowskiMetric, LeviCivita, rand_frac, Pauli, Pauli_bar
+from .tools import MinkowskiMetric, LeviCivita, rand_frac, Pauli, Pauli_bar
 
 mpmath.mp.dps = 300
 
@@ -32,12 +34,54 @@ class Particle(object):
         else:
             self.four_mom = four_mom
 
+    # ALGEBRA
+
     def __eq__(self, other):
-        """Equality checks equality of four momenta."""
+        """Equality: checks equality of four momenta."""
         if type(self) == type(other):
             return all(self.four_mom == other.four_mom)
         else:
             return False
+
+    def __neg__(self):
+        minus_self = Particle()
+        minus_self.four_mom = -1 * self.four_mom
+        return minus_self
+
+    def __add__(self, other):
+        """Sum: summs the four momenta."""
+        if other == 0:
+            return self
+        assert isinstance(other, Particle)
+        return Particle(self.four_mom + other.four_mom)
+
+    def __radd__(self, other):
+        """Sum: summs the four momenta."""
+        if other == 0:
+            return self
+        assert isinstance(other, Particle)
+        return Particle(self.four_mom + other.four_mom)
+
+    def __sub__(self, other):
+        """Sub: subtract the four momenta."""
+        assert isinstance(other, Particle)
+        return Particle(self.four_mom - other.four_mom)
+
+    def __mul__(self, other):
+        """Mul: multiply momentum by number."""
+        return Particle(self.four_mom * other)
+
+    def __rmul__(self, other):
+        """Mul: multiply momentum by number."""
+        return Particle(self.four_mom * other)
+
+    def __div__(self, other):
+        """Div: divide momentum by number."""
+        return Particle(self.four_mom / other)
+
+    def __truediv__(self, other):
+        """Div: divide momentum by number."""
+        return Particle(self.four_mom / other)
 
     # GETTERS and SETTERS
 
@@ -109,9 +153,10 @@ class Particle(object):
     @r2_sp.setter
     def r2_sp(self, temp_r2_sp):
         self._r2_sp = temp_r2_sp
+        self._r2_sp_to_r2_sp_b()
         self._r2_sp_to_four_momentum()
         self._four_mom_to_four_mom_d()
-        self._four_mom_d_to_r2_sp_b()
+        # should I check for masslessness?
         self._four_mom_to_r_sp_d()
         self._r_sp_d_to_r_sp_u()
         self._four_mom_to_l_sp_d()
@@ -125,9 +170,10 @@ class Particle(object):
     @r2_sp_b.setter
     def r2_sp_b(self, temp_r2_sp_b):
         self._r2_sp_b = temp_r2_sp_b
+        self._r2_sp_b_to_r2_sp()
         self._r2_sp_b_to_four_momentum()
         self._four_mom_to_four_mom_d()
-        self._four_mom_d_to_r2_sp()
+        # should I check for masslessness?
         self._four_mom_to_r_sp_d()
         self._r_sp_d_to_r_sp_u()
         self._four_mom_to_l_sp_d()
@@ -144,6 +190,7 @@ class Particle(object):
         self._four_mom_to_four_mom_d()
         self._four_mom_d_to_r2_sp()
         self._four_mom_d_to_r2_sp_b()
+        # should I check for masslessness?
         self._four_mom_to_r_sp_d()
         self._r_sp_d_to_r_sp_u()
         self._four_mom_to_l_sp_d()
@@ -160,6 +207,7 @@ class Particle(object):
         self._four_mom_d_to_four_mom()
         self._four_mom_d_to_r2_sp()
         self._four_mom_d_to_r2_sp_b()
+        # should I check for masslessness?
         self._four_mom_to_r_sp_d()
         self._r_sp_d_to_r_sp_u()
         self._four_mom_to_l_sp_d()
@@ -179,19 +227,12 @@ class Particle(object):
         p2 = p[0] * p[0] + p[1] * p[1] + p[2] * p[2]
         p_zero = mpmath.sqrt(p2)
         self.four_mom = numpy.array([p_zero] + p)
-        self._four_mom_to_four_mom_d()
-        self._four_mom_d_to_r2_sp()
-        self._four_mom_d_to_r2_sp_b()
-        self._four_mom_to_r_sp_d()
-        self._r_sp_d_to_r_sp_u()
-        self._four_mom_to_l_sp_d()
-        self._l_sp_d_to_l_sp_u()
 
     def angles_for_squares(self):
         """Flips left and right spinors."""
         self._l_sp_u, self._r_sp_u = self._r_sp_u, self._l_sp_u
-        self._l_sp_u.shape = (2, 1)    # column vector
-        self._r_sp_u.shape = (1, 2)    # column vector
+        self._l_sp_u.shape = (2, 1)
+        self._r_sp_u.shape = (1, 2)
         self._l_sp_u_to_l_sp_d()
         self._r_sp_u_to_r_sp_d()
         self._r1_sp_to_r2_sp()
@@ -200,11 +241,6 @@ class Particle(object):
         self._four_mom_to_four_mom_d()
 
     # PRIVATE METHODS
-
-    def __neg__(self):
-        minus_self = Particle()
-        minus_self.four_mom = -1 * self.four_mom
-        return minus_self
 
     def _four_mom_to_r_sp_d(self):     # r_sp_d is \lambda_\alpha
         lambda_one = mpmath.sqrt(self._four_mom[0] + self._four_mom[3])
@@ -229,6 +265,12 @@ class Particle(object):
             lambdabar_two = (self._four_mom[1] - self._four_mom[2] * 1j) / lambdabar_one
         self._l_sp_d = numpy.array([lambdabar_one, lambdabar_two])
         self._l_sp_d.shape = (1, 2)    # row vector
+
+    def _r2_sp_to_r2_sp_b(self):
+        self._r2_sp_b = (LeviCivita.dot(self.r2_sp.dot(LeviCivita.T))).T
+
+    def _r2_sp_b_to_r2_sp(self):
+        self._r2_sp = (LeviCivita.dot(self.r2_sp_b.dot(LeviCivita.T))).T
 
     def _r2_sp_to_four_momentum(self):
         for i in range(4):
@@ -277,3 +319,31 @@ class Particle(object):
     def _l_sp_u_to_l_sp_d(self):
         self._l_sp_d = numpy.dot(numpy.transpose(LeviCivita), self.l_sp_u)
         self._l_sp_d.shape = (1, 2)    # row vector
+
+    # EXPERIMENTAL METHODS
+
+    def randomise_twist(self):
+        self._twist_z = numpy.array([rand_frac(), rand_frac(), rand_frac(), rand_frac()])
+        self._r_sp_d = numpy.array([self._twist_z[0], self._twist_z[1]])
+        self._mu = numpy.array([self._twist_z[2], self._twist_z[3]])
+
+    def comp_twist_x(self, other):
+        x21n = self._r_sp_d[0] * other._mu[0] - self._mu[0] * other._r_sp_d[0]
+        x21d = (self._r_sp_d[0] * other._r_sp_d[1] -
+                other._r_sp_d[0] * self._r_sp_d[1])
+        x21 = x21n / x21d
+        x11 = (self._mu[0] - self._r_sp_d[1] * x21) / self._r_sp_d[0]
+
+        x22n = self._r_sp_d[0] * other._mu[1] - self._mu[1] * other._r_sp_d[0]
+        x22d = (self._r_sp_d[0] * other._r_sp_d[1] -
+                other._r_sp_d[0] * self._r_sp_d[1])
+        x22 = x22n / x22d
+        x12 = (self._mu[1] - self._r_sp_d[1] * x22) / self._r_sp_d[0]
+
+        self._twist_x = numpy.array([[x11, x12], [x21, x22]])
+
+    def twist_x_to_mom(self, other):
+        r_two_spinor = self._twist_x - other._twist_x
+        for i in range(4):
+            self._four_mom[i] = numpy.trace(numpy.dot(Pauli[i], r_two_spinor)) / 2
+        self.four_mom = self._four_mom

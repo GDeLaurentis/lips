@@ -9,16 +9,20 @@
 
 # Author: Giuseppe
 
-
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 from __future__ import unicode_literals
 
 import numpy
 import re
 import mpmath
+import sys
 
-from particle import Particle
+from .tools import pSijk, pd5, pDijk, pOijk, pPijk, pA2, pS2, pNB, ptr5, myException
 
-from tools import pSijk, pd5, pDijk, pOijk, pPijk, pA2, pS2, pNB, ptr5, myException
+if sys.version_info[0] > 2:
+    unicode = str
 
 mpmath.mp.dps = 300
 
@@ -29,8 +33,8 @@ mpmath.mp.dps = 300
 class Particles_Compute:
 
     def ldot(self, A, B):
-        """Lorentz dot product: P_A^μ * η_μν * P_B^ν."""
-        return numpy.dot(self[A].four_mom_d, self[B].four_mom)
+        """Lorentz dot product: 2 trace(P^{α̇α}P̅\u0305_{αα̇}) = P_A^μ * η_μν * P_B^ν."""
+        return numpy.trace(numpy.dot(self[A].r2_sp, self[B].r2_sp_b)) / 2
 
     def ep(self, i, j):
         """Contraction of polarization tensor with four momentum. Requires .helconf property to be set."""
@@ -106,7 +110,7 @@ class Particles_Compute:
                     1 * self.compute("s_45") * self.compute("s_45") * self.compute("s_51") * self.compute("s_51"))
 
         elif pSijk.findall(temp_string) != []:                      # S_ijk...
-            ijk = map(int, pSijk.findall(temp_string)[0])
+            ijk = list(map(int, pSijk.findall(temp_string)[0]))
             s = 0
             for i in range(len(ijk)):
                 for j in range(i + 1, len(ijk)):
@@ -124,33 +128,24 @@ class Particles_Compute:
         elif pNB.findall(temp_string) != []:                        # ⟨A|(B+C+..)..|D]
             abcd = pNB.search(temp_string)
             a = int(abcd.group('start'))
-            bc = abcd.group('middle')
+            bc = abcd.group('middle').replace("(", "").replace(")", "").split("|")
             d = int(abcd.group('end'))
-            bc = re.split('[\)|\|]', bc)
-            bc = [entry.replace('|', '') for entry in bc]
-            bc = [entry.replace('(', '') for entry in bc]
-            bc = [entry for entry in bc if entry != '']
-            a_or_s = temp_string[0]
-            if a_or_s == '⟨':
-                result = self[a].r_sp_u
-            elif a_or_s == '[':
-                result = self[a].l_sp_d
+
+            if temp_string[0] == "⟨":
+                middle = ["(" + re.sub(r'(\d+)', r'self[\1].r2_sp_b', entry) + ")" if i % 2 == 0 else
+                          "(" + re.sub(r'(\d+)', r'self[\1].r2_sp', entry) + ")" for i, entry in enumerate(bc)]
+                middle = ".dot(".join(middle) + ")" * (len(middle) - 1)
+                result = self[a].r_sp_u.dot(eval(middle))
             else:
-                myException("Invalid string in compute: string must start with ⟨ or [.")
-            for i in range(len(bc)):
-                comb_mom = re.sub(r'(\d)', r'self[\1].four_mom', bc[i])
-                comb_mom = eval(comb_mom)
-                clusteredParticle = Particle(comb_mom)
-                if a_or_s == "⟨":
-                    result = numpy.dot(result, clusteredParticle.r2_sp_b)
-                    a_or_s = "["                                    # needs to alternate
-                elif a_or_s == "[":
-                    result = numpy.dot(result, clusteredParticle.r2_sp)
-                    a_or_s = "⟨"                                    # needs to alternate
-            if a_or_s == "⟨":
-                result = numpy.dot(result, self[d].r_sp_d)
-            elif a_or_s == "[":
-                result = numpy.dot(result, self[d].l_sp_u)
-            return result[0][0]
+                middle = ["(" + re.sub(r'(\d+)', r'self[\1].r2_sp', entry) + ")" if i % 2 == 0 else
+                          "(" + re.sub(r'(\d+)', r'self[\1].r2_sp_b', entry) + ")" for i, entry in enumerate(bc)]
+                middle = ".dot(".join(middle) + ")" * (len(middle) - 1)
+                result = self[a].l_sp_d.dot(eval(middle))
+
+            if temp_string[-1] == "⟩":
+                return result.dot(self[d].r_sp_d)[0][0]
+            else:
+                return result.dot(self[d].l_sp_u)[0][0]
+
         else:
             myException("Invalid string in compute: string {} is not implemented.".format(temp_string))
