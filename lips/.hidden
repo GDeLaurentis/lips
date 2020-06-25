@@ -8,3 +8,4 @@ tools.pyc
 gaussian_rationals.pyc
 finite_field.pyc
 padic.pyc
+__pycache__

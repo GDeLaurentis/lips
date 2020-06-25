@@ -96,6 +96,11 @@ class Particle(object):
         """Div: divide momentum by number."""
         return Particle(self.four_mom / other)
 
+    # IDEXING
+
+    def __getitem__(self, key):
+        return self.four_mom[key]
+
     # GETTERS and SETTERS
 
     @property
