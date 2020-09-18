@@ -14,10 +14,9 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import numpy
-import re
 import mpmath
 
-from .tools import flatten, pSijk, pDijk, pOijk, pPijk, pA2, pS2, pNB, ptr5, myException
+from .tools import pSijk, pDijk, pOijk, pPijk, pA2, pS2, pNB, myException
 
 mpmath.mp.dps = 300
 

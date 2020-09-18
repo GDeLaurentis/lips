@@ -19,7 +19,6 @@ import re
 import os
 import copy
 import itertools
-import mpmath
 
 from .tools import MinkowskiMetric, flatten, pA2, pS2, pNB, myException
 from .particle import Particle

@@ -14,7 +14,6 @@ from __future__ import unicode_literals
 
 import numpy
 import mpmath
-import random
 
 from .tools import MinkowskiMetric, LeviCivita, rand_frac, Pauli, Pauli_bar
 

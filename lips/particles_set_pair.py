@@ -13,7 +13,7 @@ from __future__ import unicode_literals
 import os
 import mpmath
 
-from tools import pSijk, pDijk, pA2, pS2, p3B, pNB, myException
+from .tools import pSijk, pDijk, pA2, pS2, p3B, pNB, myException
 
 local_directory = os.path.dirname(__file__)
 mpmath.mp.dps = 300
