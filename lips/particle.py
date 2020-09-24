@@ -175,10 +175,16 @@ class Particle(object):
         self._r2_sp_to_four_momentum()
         self._four_mom_to_four_mom_d()
         # should I check for masslessness?
-        self._four_mom_to_r_sp_d()
-        self._r_sp_d_to_r_sp_u()
-        self._four_mom_to_l_sp_d()
-        self._l_sp_d_to_l_sp_u()
+        try:
+            self._four_mom_to_r_sp_d()
+            self._r_sp_d_to_r_sp_u()
+            self._four_mom_to_l_sp_d()
+            self._l_sp_d_to_l_sp_u()
+        except TypeError:
+            self._r_sp_u = None
+            self._r_sp_d = None
+            self._l_sp_u = None
+            self._l_sp_d = None
 
     @property
     def r2_sp_b(self):
@@ -192,10 +198,16 @@ class Particle(object):
         self._r2_sp_b_to_four_momentum()
         self._four_mom_to_four_mom_d()
         # should I check for masslessness?
-        self._four_mom_to_r_sp_d()
-        self._r_sp_d_to_r_sp_u()
-        self._four_mom_to_l_sp_d()
-        self._l_sp_d_to_l_sp_u()
+        try:
+            self._four_mom_to_r_sp_d()
+            self._r_sp_d_to_r_sp_u()
+            self._four_mom_to_l_sp_d()
+            self._l_sp_d_to_l_sp_u()
+        except TypeError:
+            self._r_sp_u = None
+            self._r_sp_d = None
+            self._l_sp_u = None
+            self._l_sp_d = None
 
     @property
     def four_mom(self):
@@ -209,10 +221,16 @@ class Particle(object):
         self._four_mom_d_to_r2_sp()
         self._four_mom_d_to_r2_sp_b()
         # should I check for masslessness?
-        self._four_mom_to_r_sp_d()
-        self._r_sp_d_to_r_sp_u()
-        self._four_mom_to_l_sp_d()
-        self._l_sp_d_to_l_sp_u()
+        try:
+            self._four_mom_to_r_sp_d()
+            self._r_sp_d_to_r_sp_u()
+            self._four_mom_to_l_sp_d()
+            self._l_sp_d_to_l_sp_u()
+        except TypeError:
+            self._r_sp_u = None
+            self._r_sp_d = None
+            self._l_sp_u = None
+            self._l_sp_d = None
 
     @property
     def four_mom_d(self):
@@ -226,10 +244,16 @@ class Particle(object):
         self._four_mom_d_to_r2_sp()
         self._four_mom_d_to_r2_sp_b()
         # should I check for masslessness?
-        self._four_mom_to_r_sp_d()
-        self._r_sp_d_to_r_sp_u()
-        self._four_mom_to_l_sp_d()
-        self._l_sp_d_to_l_sp_u()
+        try:
+            self._four_mom_to_r_sp_d()
+            self._r_sp_d_to_r_sp_u()
+            self._four_mom_to_l_sp_d()
+            self._l_sp_d_to_l_sp_u()
+        except TypeError:
+            self._r_sp_u = None
+            self._r_sp_d = None
+            self._l_sp_u = None
+            self._l_sp_d = None
 
     # PUBLIC METHODS
 

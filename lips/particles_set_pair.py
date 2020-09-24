@@ -351,8 +351,8 @@ class Particles_SetPair:
         elif pS2.findall(t_s1) != []:
             ab = map(int, list(pS2.findall(t_s1)[0]))
 
-        ab = map(int, ab)
-        ijk = map(int, pDijk.findall(t_s2)[0])
+        ab = list(map(int, ab))
+        ijk = list(map(int, pDijk.findall(t_s2)[0]))
         NonOverlappingLists = self.ijk_to_3NonOverlappingLists(ijk)
         both_in_List = -1                                       # if both ab in a single List:
         for i, List in enumerate(NonOverlappingLists):
@@ -396,7 +396,7 @@ class Particles_SetPair:
         def how_to_fix_mom_cons(t_s1, t_s2):
             l3B_0, l3Bs_0, l3Bm_0, l3Be_0, a_or_s_0, l3Bc_0 = unpack(t_s1)
             l3B_1, l3Bs_1, l3Bm_1, l3Be_1, a_or_s_1, l3Bc_1 = unpack(t_s2)
-            free = map(int, self._complementary(list(set(l3B_0 + l3B_1))))
+            free = list(map(int, self._complementary(list(set(l3B_0 + l3B_1)))))
             if len(free) >= 2:
                 return free[0], free[1], False, 1
             elif len(free) == 1:
@@ -503,29 +503,29 @@ class Particles_SetPair:
         l3Bm_0_only_list = [entry for entry in l3Bm_0 if entry not in l3Bm_1]  # look for an entry in the middle of the first but not of the second
         l3Bm_1_only_list = [entry for entry in l3Bm_1 if entry not in l3Bm_0]  # look for and entry in the middle of the second ut not of the first
         # if the two centers are not the exact same and at least one entry only in one of them is not the same as the start and end of the other
-        if set(l3B_0) == set(l3B_1) and len(set(l3B_0)) == 3 and len(set(l3B_1)) == 3 and t_v1 == t_v2:
-            X = t_v1
+        if set(l3B_0) == set(l3B_1) and len(set(l3B_0)) == 3 and len(set(l3B_1)) == 3:   # and t_v1 == t_v2:
+            X, Y = t_v1, t_v2
             if l3B_0[1] == l3B_1[0]:                                     # the function is for ⟨a|b+c|a] && ⟨b|a+c|b]
                 A, B, C = int(l3B_0[0]), int(l3B_0[1]), int(l3B_0[2])
             else:
                 A, B, C = int(l3B_0[0]), int(l3B_0[2]), int(l3B_0[1])
-            a, b = self[A].r_sp_d[0, 0], self[A].r_sp_d[1, 0]
-            c, d = self[A].l_sp_d[0, 0], self[A].l_sp_d[0, 1]
-            e, f = self[B].r_sp_d[0, 0], self[B].r_sp_d[1, 0]
-            g, h = self[B].l_sp_d[0, 0], self[B].l_sp_d[0, 1]
-            i, j = self[C].r_sp_d[0, 0], self[C].r_sp_d[1, 0]
-            k, l = self[C].l_sp_d[0, 0], self[C].l_sp_d[0, 1]
-            a = -((-(d * (e * g + i * k) - c * (e * h + i * l)) * (f * h * i * k - e * h * j * k - f * g * i * l + e * g * j * l - X) - (d * e * g - c * e * h) * X) / (
-                -(- d * f * g + c * f * h) * (d * (e * g + i * k) - c * (e * h + i * l)) + (d * e * g - c * e * h) * (- d * (f * g + j * k) + c * (f * h + j * l))))
-            b = (1 / ((d * g - c * h) * (f * i - e * j) * (d * k - c * l))) * (
-                d * f * f * g * h * i * k - c * f * f * h * h * i * k - d * e * f * g * h * j * k + c * e * f * h * h * j * k +
-                d * f * h * i * j * k * k - d * e * h * j * j * k * k - d * f * f * g * g * i * l + c * f * f * g * h * i * l +
-                d * e * f * g * g * j * l - c * e * f * g * h * j * l - d * f * g * i * j * k * l - c * f * h * i * j * k * l +
-                d * e * g * j * j * k * l + c * e * h * j * j * k * l + c * f * g * i * j * l * l - c * e * g * j * j * l * l - d * j * k * X + c * j * l * X)
+            c1, d1 = self[A].l_sp_d[0, 0], self[A].l_sp_d[0, 1]
+            a6, b6 = self[B].r_sp_d[0, 0], self[B].r_sp_d[1, 0]
+            c6, d6 = self[B].l_sp_d[0, 0], self[B].l_sp_d[0, 1]
+            a2, b2 = self[C].r_sp_d[0, 0], self[C].r_sp_d[1, 0]
+            c2, d2 = self[C].l_sp_d[0, 0], self[C].l_sp_d[0, 1]
+            a = -((-((a6 * c6 * d1 - a6 * c1 * d6) * X) - (a2 * c2 * d1 + a6 * c6 * d1 - a2 * c1 * d2 - a6 * c1 * d6) *
+                   (a6 * b2 * c6 * d2 - a2 * b6 * c6 * d2 - a6 * b2 * c2 * d6 + a2 * b6 * c2 * d6 - Y)) /
+                  (-((a2 * c2 * d1 + a6 * c6 * d1 - a2 * c1 * d2 - a6 * c1 * d6) * (-(b6 * c6 * d1) + b6 * c1 * d6)) +
+                   (a6 * c6 * d1 - a6 * c1 * d6) * (-(b2 * c2 * d1) - b6 * c6 * d1 + b2 * c1 * d2 + b6 * c1 * d6)))
+            b = (a6 * b2 ** 2 * c2 * c6 * d1 * d2 - a2 * b2 * b6 * c2 * c6 * d1 * d2 + a6 * b2 * b6 * c6 ** 2 * d1 * d2 - a2 * b6 ** 2 * c6 ** 2 * d1 * d2 -
+                 a6 * b2 ** 2 * c1 * c6 * d2 ** 2 + a2 * b2 * b6 * c1 * c6 * d2 ** 2 -
+                 a6 * b2 ** 2 * c2 ** 2 * d1 * d6 + a2 * b2 * b6 * c2 ** 2 * d1 * d6 - a6 * b2 * b6 * c2 * c6 * d1 * d6 + a2 * b6 ** 2 * c2 * c6 * d1 * d6 +
+                 a6 * b2 ** 2 * c1 * c2 * d2 * d6 - a2 * b2 * b6 * c1 * c2 * d2 * d6 -
+                 a6 * b2 * b6 * c1 * c6 * d2 * d6 + a2 * b6 ** 2 * c1 * c6 * d2 * d6 + a6 * b2 * b6 * c1 * c2 * d6 ** 2 - a2 * b6 ** 2 * c1 * c2 * d6 ** 2 +
+                 b6 * c6 * d1 * X - b6 * c1 * d6 * X - b2 * c2 * d1 * Y - b6 * c6 * d1 * Y + b2 * c1 * d2 * Y +
+                 b6 * c1 * d6 * Y) / ((-(a6 * b2) + a2 * b6) * (c2 * d1 - c1 * d2) * (c6 * d1 - c1 * d6))
             self[A].r_sp_d = numpy.array([a, b])
-            # free = map(int, free)
-            # if len(free) >= 2:
-            #     self.fix_mom_cons(free[0], free[1])
             if can_fix_mom_cons(t_s1, t_s2):
                 self.fix_mom_cons(*how_to_fix_mom_cons(t_s1, t_s2))
             else:

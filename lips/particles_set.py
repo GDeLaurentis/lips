@@ -85,7 +85,7 @@ class Particles_Set:
 
         A, B = map(int, pA2.findall(temp_string)[0])
         X = temp_value
-        plist = map(int, self._complementary(map(str, [A, B])))  # free momenta
+        plist = list(map(int, self._complementary(map(str, [A, B]))))  # free momenta
         if len(plist) < 2:                                           # need at least 4 particles to fix mom cons (i.e. two free ones)
             myException("Set_A2 called with less than 4 particles. Cound't fix momentum conservation.")
         a, b = self[A].r_sp_u[0, 0], self[A].r_sp_u[0, 1]            # ⟨A| = (a, b)
@@ -101,7 +101,7 @@ class Particles_Set:
 
         A, B = map(int, pS2.findall(temp_string)[0])
         X = temp_value
-        plist = map(int, self._complementary(map(str, [A, B])))  # free momenta
+        plist = list(map(int, self._complementary(map(str, [A, B]))))  # free momenta
         if len(plist) < 2:                                           # need at least 4 particles to fix mom cons (i.e. two free ones)
             myException("Set_S2 called with less than 4 particles. Cound't fix momentum conservation.")
         a, b = self[A].l_sp_d[0, 0], self[A].l_sp_d[0, 1]            # [A| = (a, b)
@@ -318,7 +318,7 @@ class Particles_Set:
 
     def set_Dijk(self, temp_string, temp_value, fix_mom=True, mode=1):  # Set Dijk, change angle bracket (odd mode) or square bracket (even mode)
 
-        ijk = map(int, pDijk.findall(temp_string)[0])
+        ijk = list(map(int, pDijk.findall(temp_string)[0]))
         NonOverlappingLists = self.ijk_to_3NonOverlappingLists(ijk)
 
         to_be_changed = NonOverlappingLists[0].pop((mode - 1) // 2)

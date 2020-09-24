@@ -68,7 +68,7 @@ class Particles_Compute:
         self.check_consistency(temp_string)                         # Check consistency of string
 
         if ptr5.findall(temp_string) != []:                         # tr5_ijkl [i|j|k|l|i⟩ - ⟨i|j|k|l|i]
-            ijkl = map(int, ptr5.findall(temp_string)[0])
+            ijkl = list(map(int, ptr5.findall(temp_string)[0]))
             return (self.compute("[{a}|{b}|{c}|{d}|{a}⟩".format(a=ijkl[0], b=ijkl[1], c=ijkl[2], d=ijkl[3])) -
                     self.compute("⟨{a}|{b}|{c}|{d}|{a}]".format(a=ijkl[0], b=ijkl[1], c=ijkl[2], d=ijkl[3])))
 
@@ -87,7 +87,7 @@ class Particles_Compute:
             return Pi
 
         if pDijk.findall(temp_string) != []:                        # Δ_ijk
-            ijk = map(int, pDijk.findall(temp_string)[0])
+            ijk = list(map(int, pDijk.findall(temp_string)[0]))
             temp_oParticles = self.ijk_to_3Ks(ijk)
             Delta = temp_oParticles.ldot(1, 2)**2 - temp_oParticles.ldot(1, 1) * temp_oParticles.ldot(2, 2)
             return Delta
@@ -158,5 +158,13 @@ class Particles_Compute:
                 return self.compute("⟨1|(3+4)|(5+6)|2⟩") + self.compute("⟨1|(5+6)|(3+4)|2⟩")
             elif temp_string == "(⟨1|(3+4)|(5+6)|7⟩-⟨1|(5+6)|(3+4)|7⟩)":
                 return self.compute("⟨1|(3+4)|(5+6)|7⟩") - self.compute("⟨1|(5+6)|(3+4)|7⟩")
+            elif temp_string == "(s_12-s_56)":
+                return self.compute("s_12") - self.compute("s_56")
+            elif temp_string == "(s_12-s_34)":
+                return self.compute("s_12") - self.compute("s_34")
+            elif temp_string == "(s_34-s_56)":
+                return self.compute("s_34") - self.compute("s_56")
+            elif temp_string == "(⟨1|(2+5)|1]-⟨2|(1+6)|2])":
+                return self.compute("⟨1|(2+5)|1]") - self.compute("⟨2|(1+6)|2]")
             else:
                 myException("Invalid string in compute: string {} is not implemented.".format(temp_string))
