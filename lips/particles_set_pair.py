@@ -352,8 +352,14 @@ class Particles_SetPair:
             ab = map(int, list(pS2.findall(t_s1)[0]))
 
         ab = list(map(int, ab))
-        ijk = list(map(int, pDijk.findall(t_s2)[0]))
-        NonOverlappingLists = self.ijk_to_3NonOverlappingLists(ijk)
+        match_list = pDijk.findall(t_s2)[0]
+        if match_list[0] == '':
+            adjacent = False
+            NonOverlappingLists = [list(map(int, corner)) for corner in match_list[1:]]
+        else:
+            adjacent = True
+            NonOverlappingLists = self.ijk_to_3NonOverlappingLists(list(map(int, match_list[0])))
+
         both_in_List = -1                                       # if both ab in a single List:
         for i, List in enumerate(NonOverlappingLists):
             if (ab[0] in List and ab[1] in List):
@@ -369,7 +375,10 @@ class Particles_SetPair:
             NonOverlappingLists = [NonOverlappingLists[(free_List + 1) % 3],
                                    NonOverlappingLists[(free_List + 2) % 3],
                                    NonOverlappingLists[free_List]]
-        t_s2 = "Δ_{}{}{}".format(NonOverlappingLists[0][0], NonOverlappingLists[1][0], NonOverlappingLists[2][0])
+        if adjacent is True:
+            t_s2 = "Δ_{}{}{}".format(NonOverlappingLists[0][0], NonOverlappingLists[1][0], NonOverlappingLists[2][0])
+        else:
+            t_s2 = "Δ_{}_{}_{}".format("".join(map(str, NonOverlappingLists[0])), "".join(map(str, NonOverlappingLists[1])), "".join(map(str, NonOverlappingLists[2])))
         self.set(t_s1, t_v1, fix_mom=False)
         if t_s1[0] == "⟨":
             self.set(t_s2, t_v2, fix_mom=True, mode=2)
@@ -716,8 +725,13 @@ class Particles_SetPair:
 
         def reorder_invariants(t_s1, t_s2):
             l3B, l3Bs, l3Bm, l3Be, a_or_s, l3Bc = unpack(t_s1)
-            ijk = map(int, pDijk.findall(t_s2)[0])
-            NonOverlappingLists = self.ijk_to_3NonOverlappingLists(ijk)
+            match_list = pDijk.findall(t_s2)[0]
+            if match_list[0] == '':
+                adjacent = False
+                NonOverlappingLists = [list(map(int, corner)) for corner in match_list[1:]]
+            else:
+                adjacent = True
+                NonOverlappingLists = self.ijk_to_3NonOverlappingLists(list(map(int, match_list[0])))
             if l3Bs == l3Be:
                 for NonOverlappingList in NonOverlappingLists:
                     if l3Bs in NonOverlappingList and [entry for entry in NonOverlappingList if entry != l3Bs][0] in l3Bm:
@@ -747,7 +761,10 @@ class Particles_SetPair:
                 else:
                     NonOverlappingLists.remove(NonOverlappingList)
                     NonOverlappingLists += [NonOverlappingList]
-                    t_s2 = "Δ_{}{}{}".format(NonOverlappingLists[0][0], NonOverlappingLists[1][0], NonOverlappingLists[2][0])
+                    if adjacent is True:
+                        t_s2 = "Δ_{}{}{}".format(NonOverlappingLists[0][0], NonOverlappingLists[1][0], NonOverlappingLists[2][0])
+                    else:
+                        t_s2 = "Δ_{}_{}_{}".format("".join(map(str, NonOverlappingLists[0])), "".join(map(str, NonOverlappingLists[1])), "".join(map(str, NonOverlappingLists[2])))
                     return t_s1, t_s2
             return False
 
@@ -766,8 +783,11 @@ class Particles_SetPair:
             return "Not implemented."
 
         l3B, l3Bs, l3Bm, l3Be, a_or_s, l3Bc = unpack(t_s1)
-        ijk = map(int, pDijk.findall(t_s2)[0])
-        NonOverlappingLists = self.ijk_to_3NonOverlappingLists(ijk)
+        match_list = pDijk.findall(t_s2)[0]
+        if match_list[0] == '':
+            NonOverlappingLists = [list(map(int, corner)) for corner in match_list[1:]]
+        else:
+            NonOverlappingLists = self.ijk_to_3NonOverlappingLists(list(map(int, match_list[0])))
 
         self.set(t_s1, t_v1, fix_mom=False)
         if t_s1[0] == "⟨":
@@ -839,8 +859,11 @@ class Particles_SetPair:
             expression_for_e = oFile.read()
 
         Sijk = map(int, pSijk.findall(t_s1)[0])
-        Dijk = map(int, pDijk.findall(t_s2)[0])
-        NonOverlappingLists = self.ijk_to_3NonOverlappingLists(Dijk)
+        match_list = pDijk.findall(t_s2)[0]
+        if match_list[0] == '':
+            NonOverlappingLists = [list(map(int, corner)) for corner in match_list[1:]]
+        else:
+            NonOverlappingLists = self.ijk_to_3NonOverlappingLists(list(map(int, match_list[0])))
 
         FirstNonOverlappingList = -1
         SecondNonOverlappingList = -1

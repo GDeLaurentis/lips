@@ -318,8 +318,11 @@ class Particles_Set:
 
     def set_Dijk(self, temp_string, temp_value, fix_mom=True, mode=1):  # Set Dijk, change angle bracket (odd mode) or square bracket (even mode)
 
-        ijk = list(map(int, pDijk.findall(temp_string)[0]))
-        NonOverlappingLists = self.ijk_to_3NonOverlappingLists(ijk)
+        match_list = pDijk.findall(temp_string)[0]
+        if match_list[0] == '':
+            NonOverlappingLists = [list(map(int, corner)) for corner in match_list[1:]]
+        else:
+            NonOverlappingLists = self.ijk_to_3NonOverlappingLists(list(map(int, match_list[0])))
 
         to_be_changed = NonOverlappingLists[0].pop((mode - 1) // 2)
 

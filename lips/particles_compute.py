@@ -86,9 +86,13 @@ class Particles_Compute:
             Pi = (self.compute("s_" + "".join(map(unicode, nol[2] + [nol[0][0]]))) - self.compute("s_" + "".join(map(unicode, nol[2] + [nol[0][1]]))))
             return Pi
 
-        if pDijk.findall(temp_string) != []:                        # Δ_ijk
-            ijk = list(map(int, pDijk.findall(temp_string)[0]))
-            temp_oParticles = self.ijk_to_3Ks(ijk)
+        if pDijk.findall(temp_string) != []:                        # Δ_ijk or Δ_ij_kl_lm
+            match_list = pDijk.findall(temp_string)[0]
+            if match_list[0] == '':
+                NonOverlappingLists = [list(map(int, corner)) for corner in match_list[1:]]
+            else:
+                NonOverlappingLists = self.ijk_to_3NonOverlappingLists(list(map(int, match_list[0])))
+            temp_oParticles = self.cluster(NonOverlappingLists)
             Delta = temp_oParticles.ldot(1, 2)**2 - temp_oParticles.ldot(1, 1) * temp_oParticles.ldot(2, 2)
             return Delta
 
