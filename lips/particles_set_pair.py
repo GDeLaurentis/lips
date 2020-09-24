@@ -378,7 +378,7 @@ class Particles_SetPair:
         if adjacent is True:
             t_s2 = "Δ_{}{}{}".format(NonOverlappingLists[0][0], NonOverlappingLists[1][0], NonOverlappingLists[2][0])
         else:
-            t_s2 = "Δ_{}_{}_{}".format("".join(map(str, NonOverlappingLists[0])), "".join(map(str, NonOverlappingLists[1])), "".join(map(str, NonOverlappingLists[2])))
+            t_s2 = "Δ_{}|{}|{}".format("".join(map(str, NonOverlappingLists[0])), "".join(map(str, NonOverlappingLists[1])), "".join(map(str, NonOverlappingLists[2])))
         self.set(t_s1, t_v1, fix_mom=False)
         if t_s1[0] == "⟨":
             self.set(t_s2, t_v2, fix_mom=True, mode=2)
@@ -764,7 +764,7 @@ class Particles_SetPair:
                     if adjacent is True:
                         t_s2 = "Δ_{}{}{}".format(NonOverlappingLists[0][0], NonOverlappingLists[1][0], NonOverlappingLists[2][0])
                     else:
-                        t_s2 = "Δ_{}_{}_{}".format("".join(map(str, NonOverlappingLists[0])), "".join(map(str, NonOverlappingLists[1])), "".join(map(str, NonOverlappingLists[2])))
+                        t_s2 = "Δ_{}|{}|{}".format("".join(map(str, NonOverlappingLists[0])), "".join(map(str, NonOverlappingLists[1])), "".join(map(str, NonOverlappingLists[2])))
                     return t_s1, t_s2
             return False
 
