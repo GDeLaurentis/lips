@@ -23,6 +23,7 @@ import mpmath
 from .tools import MinkowskiMetric, flatten, pA2, pS2, pNB, myException
 from .particle import Particle
 from .particles_compute import Particles_Compute
+from .particles_eval import Particles_Eval
 from .particles_set import Particles_Set
 from .particles_set_pair import Particles_SetPair
 
@@ -49,7 +50,7 @@ def indexing_decorator(func):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 
-class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
+class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetPair, list):
     """Describes the kinematics of n particles. Base one list of Particle objects."""
 
     def __init__(self, number_of_particles_or_particles=None, seed=None, real_momenta=False, dtype="mpc", fix_mom_cons=True):

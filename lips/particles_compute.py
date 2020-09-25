@@ -19,7 +19,7 @@ import re
 import mpmath
 import sys
 
-from .tools import pSijk, pd5, pDijk, pOijk, pPijk, pA2, pS2, pNB, ptr5, myException
+from .tools import pSijk, pd5, pDijk, pOijk, pPijk, pA2, pS2, pNB, ptr5
 
 if sys.version_info[0] > 2:
     unicode = str
@@ -73,7 +73,7 @@ class Particles_Compute:
                     self.compute("⟨{a}|{b}|{c}|{d}|{a}]".format(a=ijkl[0], b=ijkl[1], c=ijkl[2], d=ijkl[3])))
 
         if pOijk.findall(temp_string) != []:                        # Ω_ijk
-            ijk = map(int, pOijk.findall(temp_string)[0])
+            ijk = list(map(int, pOijk.findall(temp_string)[0]))
             nol = self.ijk_to_3NonOverlappingLists(ijk)
             Omega = (2 * self.compute("s_" + "".join(map(unicode, nol[2]))) * self.compute("s_" + "".join(map(unicode, nol[1]))) -
                      (self.compute("s_" + "".join(map(unicode, nol[2]))) + self.compute("s_" + "".join(map(unicode, nol[1]))) -
@@ -81,7 +81,7 @@ class Particles_Compute:
             return Omega
 
         if pPijk.findall(temp_string) != []:                        # Π_ijk, eg: Π_351 = s_123-s124
-            ijk = map(int, pPijk.findall(temp_string)[0])
+            ijk = list(map(int, pPijk.findall(temp_string)[0]))
             nol = self.ijk_to_3NonOverlappingLists(ijk)
             Pi = (self.compute("s_" + "".join(map(unicode, nol[2] + [nol[0][0]]))) - self.compute("s_" + "".join(map(unicode, nol[2] + [nol[0][1]]))))
             return Pi
@@ -152,23 +152,4 @@ class Particles_Compute:
                 return result.dot(self[d].l_sp_u)[0][0]
 
         else:
-            if temp_string == "(⟨1|(3+4)|(5+6)|2⟩-⟨1|(5+6)|(3+4)|2⟩)":
-                return self.compute("⟨1|(3+4)|(5+6)|2⟩") - self.compute("⟨1|(5+6)|(3+4)|2⟩")
-            elif temp_string == "(⟨1|(5+6)|(3+4)|2⟩-⟨1|(3+4)|(5+6)|2⟩)":
-                return self.compute("⟨1|(5+6)|(3+4)|2⟩") - self.compute("⟨1|(3+4)|(5+6)|2⟩")
-            elif temp_string == "(⟨3|(5+6)|3]+⟨4|(5+6)|4])" or temp_string == "(⟨4|(5+6)|4]+⟨3|(5+6)|3])":
-                return self.compute("⟨3|(5+6)|3]") + self.compute("⟨4|(5+6)|4]")
-            elif temp_string == "(⟨1|(3+4)|(5+6)|2⟩+⟨1|(5+6)|(3+4)|2⟩)":
-                return self.compute("⟨1|(3+4)|(5+6)|2⟩") + self.compute("⟨1|(5+6)|(3+4)|2⟩")
-            elif temp_string == "(⟨1|(3+4)|(5+6)|7⟩-⟨1|(5+6)|(3+4)|7⟩)":
-                return self.compute("⟨1|(3+4)|(5+6)|7⟩") - self.compute("⟨1|(5+6)|(3+4)|7⟩")
-            elif temp_string == "(s_12-s_56)":
-                return self.compute("s_12") - self.compute("s_56")
-            elif temp_string == "(s_12-s_34)":
-                return self.compute("s_12") - self.compute("s_34")
-            elif temp_string == "(s_34-s_56)":
-                return self.compute("s_34") - self.compute("s_56")
-            elif temp_string == "(⟨1|(2+5)|1]-⟨2|(1+6)|2])":
-                return self.compute("⟨1|(2+5)|1]") - self.compute("⟨2|(1+6)|2]")
-            else:
-                myException("Invalid string in compute: string {} is not implemented.".format(temp_string))
+            return self.eval(temp_string)
