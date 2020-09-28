@@ -48,6 +48,7 @@ class Particles_Eval:
         string = p3B.sub(r"self.compute('⟨\1|(\2)|\3]')", string)
         string = re.sub(r'(\d)s', r'\1*s', string)
         string = string.replace(')s', ')*s')
+        string = string.replace(')(', ')*(')
         return string
 
     def _eval_expr(self, expr):
