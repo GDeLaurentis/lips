@@ -28,18 +28,18 @@ Cores = 6
         (6, "invs_2", "invs_2", 0, 870),
         (6, "invs_2", "invs_N", 48, 4950),
         (6, "invs_2", "invs_s", 0, 300),
-        (6, "invs_2", "invs_D", 0, 60),
+        (6, "invs_2", "invs_D", 0, 90),
         (6, "invs_3", "invs_3", 204, 8556),
         (6, "invs_3", "invs_s", 0, 930),
-        (6, "invs_3", "invs_D", 40, 186),
+        (6, "invs_3", "invs_D", 67, 279),
         (6, "invs_s", "invs_s", 0, 90),
-        (6, "invs_s", "invs_D", 8, 20),
+        (6, "invs_s", "invs_D", 12, 30),
     ]
 )
 def test_particles_set(multiplicity, type1, type2, expected_failures, expected_length):
 
     oInvariants = Invariants(multiplicity, no_cached=True)
-    tuples = [(inv1, inv2) for inv1 in eval("oInvariants." + type1) for inv2 in eval("oInvariants." + type2) if inv1 != inv2]
+    tuples = [(inv1, inv2) for inv1 in getattr(oInvariants, type1) for inv2 in getattr(oInvariants, type2) if inv1 != inv2]
 
     TrueOrFalseList = mapThreads(DoubleScalingsTestingInner, multiplicity, oInvariants.full, tuples, UseParallelisation=UseParallelisation, Cores=Cores)
     failed_counter = sum(1 for entry in TrueOrFalseList if entry is False or entry is None)

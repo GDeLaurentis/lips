@@ -358,7 +358,7 @@ class Particles_Set:
 
     def set_Oijk(self, temp_string, temp_value, fix_mom=True):
 
-        ijk = map(int, pOijk.findall(temp_string)[0])
+        ijk = list(map(int, pOijk.findall(temp_string)[0]))
         nol = self.ijk_to_3NonOverlappingLists(ijk)
         A, B = nol[2][0], nol[2][1]
         C, D = nol[0][0], nol[0][1]
@@ -437,7 +437,7 @@ class Particles_Set:
 
     def set_Pijk(self, temp_string, temp_value, fix_mom=True):
 
-        ijk = map(int, pPijk.findall(temp_string)[0])
+        ijk = list(map(int, pPijk.findall(temp_string)[0]))
         nol = self.ijk_to_3NonOverlappingLists(ijk)
         A, B = nol[2][0], nol[2][1]
         C, D = nol[0][0], nol[0][1]
@@ -466,7 +466,7 @@ class Particles_Set:
     def set_tr5(self, temp_string, temp_value, fix_mom=True):       # ⟨A|B⟩ = (a, b).(c, d) = ac+bd = X ----> c = (X - bd)/a
 
         a, b, c, d = [int(entry) for entry in ptr5.findall(temp_string)[0]]
-        plist = map(int, self._complementary(map(str, [a, b, c, d])))  # free momenta
+        plist = list(map(int, self._complementary(map(str, [a, b, c, d]))))  # free momenta
         if len(plist) < 2:
             myException("Set_tr5 called with less than 6 particles. Cound't fix momentum conservation.")
 

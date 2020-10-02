@@ -5,3 +5,4 @@ __pycache__
 !.hidden
 *.egg-info/
 dist/
+htmlcov

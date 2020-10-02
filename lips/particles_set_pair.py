@@ -226,9 +226,9 @@ class Particles_SetPair:
     def set_pair_A2_or_S2_and_NB(self, t_s1, t_v1, t_s2, t_v2):    # Current failed: 48/4680 @ 6pt
 
         if pA2.findall(t_s1) != []:
-            ab = map(int, list(pA2.findall(t_s1)[0]))
+            ab = list(map(int, list(pA2.findall(t_s1)[0])))
         elif pS2.findall(t_s1) != []:
-            ab = map(int, list(pS2.findall(t_s1)[0]))
+            ab = list(map(int, list(pS2.findall(t_s1)[0])))
 
         if "-" in t_s2:                                         # a minus sign would mess up inversion
             raise myException("Detected minus in string. Not implemented.")
@@ -295,11 +295,11 @@ class Particles_SetPair:
     def set_pair_A2_or_S2_and_Sijk(self, t_s1, t_v1, t_s2, t_v2):   # Current failed: 0/300 @ 6pt
 
         if pA2.findall(t_s1) != []:
-            ab = map(int, list(pA2.findall(t_s1)[0]))
+            ab = list(map(int, list(pA2.findall(t_s1)[0])))
         elif pS2.findall(t_s1) != []:
-            ab = map(int, list(pS2.findall(t_s1)[0]))
+            ab = list(map(int, list(pS2.findall(t_s1)[0])))
 
-        ijk = map(int, list(pSijk.findall(t_s2)[0]))
+        ijk = list(map(int, list(pSijk.findall(t_s2)[0])))
         if ab[0] in ijk or ab[1] in ijk:                       # completely or partially overlapping
             overlap = []                                       # move the overlap at the end
             for i in range(2):
@@ -314,7 +314,7 @@ class Particles_SetPair:
             t_s2 = str1
         elif ab[0] not in ijk and ab[1] not in ijk:             # disjoint
             if len(self) == 6 and len(ijk) == 3:                # six particles -> disjoint = overlapping
-                compl = self._complementary(map(str, ijk))
+                compl = self._complementary(list(map(str, ijk)))
                 t_s2 = 's_{}{}{}'.format(compl[0], compl[1], compl[2])
                 self.set_pair_inner(t_s1, t_v1, t_s2, t_v2)
                 return
@@ -328,7 +328,7 @@ class Particles_SetPair:
         elif t_s1[0] == "[":                                    # set it using mode 1 (this reduces the number of invariants that go to zero)
             self.set(t_s1, t_v1, fix_mom=False)
             self.set(t_s2, t_v2, fix_mom=False, mode=1)
-        plist = map(int, self._complementary(list(set([str(entry) for entry in ijk + ab]))))
+        plist = list(map(int, self._complementary(list(set([str(entry) for entry in ijk + ab])))))
         if len(plist) >= 2:
             self.fix_mom_cons(plist[0], plist[1])
         elif len(plist) == 1:
@@ -347,9 +347,9 @@ class Particles_SetPair:
     def set_pair_A2_or_S2_and_Dijk(self, t_s1, t_v1, t_s2, t_v2):   # Current failed: 0/60 @ 6pt
 
         if pA2.findall(t_s1) != []:
-            ab = map(int, list(pA2.findall(t_s1)[0]))
+            ab = list(map(int, list(pA2.findall(t_s1)[0])))
         elif pS2.findall(t_s1) != []:
-            ab = map(int, list(pS2.findall(t_s1)[0]))
+            ab = list(map(int, list(pS2.findall(t_s1)[0])))
 
         ab = list(map(int, ab))
         match_list = pDijk.findall(t_s2)[0]
@@ -601,15 +601,15 @@ class Particles_SetPair:
 
     def set_pair_3B_and_Sijk(self, t_s1, t_v1, t_s2, t_v2):   # Current failed: 0/840 @ 6pt
 
-        ijk = map(int, list(pSijk.findall(t_s2)[0]))
+        ijk = list(map(int, list(pSijk.findall(t_s2)[0])))
         l3B = list(p3B.findall(t_s1)[0])
         l3B[1] = l3B[1].split("+")
-        l3Bs, l3Bm, l3Be = int(l3B[0]), map(int, l3B[1]), int(l3B[2])
-        l3B = map(int, [item for sublist in l3B for item in sublist])
-        free = map(int, self._complementary(map(str, list(set(ijk + l3B)))))
-        free_first_flipped = map(int, self._complementary(map(str, list(set(l3B + map(int, self._complementary(map(str, ijk))))))))
-        free_second_flipped = map(
-            int, self._complementary(map(str, list(set(ijk + [l3Bs] + [l3Be] + map(int, self._complementary(list(set(map(str, l3B))))))))))
+        l3Bs, l3Bm, l3Be = int(l3B[0]), list(map(int, l3B[1])), int(l3B[2])
+        l3B = list(map(int, [item for sublist in l3B for item in sublist]))
+        free = list(map(int, self._complementary(list(map(str, list(set(ijk + l3B)))))))
+        free_first_flipped = list(map(int, self._complementary(list(map(str, list(set(l3B + list(map(int, self._complementary(list(map(str, ijk))))))))))))
+        free_second_flipped = list(map(
+            int, self._complementary(list(map(str, list(set(ijk + [l3Bs] + [l3Be] + list(map(int, self._complementary(list(set(map(str, l3B)))))))))))))
         if len(free) >= 2 or (len(free_first_flipped) < 2 and len(free_second_flipped) < 2):
             l3Bm_only, l3Bs_only, l3Be_only = None, False, False
             for i in l3Bm:
@@ -649,10 +649,10 @@ class Particles_SetPair:
                 self.set_pair_inner(t_s2, t_v2, t_s1, t_v1)
                 return [t_s2, t_s1]                       # cheeky fix
         elif len(free_first_flipped) >= 2:                # flip it and try again
-            t_s2 = 's_{}'.format(''.join(self._complementary(map(str, ijk))))
+            t_s2 = 's_{}'.format(''.join(self._complementary(list(map(str, ijk)))))
             return self.set_pair_inner(t_s2, t_v2, t_s1, t_v1)
         elif len(free_second_flipped) >= 2:               # flip it and try again
-            comp = map(int, self._complementary(map(str, list(set(l3B)))))
+            comp = list(map(int, self._complementary(list(map(str, list(set(l3B)))))))
             l3Bc = ""
             for i in range(len(comp)):
                 l3Bc += "{}+".format(comp[i])
@@ -664,9 +664,9 @@ class Particles_SetPair:
             return self.set_pair_inner(t_s2, t_v2, t_s1, t_v1)
         l3B = list(p3B.findall(t_s1)[0])                  # recompute this stuff since it changes sometimes
         l3B[1] = l3B[1].split("+")
-        l3Bs, l3Bm, l3Be = int(l3B[0]), map(int, l3B[1]), int(l3B[2])
-        l3B = map(int, [item for sublist in l3B for item in sublist])
-        free = map(int, self._complementary(map(str, list(set(ijk + l3B)))))
+        l3Bs, l3Bm, l3Be = int(l3B[0]), list(map(int, l3B[1])), int(l3B[2])
+        l3B = list(map(int, [item for sublist in l3B for item in sublist]))
+        free = list(map(int, self._complementary(list(map(str, list(set(ijk + l3B)))))))
         self.set(t_s2, t_v2, fix_mom=False)               # set it
         self.set(t_s1, t_v1, fix_mom=False, mode=use_mode)
         if len(free) >= 2:
@@ -700,7 +700,7 @@ class Particles_SetPair:
             for i in range(len(l3Bm)):
                 l3Bc += "{}+".format(l3Bm[i])
             l3Bc = l3Bc[:-1]
-            return map(int, l3B), int(l3Bs), map(int, l3Bm), int(l3Be), a_or_s, l3Bc
+            return list(map(int, l3B)), int(l3Bs), list(map(int, l3Bm)), int(l3Be), a_or_s, l3Bc
 
         def flip_using_mom_cons(t_s):
             l3B, l3Bs, l3Bm, l3Be, a_or_s, l3Bc = unpack(t_s)
@@ -805,8 +805,8 @@ class Particles_SetPair:
 
     def set_pair_Sijk_and_Sijk(self, t_s1, t_v1, t_s2, t_v2):   # Current failed: 0/90 @ 6pt
 
-        ijk = map(int, list(pSijk.findall(t_s1)[0]))
-        lmn = map(int, list(pSijk.findall(t_s2)[0]))
+        ijk = list(map(int, list(pSijk.findall(t_s1)[0])))
+        lmn = list(map(int, list(pSijk.findall(t_s2)[0])))
         ovrlap, ijko, lmno = [], [], []                   # in both ijk and lmn, only in ijk, only in lmn
         for i in ijk:
             if i in lmn:
@@ -818,7 +818,7 @@ class Particles_SetPair:
                 pass
             else:
                 lmno += [l]
-        plist = map(int, self._complementary(map(str, ovrlap + ijko + lmno)))
+        plist = list(map(int, self._complementary(list(map(str, ovrlap + ijko + lmno)))))
         if len(plist) >= 2:                               # if there are at least two free particles then
             t_s1 = 's_'                                   # just make sure the overlap is at the end
             for i in range(len(ijko)):                    # and use mode=1/mode=2 for the first/second respectively
@@ -833,7 +833,7 @@ class Particles_SetPair:
         else:                                             # otherwise if there are not enough free particles flip the longest
             if len(ijk) > len(lmn):                       # make sure lmn is the longest
                 lmn, ijk, t_s1 = ijk, lmn, t_s2
-            lmn = map(int, self._complementary(map(str, lmn)))
+            lmn = list(map(int, self._complementary(map(str, lmn))))
             t_s2 = 's_'
             for i in range(len(lmn)):
                 t_s2 += '{}'.format(lmn[i])
@@ -858,7 +858,7 @@ class Particles_SetPair:
         with open(os.path.join(local_directory, "DoubleCollinearLimit_D&S_e"), "r") as oFile:
             expression_for_e = oFile.read()
 
-        Sijk = map(int, pSijk.findall(t_s1)[0])
+        Sijk = list(map(int, pSijk.findall(t_s1)[0]))
         match_list = pDijk.findall(t_s2)[0]
         if match_list[0] == '':
             NonOverlappingLists = [list(map(int, corner)) for corner in match_list[1:]]
