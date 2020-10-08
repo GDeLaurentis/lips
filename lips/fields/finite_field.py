@@ -5,6 +5,21 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import functools
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+
+def TypeErrorCheck(func):
+    @functools.wraps(func)
+    def wrapper_TypeErrorCheck(self, other):
+        try:
+            return func(self, other)
+        except TypeError:
+            return NotImplemented
+    return wrapper_TypeErrorCheck
+
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 
@@ -37,29 +52,37 @@ class ModP(int):
     def __neg__(self):
         return ModP(self.p - int(self), self.p)
 
+    @TypeErrorCheck
     def __add__(self, other):
         return ModP(int(self) + int(other), self.p)
 
+    @TypeErrorCheck
     def __radd__(self, other):
         return ModP(int(other) + int(self), self.p)
 
+    @TypeErrorCheck
     def __sub__(self, other):
         return ModP(int(self) - int(other), self.p)
 
+    @TypeErrorCheck
     def __rsub__(self, other):
         return ModP(int(other) - int(self), self.p)
 
+    @TypeErrorCheck
     def __mul__(self, other):
         return ModP(int(self) * int(other), self.p)
 
+    @TypeErrorCheck
     def __rmul__(self, other):
         return ModP(int(other) * int(self), self.p)
 
+    @TypeErrorCheck
     def __truediv__(self, other):
         if not isinstance(other, ModP):
             other = ModP(other, self.p)
         return self * other._inv()
 
+    @TypeErrorCheck
     def __rtruediv__(self, other):
         return other * self._inv()
 

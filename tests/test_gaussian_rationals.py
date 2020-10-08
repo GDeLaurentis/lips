@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 
 import numpy
 
-from lips.gaussian_rationals import GaussianRational, rand_rat_frac
+from lips.fields.gaussian_rationals import GaussianRational, rand_rat_frac
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #

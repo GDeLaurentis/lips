@@ -18,9 +18,9 @@ import random
 
 from .tools import MinkowskiMetric, LeviCivita, rand_frac, Pauli, Pauli_bar
 
-from .gaussian_rationals import GaussianRational, rand_rat_frac
-from .finite_field import ModP
-from .padic import PAdic
+from .fields.gaussian_rationals import GaussianRational, rand_rat_frac
+from .fields.finite_field import ModP
+from .fields.padic import PAdic
 
 mpmath.mp.dps = 300
 
