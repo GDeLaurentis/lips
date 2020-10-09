@@ -44,8 +44,10 @@ class Particle(object):
             self.randomise_finite_field()
         elif four_mom is None and dtype == "padic":
             self.randomise_padic()
-        else:
+        elif four_mom is not None:
             self.four_mom = four_mom
+        else:
+            raise Exception('Bad Particle Constructor')
 
     # ALGEBRA
 
