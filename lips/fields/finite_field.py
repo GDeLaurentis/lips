@@ -7,6 +7,7 @@ from __future__ import unicode_literals
 
 import functools
 
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 
@@ -26,7 +27,7 @@ def TypeErrorCheck(func):
 class ModP(int):
     'Integers modulus p, with p prime.'
 
-    __slots__ = 'p'
+    # __slots__ = 'p'
 
     def __new__(cls, *args, **kwargs):
         if len(args) == 2 and isinstance(args[0], int) and isinstance(args[1], int):  # usually this should get called
@@ -50,7 +51,7 @@ class ModP(int):
         return (int(self), self.p)
 
     def __setstate__(self, state):
-        self.p = state[1]
+        self.__init__(*state)
 
     def __str__(self):
         return "%d %% %d" % (self, self.p)
