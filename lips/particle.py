@@ -24,7 +24,7 @@ from .fields.padic import PAdic
 
 mpmath.mp.dps = 300
 
-p = 10009   # 2 ** 31 - 1  # 7919  # 10007  # 10009
+p = 2 ** 31 - 1  # 7919  # 10007  # 10009
 k = 4
 
 

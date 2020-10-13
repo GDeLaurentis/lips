@@ -26,16 +26,25 @@ def TypeErrorCheck(func):
 class ModP(int):
     'Integers modulus p, with p prime.'
 
-    # __slots__ = ["p"]
+    __slots__ = 'p'
 
     def __new__(cls, *args, **kwargs):
-        if len(args) == 2:  # usually this should get called
+        if len(args) == 2 and isinstance(args[0], int) and isinstance(args[1], int):  # usually this should get called
             return int.__new__(cls, args[0] % args[1])
-        elif len(args) == 1:  # this is needed for pickling
+        elif len(args) == 1 and isinstance(args[0], int):  # this is needed for pickling
             return int.__new__(cls, args[0])
+        elif len(args) == 1:
+            return int.__new__(cls, cls.__rstr__(args[0])[0])
+        else:
+            raise Exception('Bad finite field constructor.')
 
     def __init__(self, *args, **kwargs):
-        self.p = args[1]
+        if len(args) == 2:
+            self.p = args[1]
+        elif len(args) == 1:
+            self.p = self.__rstr__(args[0])[1]
+        else:
+            raise Exception('Bad finite field constructor.')
 
     def __getstate__(self):
         return (int(self), self.p)
@@ -45,6 +54,10 @@ class ModP(int):
 
     def __str__(self):
         return "%d %% %d" % (self, self.p)
+
+    @staticmethod
+    def __rstr__(string):
+        return tuple(map(int, string.replace(" ", "").split("%")))
 
     def __repr__(self):
         return str(self)
@@ -104,6 +117,6 @@ class ModP(int):
             tcurr, tnext = tnext, tcurr - q * tnext
 
         if rcurr != 1:
-            raise ValueError("Inverse of {} mod {} does not exist. Are you sure %d is prime?" % (self, self.p, self.p))
+            raise ValueError("Inverse of {} mod {} does not exist. Are you sure {} is prime?".format(self, self.p, self.p))
 
         return ModP(tcurr, self.p)

@@ -32,9 +32,10 @@ def padicfy(func):
         elif type(other) in [int, ModP, numpy.int64] or str(type(other)) == "long":
             return func(self, PAdic(other, self.p, (self.k + self.n) if (self.k + self.n) > 0 else 0))
         else:
-            print(type(self), ", ", type(other))
-            print(self, ", ", other)
-            raise Exception
+            # print(type(self), ", ", type(other))
+            # print(self, ", ", other)
+            # raise Exception
+            return NotImplemented
     return wrapper_padicfy
 
 
