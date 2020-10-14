@@ -117,8 +117,13 @@ class Particle(object):
         self._r_sp_d_to_r_sp_u()
         self._r1_sp_to_r2_sp()
         self._r1_sp_to_r2_sp_b()
-        self._r2_sp_b_to_four_momentum()
-        self._four_mom_to_four_mom_d()
+        # should I four_mom is in the field?
+        try:
+            self._r2_sp_b_to_four_momentum()
+            self._four_mom_to_four_mom_d()
+        except (TypeError, SystemError):
+            self._four_mom = None
+            self._four_mom_d = None
 
     @property
     def l_sp_d(self):
@@ -132,8 +137,13 @@ class Particle(object):
         self._l_sp_d_to_l_sp_u()
         self._r1_sp_to_r2_sp()
         self._r1_sp_to_r2_sp_b()
-        self._r2_sp_b_to_four_momentum()
-        self._four_mom_to_four_mom_d()
+        # should I four_mom is in the field?
+        try:
+            self._r2_sp_b_to_four_momentum()
+            self._four_mom_to_four_mom_d()
+        except (TypeError, SystemError):
+            self._four_mom = None
+            self._four_mom_d = None
 
     @property
     def r_sp_u(self):
@@ -147,8 +157,13 @@ class Particle(object):
         self._r_sp_u_to_r_sp_d()
         self._r1_sp_to_r2_sp()
         self._r1_sp_to_r2_sp_b()
-        self._r2_sp_b_to_four_momentum()
-        self._four_mom_to_four_mom_d()
+        # should I four_mom is in the field?
+        try:
+            self._r2_sp_b_to_four_momentum()
+            self._four_mom_to_four_mom_d()
+        except (TypeError, SystemError):
+            self._four_mom = None
+            self._four_mom_d = None
 
     @property
     def l_sp_u(self):
@@ -162,8 +177,13 @@ class Particle(object):
         self._l_sp_u_to_l_sp_d()
         self._r1_sp_to_r2_sp()
         self._r1_sp_to_r2_sp_b()
-        self._r2_sp_b_to_four_momentum()
-        self._four_mom_to_four_mom_d()
+        # should I four_mom is in the field?
+        try:
+            self._r2_sp_b_to_four_momentum()
+            self._four_mom_to_four_mom_d()
+        except (TypeError, SystemError):
+            self._four_mom = None
+            self._four_mom_d = None
 
     @property
     def r2_sp(self):
@@ -174,8 +194,13 @@ class Particle(object):
     def r2_sp(self, temp_r2_sp):
         self._r2_sp = temp_r2_sp
         self._r2_sp_to_r2_sp_b()
-        self._r2_sp_to_four_momentum()
-        self._four_mom_to_four_mom_d()
+        # should I four_mom is in the field?
+        try:
+            self._r2_sp_to_four_momentum()
+            self._four_mom_to_four_mom_d()
+        except (TypeError, SystemError):
+            self._four_mom = None
+            self._four_mom_d = None
         # should I check for masslessness?
         try:
             self._four_mom_to_r_sp_d()
@@ -197,8 +222,13 @@ class Particle(object):
     def r2_sp_b(self, temp_r2_sp_b):
         self._r2_sp_b = temp_r2_sp_b
         self._r2_sp_b_to_r2_sp()
-        self._r2_sp_b_to_four_momentum()
-        self._four_mom_to_four_mom_d()
+        # should I four_mom is in the field?
+        try:
+            self._r2_sp_b_to_four_momentum()
+            self._four_mom_to_four_mom_d()
+        except (TypeError, SystemError):
+            self._four_mom = None
+            self._four_mom_d = None
         # should I check for masslessness?
         try:
             self._four_mom_to_r_sp_d()

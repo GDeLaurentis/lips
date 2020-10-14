@@ -32,9 +32,6 @@ def padicfy(func):
         elif type(other) in [int, ModP, numpy.int64] or str(type(other)) == "long":
             return func(self, PAdic(other, self.p, (self.k + self.n) if (self.k + self.n) > 0 else 0))
         else:
-            # print(type(self), ", ", type(other))
-            # print(self, ", ", other)
-            # raise Exception
             return NotImplemented
     return wrapper_padicfy
 
@@ -42,39 +39,43 @@ def padicfy(func):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 
-class PAdic(int):
+class PAdic(object):
 
     """PAdic Integers, with p prime."""
 
-    def __new__(cls, num, p=None, k=None, n=0, from_addition=False, recover_precision_from_powers_of_p=True):
+    def __init__(self, num, p=None, k=None, n=0, from_addition=False, recover_precision_from_powers_of_p=True):
         """0 ≤ num ≤ p ^ k; p: prime; k: significant digits; n: power of prefactors of p."""
         if p is not None and k is not None:
             factors_of_p = next((i for i, j in enumerate(to_base(num, p)) if j != 0), 0)
-            self = int.__new__(cls, int(num // p ** factors_of_p) % int(p ** k))
+            self.num = int(num // p ** factors_of_p) % int(p ** k)
             self.p = int(p)
-            if from_addition is False or (recover_precision_from_powers_of_p and self == 1 and factors_of_p > 0):
+            if from_addition is False or (recover_precision_from_powers_of_p and self.num == 1 and factors_of_p > 0):
                 if from_addition is True:
                     print("!Warning! recovering a digit.")
                 self.k = int(k)
             else:
                 self.k = int(k) - from_addition * factors_of_p
             self.n = int(factors_of_p) + n
-            return self
         elif p is None and k is None:
-            return int.__new__(cls, num)
+            self.num = num
         else:
             raise Exception("Invalid p-adic initialisation")
+
+    def __int__(self):
+        return self.num
 
     def __getstate__(self):
         return (int(self), self.p, self.k, self.n)
 
     def __setstate__(self, state):
-        self.p = state[1]
-        self.k = state[2]
-        self.n = state[3]
+        self.__init__(*state)
 
-    # def __abs__(self):
-    #     return -self.n
+    def __abs__(self):
+        return self.p ** -self.n
+
+    @padicfy
+    def __eq__(self, other):
+        return all([int(self) == int(other), self.p == other.p, self.k == other.k, self.n == other.n])
 
     @property
     def as_tuple(self):
