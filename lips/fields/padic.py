@@ -41,7 +41,7 @@ def padicfy(func):
 
 class PAdic(object):
 
-    """PAdic Integers, with p prime."""
+    """PAdic numbers, with p prime, k digits, n valuation."""
 
     def __init__(self, num, p=None, k=None, n=0, from_addition=False, recover_precision_from_powers_of_p=True):
         """0 ≤ num ≤ p ^ k; p: prime; k: significant digits; n: power of prefactors of p."""

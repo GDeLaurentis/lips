@@ -19,3 +19,4 @@ Particles objects allow to:\n
 from .particle import Particle                   # noqa
 from .particles import Particles                 # noqa
 from .tools import myException, ldot, flatten    # noqa
+from .fields.Field import field                  # noqa

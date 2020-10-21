@@ -34,18 +34,20 @@ k = 4
 class Particle(object):
     """Describes the kinematics of a single particle."""
 
-    def __init__(self, four_mom=None, real_momentum=False, dtype="mpc"):
+    def __init__(self, four_mom=None, r2_sp=None, real_momentum=False, dtype="mpc"):
         """Initialisation. Calls randomise if None, else initialises the four momentum."""
-        if four_mom is None and dtype == "mpc":
+        if four_mom is None and r2_sp is None and dtype == "mpc":
             self.randomise(real_momentum=real_momentum)
-        elif four_mom is None and dtype == "gaussian rational":
+        elif four_mom is None and r2_sp is None and dtype == "gaussian rational":
             self.randomise_rational()
-        elif four_mom is None and dtype == "finite field":
+        elif four_mom is None and r2_sp is None and dtype == "finite field":
             self.randomise_finite_field()
-        elif four_mom is None and dtype == "padic":
+        elif four_mom is None and r2_sp is None and dtype == "padic":
             self.randomise_padic()
         elif four_mom is not None:
             self.four_mom = four_mom
+        elif r2_sp is not None:
+            self.r2_sp = r2_sp
         else:
             raise Exception('Bad Particle Constructor')
 
@@ -66,37 +68,39 @@ class Particle(object):
     def __add__(self, other):
         """Sum: summs the four momenta."""
         if other == 0:
-            return self
+            return Particle(r2_sp=self.r2_sp)
         assert isinstance(other, Particle)
-        return Particle(self.four_mom + other.four_mom)
+        return Particle(r2_sp=self.r2_sp + other.r2_sp)
 
     def __radd__(self, other):
         """Sum: summs the four momenta."""
         if other == 0:
-            return self
+            return Particle(r2_sp=self.r2_sp)
         assert isinstance(other, Particle)
-        return Particle(self.four_mom + other.four_mom)
+        return Particle(r2_sp=self.r2_sp + other.r2_sp)
 
     def __sub__(self, other):
         """Sub: subtract the four momenta."""
+        if other == 0:
+            return Particle(r2_sp=self.r2_sp)
         assert isinstance(other, Particle)
-        return Particle(self.four_mom - other.four_mom)
+        return Particle(r2_sp=self.r2_sp - other.r2_sp)
 
     def __mul__(self, other):
         """Mul: multiply momentum by number."""
-        return Particle(self.four_mom * other)
+        return Particle(r2_sp=self.r2_sp * other)
 
     def __rmul__(self, other):
         """Mul: multiply momentum by number."""
-        return Particle(self.four_mom * other)
+        return Particle(r2_sp=self.r2_sp * other)
 
     def __div__(self, other):
         """Div: divide momentum by number."""
-        return Particle(self.four_mom / other)
+        return Particle(r2_sp=self.r2_sp / other)
 
     def __truediv__(self, other):
         """Div: divide momentum by number."""
-        return Particle(self.four_mom / other)
+        return Particle(r2_sp=self.r2_sp / other)
 
     # IDEXING
 
@@ -117,7 +121,7 @@ class Particle(object):
         self._r_sp_d_to_r_sp_u()
         self._r1_sp_to_r2_sp()
         self._r1_sp_to_r2_sp_b()
-        # should I four_mom is in the field?
+        # should I check if four_mom is in the field?
         try:
             self._r2_sp_b_to_four_momentum()
             self._four_mom_to_four_mom_d()
@@ -137,7 +141,7 @@ class Particle(object):
         self._l_sp_d_to_l_sp_u()
         self._r1_sp_to_r2_sp()
         self._r1_sp_to_r2_sp_b()
-        # should I four_mom is in the field?
+        # should I check if four_mom is in the field?
         try:
             self._r2_sp_b_to_four_momentum()
             self._four_mom_to_four_mom_d()
@@ -157,7 +161,7 @@ class Particle(object):
         self._r_sp_u_to_r_sp_d()
         self._r1_sp_to_r2_sp()
         self._r1_sp_to_r2_sp_b()
-        # should I four_mom is in the field?
+        # should I check if four_mom is in the field?
         try:
             self._r2_sp_b_to_four_momentum()
             self._four_mom_to_four_mom_d()
@@ -177,7 +181,7 @@ class Particle(object):
         self._l_sp_u_to_l_sp_d()
         self._r1_sp_to_r2_sp()
         self._r1_sp_to_r2_sp_b()
-        # should I four_mom is in the field?
+        # should I check if four_mom is in the field?
         try:
             self._r2_sp_b_to_four_momentum()
             self._four_mom_to_four_mom_d()
@@ -194,7 +198,7 @@ class Particle(object):
     def r2_sp(self, temp_r2_sp):
         self._r2_sp = temp_r2_sp
         self._r2_sp_to_r2_sp_b()
-        # should I four_mom is in the field?
+        # should I check if four_mom is in the field?
         try:
             self._r2_sp_to_four_momentum()
             self._four_mom_to_four_mom_d()
@@ -222,7 +226,7 @@ class Particle(object):
     def r2_sp_b(self, temp_r2_sp_b):
         self._r2_sp_b = temp_r2_sp_b
         self._r2_sp_b_to_r2_sp()
-        # should I four_mom is in the field?
+        # should I check if four_mom is in the field?
         try:
             self._r2_sp_b_to_four_momentum()
             self._four_mom_to_four_mom_d()
@@ -368,6 +372,8 @@ class Particle(object):
         self._r2_sp = (LeviCivita.dot(self.r2_sp_b.dot(LeviCivita.T))).T
 
     def _r2_sp_to_four_momentum(self):
+        if not hasattr(self, "_four_mom"):
+            self._four_mom = numpy.array([None, None, None, None])
         for i in range(4):
             self._four_mom[i] = numpy.trace(numpy.dot(Pauli_bar[i], self.r2_sp)) / 2
 
