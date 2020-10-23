@@ -75,7 +75,8 @@ class PAdic(object):
 
     @padicfy
     def __eq__(self, other):
-        return all([int(self) == int(other), self.p == other.p, self.k == other.k, self.n == other.n])
+        return (all([int(self) == int(other), self.p == other.p, self.k == other.k, self.n == other.n]) or
+                all([int(self) == int(other), int(self) == 0, self.p == other.p, self.k + self.n == other.k]))  # e.g. 0 * p + O(p^2) == 0 + O(p^2)
 
     @property
     def as_tuple(self):

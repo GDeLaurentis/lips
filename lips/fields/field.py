@@ -80,7 +80,7 @@ class Field(object):
     def singular_notation(self):
         if self.name == 'mpc':
             return '(complex,{},I)'.format(self.digits)
-        elif self.name == 'finite field':
+        elif self.name in ['finite field', 'padic']:
             return str(self.characteristic)
         else:
             return None
