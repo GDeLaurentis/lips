@@ -30,18 +30,24 @@ class ModP(int):
     # __slots__ = 'p'
 
     def __new__(cls, *args, **kwargs):
+        from .padic import PAdic
         if len(args) == 2 and isinstance(args[0], int) and isinstance(args[1], int):  # usually this should get called
             return int.__new__(cls, args[0] % args[1])
         elif len(args) == 1 and isinstance(args[0], int):  # this is needed for pickling
             return int.__new__(cls, args[0])
+        elif len(args) == 1 and isinstance(args[0], PAdic):
+            return int.__new__(cls, int(args[0]))
         elif len(args) == 1:
             return int.__new__(cls, cls.__rstr__(args[0])[0])
         else:
-            raise Exception('Bad finite field constructor.')
+            raise Exception('Bad finite field constructor. args:{}, kwargs:{}.'.format(args, kwargs))
 
     def __init__(self, *args, **kwargs):
+        from .padic import PAdic
         if len(args) == 2:
             self.p = args[1]
+        elif len(args) == 1 and isinstance(args[0], PAdic):
+            self.p = args[0].p ** args[0].k
         elif len(args) == 1:
             self.p = self.__rstr__(args[0])[1]
         else:

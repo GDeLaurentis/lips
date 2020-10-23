@@ -15,17 +15,15 @@ from __future__ import unicode_literals
 import numpy
 import mpmath
 import random
+import lips
 
-from .tools import MinkowskiMetric, LeviCivita, rand_frac, Pauli, Pauli_bar
-
+from .fields.field import Field
 from .fields.gaussian_rationals import GaussianRational, rand_rat_frac
 from .fields.finite_field import ModP
 from .fields.padic import PAdic
+from .tools import MinkowskiMetric, LeviCivita, rand_frac, Pauli, Pauli_bar
 
 mpmath.mp.dps = 300
-
-p = 2 ** 31 - 1  # 7919  # 10007  # 10009
-k = 4
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -34,15 +32,16 @@ k = 4
 class Particle(object):
     """Describes the kinematics of a single particle."""
 
-    def __init__(self, four_mom=None, r2_sp=None, real_momentum=False, dtype="mpc"):
+    def __init__(self, four_mom=None, r2_sp=None, real_momentum=False, field=Field('mpc', 0, 300)):
         """Initialisation. Calls randomise if None, else initialises the four momentum."""
-        if four_mom is None and r2_sp is None and dtype == "mpc":
+        self.field = field
+        if four_mom is None and r2_sp is None and field.name == "mpc":
             self.randomise(real_momentum=real_momentum)
-        elif four_mom is None and r2_sp is None and dtype == "gaussian rational":
+        elif four_mom is None and r2_sp is None and field.name == "gaussian rational":
             self.randomise_rational()
-        elif four_mom is None and r2_sp is None and dtype == "finite field":
+        elif four_mom is None and r2_sp is None and field.name == "finite field":
             self.randomise_finite_field()
-        elif four_mom is None and r2_sp is None and dtype == "padic":
+        elif four_mom is None and r2_sp is None and field.name == "padic":
             self.randomise_padic()
         elif four_mom is not None:
             self.four_mom = four_mom
@@ -314,18 +313,20 @@ class Particle(object):
         self.l_sp_d = numpy.array([GaussianRational(rand_rat_frac(), rand_rat_frac()), GaussianRational(rand_rat_frac(), rand_rat_frac())])
 
     def randomise_finite_field(self):
-        self._r_sp_d = numpy.array([ModP(random.randrange(0, p), p), ModP(random.randrange(0, p), p)], dtype=ModP)
+        p = self.field.characteristic
+        self._r_sp_d = numpy.array([ModP(random.randrange(0, p), p), ModP(random.randrange(0, p), p)], dtype=object)
         self._r_sp_d.shape = (2, 1)
         self._r_sp_d_to_r_sp_u()
         self._four_mom = numpy.array([None, None, None, None])
-        self.l_sp_d = numpy.array([ModP(random.randrange(0, p), p), ModP(random.randrange(0, p), p)], dtype=ModP)
+        self.l_sp_d = numpy.array([ModP(random.randrange(0, p), p), ModP(random.randrange(0, p), p)], dtype=object)
 
     def randomise_padic(self):
-        self._r_sp_d = numpy.array([PAdic(random.randrange(0, p ** k - 1), p, k), PAdic(random.randrange(0, p ** k - 1), p, k)], dtype=PAdic)
+        p, k = self.field.characteristic, self.field.digits
+        self._r_sp_d = numpy.array([PAdic(random.randrange(0, p ** k - 1), p, k), PAdic(random.randrange(0, p ** k - 1), p, k)], dtype=object)
         self._r_sp_d.shape = (2, 1)
         self._r_sp_d_to_r_sp_u()
         self._four_mom = numpy.array([None, None, None, None])
-        self.l_sp_d = numpy.array([PAdic(random.randrange(0, p ** k - 1), p, k), PAdic(random.randrange(0, p ** k - 1), p, k)], dtype=PAdic)
+        self.l_sp_d = numpy.array([PAdic(random.randrange(0, p ** k - 1), p, k), PAdic(random.randrange(0, p ** k - 1), p, k)], dtype=object)
 
     def angles_for_squares(self):
         """Flips left and right spinors."""
@@ -342,26 +343,34 @@ class Particle(object):
     # PRIVATE METHODS
 
     def _four_mom_to_r_sp_d(self):     # r_sp_d is \lambda_\alpha
-        lambda_one = mpmath.sqrt(self._four_mom[0] + self._four_mom[3])
-        if abs(lambda_one) == 0:
-            if self._four_mom[1] == 0 and self._four_mom[2] == 0:
-                lambda_two = lambda_one  # i.e. zero
+        if lips.spinor_convention == 'symmetric':
+            lambda_one = mpmath.sqrt(self._four_mom[0] + self._four_mom[3])
+            if abs(lambda_one) == 0:
+                if self._four_mom[1] == 0 and self._four_mom[2] == 0:
+                    lambda_two = lambda_one  # i.e. zero
+                else:
+                    raise ValueError("Encountered zero denominator in spinor.")
             else:
-                raise ValueError("Encountered zero denominator in spinor.")
-        else:
-            lambda_two = (self._four_mom[1] + self._four_mom[2] * 1j) / lambda_one
+                lambda_two = (self._four_mom[1] + self._four_mom[2] * 1j) / lambda_one
+        elif lips.spinor_convention == 'asymmetric':
+            lambda_one = self._four_mom[0] + self._four_mom[3]
+            lambda_two = (self._four_mom[1] + self._four_mom[2] * 1j)
         self._r_sp_d = numpy.array([lambda_one, lambda_two])
         self._r_sp_d.shape = (2, 1)    # column vector
 
     def _four_mom_to_l_sp_d(self):     # l_sp_d is \bar{\lambda}_{\dot\alpha}
-        lambdabar_one = mpmath.sqrt(self._four_mom[0] + self._four_mom[3])
-        if abs(lambdabar_one) == 0:
-            if self._four_mom[1] == 0 and self._four_mom[2] == 0:
-                lambdabar_two = lambdabar_one  # i.e. zero
+        if lips.spinor_convention == 'symmetric':
+            lambdabar_one = mpmath.sqrt(self._four_mom[0] + self._four_mom[3])
+            if abs(lambdabar_one) == 0:
+                if self._four_mom[1] == 0 and self._four_mom[2] == 0:
+                    lambdabar_two = lambdabar_one  # i.e. zero
+                else:
+                    raise ValueError("Encountered zero denominator in spinor.")
             else:
-                raise ValueError("Encountered zero denominator in spinor.")
-        else:
-            lambdabar_two = (self._four_mom[1] - self._four_mom[2] * 1j) / lambdabar_one
+                lambdabar_two = (self._four_mom[1] - self._four_mom[2] * 1j) / lambdabar_one
+        elif lips.spinor_convention == 'asymmetric':
+            lambdabar_one = 1
+            lambdabar_two = (self._four_mom[1] - self._four_mom[2] * 1j) / (self._four_mom[0] + self._four_mom[3])
         self._l_sp_d = numpy.array([lambdabar_one, lambdabar_two])
         self._l_sp_d.shape = (1, 2)    # row vector
 
@@ -372,12 +381,14 @@ class Particle(object):
         self._r2_sp = (LeviCivita.dot(self.r2_sp_b.dot(LeviCivita.T))).T
 
     def _r2_sp_to_four_momentum(self):
-        if not hasattr(self, "_four_mom"):
+        if not hasattr(self, "_four_mom") or self._four_mom is None:
             self._four_mom = numpy.array([None, None, None, None])
         for i in range(4):
             self._four_mom[i] = numpy.trace(numpy.dot(Pauli_bar[i], self.r2_sp)) / 2
 
     def _r2_sp_b_to_four_momentum(self):
+        if not hasattr(self, "_four_mom") or self._four_mom is None:
+            self._four_mom = numpy.array([None, None, None, None])
         for i in range(4):
             self._four_mom[i] = numpy.trace(numpy.dot(Pauli[i], self.r2_sp_b)) / 2
 
