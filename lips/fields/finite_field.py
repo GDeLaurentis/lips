@@ -124,6 +124,6 @@ class ModP(int):
             tcurr, tnext = tnext, tcurr - q * tnext
 
         if rcurr != 1:
-            raise ValueError("Inverse of {} mod {} does not exist. Are you sure {} is prime?".format(self, self.p, self.p))
+            raise ZeroDivisionError("Inverse of {} mod {} does not exist. Are you sure {} is prime?".format(self, self.p, self.p))
 
         return ModP(tcurr, self.p)
