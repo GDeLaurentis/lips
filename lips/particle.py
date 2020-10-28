@@ -206,9 +206,9 @@ class Particle(object):
             self._four_mom_d = None
         # should I check for masslessness?
         try:
-            self._four_mom_to_r_sp_d()
+            self._r2_sp_to_r_sp_d()
             self._r_sp_d_to_r_sp_u()
-            self._four_mom_to_l_sp_d()
+            self._r2_sp_to_l_sp_d()
             self._l_sp_d_to_l_sp_u()
         except TypeError:
             self._r_sp_u = None
@@ -234,9 +234,9 @@ class Particle(object):
             self._four_mom_d = None
         # should I check for masslessness?
         try:
-            self._four_mom_to_r_sp_d()
+            self._r2_sp_to_r_sp_d()
             self._r_sp_d_to_r_sp_u()
-            self._four_mom_to_l_sp_d()
+            self._r2_sp_to_l_sp_d()
             self._l_sp_d_to_l_sp_u()
         except TypeError:
             self._r_sp_u = None
@@ -342,37 +342,73 @@ class Particle(object):
 
     # PRIVATE METHODS
 
-    def _four_mom_to_r_sp_d(self):     # r_sp_d is \lambda_\alpha
-        if lips.spinor_convention == 'symmetric':
-            lambda_one = mpmath.sqrt(self._four_mom[0] + self._four_mom[3])
-            if abs(lambda_one) == 0:
-                if self._four_mom[1] == 0 and self._four_mom[2] == 0:
-                    lambda_two = lambda_one  # i.e. zero
-                else:
-                    raise ValueError("Encountered zero denominator in spinor.")
-            else:
-                lambda_two = (self._four_mom[1] + self._four_mom[2] * 1j) / lambda_one
+    # def _four_mom_to_r_sp_d(self):     # r_sp_d is \lambda_\alpha
+    #     if lips.spinor_convention == 'symmetric':
+    #         lambda_one = mpmath.sqrt(self._four_mom[0] + self._four_mom[3])
+    #         if abs(lambda_one) == 0:
+    #             if self._four_mom[1] == 0 and self._four_mom[2] == 0:
+    #                 lambda_two = lambda_one  # i.e. zero
+    #             else:
+    #                 raise ValueError("Encountered zero denominator in spinor.")
+    #         else:
+    #             lambda_two = (self._four_mom[1] + self._four_mom[2] * 1j) / lambda_one
+    #     elif lips.spinor_convention == 'asymmetric':
+    #         lambda_one = self._four_mom[0] + self._four_mom[3]
+    #         lambda_two = (self._four_mom[1] + self._four_mom[2] * 1j)
+    #     self._r_sp_d = numpy.array([lambda_one, lambda_two])
+    #     self._r_sp_d.shape = (2, 1)    # column vector
+
+    def _r2_sp_to_r_sp_d(self):
+        self._set_r_sp_d(self.r2_sp[1, 1], - self.r2_sp[1, 0])
+
+    def _four_mom_to_r_sp_d(self):
+        self._set_r_sp_d(self._four_mom[0] + self._four_mom[3], self._four_mom[1] + self._four_mom[2] * 1j)
+
+    def _set_r_sp_d(self, P0_plus_P3, P1_plus_iP2):  # r_sp_d is \lambda_\alpha
+        if lips.spinor_convention == 'symmetric' and P0_plus_P3 == 0:
+            raise ValueError("Encountered zero denominator in spinor.")
+        elif lips.spinor_convention == 'symmetric':
+            lambda_one = mpmath.sqrt(P0_plus_P3)
+            lambda_two = P1_plus_iP2 / lambda_one
         elif lips.spinor_convention == 'asymmetric':
-            lambda_one = self._four_mom[0] + self._four_mom[3]
-            lambda_two = (self._four_mom[1] + self._four_mom[2] * 1j)
-        self._r_sp_d = numpy.array([lambda_one, lambda_two])
+            lambda_one = P0_plus_P3
+            lambda_two = P1_plus_iP2
+        self._r_sp_d = numpy.array([lambda_one, lambda_two], dtype=object)
         self._r_sp_d.shape = (2, 1)    # column vector
 
-    def _four_mom_to_l_sp_d(self):     # l_sp_d is \bar{\lambda}_{\dot\alpha}
-        if lips.spinor_convention == 'symmetric':
-            lambdabar_one = mpmath.sqrt(self._four_mom[0] + self._four_mom[3])
-            if abs(lambdabar_one) == 0:
-                if self._four_mom[1] == 0 and self._four_mom[2] == 0:
-                    lambdabar_two = lambdabar_one  # i.e. zero
-                else:
-                    raise ValueError("Encountered zero denominator in spinor.")
-            else:
-                lambdabar_two = (self._four_mom[1] - self._four_mom[2] * 1j) / lambdabar_one
+    # def _four_mom_to_l_sp_d(self):     # l_sp_d is \bar{\lambda}_{\dot\alpha}
+    #     if lips.spinor_convention == 'symmetric':
+    #         lambdabar_one = mpmath.sqrt(self._four_mom[0] + self._four_mom[3])
+    #         if abs(lambdabar_one) == 0:
+    #             if self._four_mom[1] == 0 and self._four_mom[2] == 0:
+    #                 lambdabar_two = lambdabar_one  # i.e. zero
+    #             else:
+    #                 raise ValueError("Encountered zero denominator in spinor.")
+    #         else:
+    #             lambdabar_two = (self._four_mom[1] - self._four_mom[2] * 1j) / lambdabar_one
+    #     elif lips.spinor_convention == 'asymmetric':
+    #         lambdabar_one = 1
+    #         lambdabar_two = (self._four_mom[1] - self._four_mom[2] * 1j) / (self._four_mom[0] + self._four_mom[3])
+    #     self._l_sp_d = numpy.array([lambdabar_one, lambdabar_two])
+    #     self._l_sp_d.shape = (1, 2)    # row vector
+
+    def _r2_sp_to_l_sp_d(self):
+        self._set_l_sp_d(self.r2_sp[1, 1], - self.r2_sp[0, 1])
+
+    def _four_mom_to_l_sp_d(self):
+        self._set_l_sp_d(self._four_mom[0] + self._four_mom[3], self._four_mom[1] - self._four_mom[2] * 1j)
+
+    def _set_l_sp_d(self, P0_plus_P3, P1_minus_iP2):  # l_sp_d is \bar{\lambda}_{\dot\alpha}
+        if lips.spinor_convention == 'symmetric' and P0_plus_P3 == 0:
+            raise ValueError("Encountered zero denominator in spinor.")
+        elif lips.spinor_convention == 'symmetric':
+            lambda_one = mpmath.sqrt(P0_plus_P3)
+            lambda_two = P1_minus_iP2 / lambda_one
         elif lips.spinor_convention == 'asymmetric':
-            lambdabar_one = 1
-            lambdabar_two = (self._four_mom[1] - self._four_mom[2] * 1j) / (self._four_mom[0] + self._four_mom[3])
-        self._l_sp_d = numpy.array([lambdabar_one, lambdabar_two])
-        self._l_sp_d.shape = (1, 2)    # row vector
+            lambda_one = 1
+            lambda_two = P1_minus_iP2 / P0_plus_P3
+        self._l_sp_d = numpy.array([lambda_one, lambda_two], dtype=object)
+        self._l_sp_d.shape = (1, 2)    # column vector
 
     def _r2_sp_to_r2_sp_b(self):
         self._r2_sp_b = (LeviCivita.dot(self.r2_sp.dot(LeviCivita.T))).T
