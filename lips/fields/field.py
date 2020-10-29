@@ -9,6 +9,7 @@ from __future__ import unicode_literals
 
 import mpmath
 
+from lips.fields.padic import PAdic
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
@@ -75,6 +76,15 @@ class Field(object):
             mpmath.mp.dps = value
         else:
             self._digits = value
+
+    @property
+    def tollerance(self):
+        if self.name in ['gaussian rational', 'finite field']:
+            return 0
+        elif self.name == 'mpc':
+            return 10 ** - (min([0.95 * mpmath.mp.dps, mpmath.mp.dps - 4]))
+        elif self.name == 'padic':
+            return PAdic(0, self.characteristic, 0, self.digits)
 
     @property
     def singular_notation(self):

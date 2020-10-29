@@ -31,8 +31,8 @@ class Particles_Set:
             self.set_inner(temp_string, temp_value, fix_mom, mode)
             # check it worked
             abs_diff = abs(self.compute(temp_string) - temp_value)
-            error = abs(100) * abs(abs_diff / temp_value)
-            if error < prec:   # if error is less than 1 in 1000 or it is compatible with zero
+            # error = abs(100) * abs(abs_diff / temp_value)
+            if abs_diff < self.field.tollerance:    # error < prec:   # if error is less than 1 in 1000 or it is compatible with zero
                 if i == 0:
                     return True
                 else:
@@ -41,7 +41,7 @@ class Particles_Set:
             if "nan" in str(self.compute(temp_string)):
                 myException("NaN encountered in set!")
                 break
-        myException("Failed to set {} to {}. The target was {}, the actual value was {}, the error was {}.".format(temp_string, temp_value, temp_value, self.compute(temp_string), error))
+        myException("Failed to set {} to {}. The target was {}, the actual value was {}, the error was {}.".format(temp_string, temp_value, temp_value, self.compute(temp_string), abs_diff))
         return False
 
     def set_inner(self, temp_string, temp_value, fix_mom=True, mode=1):
