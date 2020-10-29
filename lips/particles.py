@@ -21,6 +21,7 @@ import itertools
 import mpmath
 
 from .fields.field import Field
+from .fields.padic import PAdic
 from .tools import MinkowskiMetric, flatten, pA2, pS2, pNB, myException
 from .particle import Particle
 from .particles_compute import Particles_Compute
@@ -68,7 +69,7 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
         elif number_of_particles_or_particles is not None:
             raise Exception("Invalid initialisation of Particles instance.")
         self.oRefVec = Particle(real_momentum=real_momenta, field=field)
-        if fix_mom_cons is True and max(map(abs, flatten(self.total_mom))) > 10 ** -(0.9 * 300):
+        if fix_mom_cons is True and max(map(abs, flatten(self.total_mom))) > field.tollerance:
             self.fix_mom_cons(real_momenta=real_momenta)
 
     def __eq__(self, other):
@@ -127,26 +128,20 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
 
     def momentum_conservation_check(self, silent=True):
         """Returns true if momentum is conserved."""
-        mom_violation = 0
-        for i in range(4):
-            if abs(flatten(self.total_mom)[i]) > mom_violation:
-                mom_violation = abs(flatten(self.total_mom)[i])
+        mom_violation = max(map(abs, flatten(self.total_mom)))
         if silent is False:
-            print("The largest momentum violation is {}".format(float(mom_violation)))
-        if mom_violation > 10 ** -(0.9 * 300):
+            print("The largest momentum violation is {}".format(float(mom_violation) if type(mom_violation) is mpmath.mpf else mom_violation))
+        if mom_violation > self.field.tollerance:
             myException("Momentum conservation violation.")
             return False
         return True
 
     def onshell_relation_check(self, silent=True):
         """Returns true if all on-shell relations are satisfied."""
-        onshell_violation = 0
-        for i in range(1, len(self) + 1):
-            if abs(self.ldot(i, i)) > onshell_violation:
-                onshell_violation = abs(self.ldot(i, i))
+        onshell_violation = max([abs(self.ldot(i, i)) for i in range(1, len(self) + 1)])
         if silent is False:
-            print("The largest on shell violation is {}".format(float(onshell_violation)))
-        if onshell_violation > 10 ** -(0.9 * 300):
+            print("The largest on shell violation is {}".format(float(onshell_violation) if type(onshell_violation) is mpmath.mpf else onshell_violation))
+        if onshell_violation > self.field.tollerance:
             myException("Onshell relation violation.")
             return False
         return True
@@ -162,10 +157,16 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
 
         if silent is False:
             print("Consistency check:")
-            # print("{} Consistency check {}".format(Hyphens, Hyphens))
 
         mom_cons = self.momentum_conservation_check(silent)         # momentum conservation violation
         on_shell = self.onshell_relation_check(silent)              # onshell violation
+
+        if self.field.name == 'padic':
+            threshold = PAdic(0, self.field.characteristic, 0, 1)
+        elif self.field.name == 'finite field':
+            threshold = 10 ** -300
+        else:
+            threshold = 10 ** -6
 
         values = []                                                 # smallest and biggest invariants
         for _invar in _invars:
@@ -189,17 +190,17 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
         small_outliers, small_outliers_values = [], []
         big_outliers, big_outliers_values = [], []
         for i in range(len(_invars)):
-            if values[i] < 0.00001:
+            if values[i] < threshold:
                 small_outliers += [_invars[i]]
                 small_outliers_values += [values[i]]
                 if silent is False:
                     print("{} = {}".format(_invars[i], float(values[i])))
-            if values[i] > 0.0001:
+            if values[i] > threshold:
                 break
         if silent is False:
             print("...")
         for i in range(len(_invars)):
-            if values[i] > 100000:
+            if values[i] > 1 / threshold:
                 myException("Outliers are big!")
                 big_outliers += [_invars[i]]
                 big_outliers_values += [values[i]]

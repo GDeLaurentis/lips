@@ -468,7 +468,7 @@ class Particle(object):
         self._l_sp_d = numpy.dot(numpy.transpose(LeviCivita), self.l_sp_u)
         self._l_sp_d.shape = (1, 2)    # row vector
 
-    # EXPERIMENTAL METHODS
+    # TWISTOR METHODS
 
     def randomise_twist(self):
         self._twist_z = numpy.array([rand_frac(), rand_frac(), rand_frac(), rand_frac()])
