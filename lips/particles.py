@@ -166,7 +166,7 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
         elif self.field.name == 'finite field':
             threshold = 10 ** -300
         else:
-            threshold = 10 ** -6
+            threshold = 10 ** -8
 
         values = []                                                 # smallest and biggest invariants
         for _invar in _invars:
@@ -190,25 +190,22 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
         small_outliers, small_outliers_values = [], []
         big_outliers, big_outliers_values = [], []
         for i in range(len(_invars)):
-            if values[i] < threshold:
+            if values[i] <= threshold:
                 small_outliers += [_invars[i]]
                 small_outliers_values += [values[i]]
                 if silent is False:
-                    print("{} = {}".format(_invars[i], float(values[i])))
+                    print("{} = {}".format(_invars[i], float(values[i]) if type(values[i]) is mpmath.mpf else values[i]))
             if values[i] > threshold:
                 break
         if silent is False:
             print("...")
         for i in range(len(_invars)):
-            if values[i] > 1 / threshold:
+            if values[i] >= 1 / threshold:
                 myException("Outliers are big!")
                 big_outliers += [_invars[i]]
                 big_outliers_values += [values[i]]
                 if silent is False:
-                    print("{} = {}".format(_invars[i], float(values[i])))
-        if silent is False:
-            pass
-            # print("{}-------------------{}".format(Hyphens, Hyphens))
+                    print("{} = {}".format(_invars[i], float(values[i]) if type(values[i]) is mpmath.mpf else values[i]))
         return mom_cons, on_shell, big_outliers, small_outliers
 
     # BASE ONE LIST

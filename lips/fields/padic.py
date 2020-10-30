@@ -7,10 +7,11 @@ from __future__ import unicode_literals
 
 import functools
 import numpy
+import random
 
 from .finite_field import ModP
 
-recover_precision_from_exact_powers_of_p = False
+fixed_relative_precision = False
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
@@ -64,8 +65,8 @@ class PAdic(object):
             num = int(num // p ** factors_of_p) % (p ** self.k)
             self.n = factors_of_p + n
             self.num = num
-            if recover_precision_from_exact_powers_of_p is True and num == 1 and factors_of_p > 0:
-                print("!Warning! recovering a digit.")
+            if fixed_relative_precision is True and factors_of_p > 0:
+                # print("Warning: possible loss of a significant digit!")
                 self.k = self.k + factors_of_p
         else:
             raise Exception("Invalid p-adic initialisation")
