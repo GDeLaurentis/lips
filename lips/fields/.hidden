@@ -1,4 +1,6 @@
 finite_field.pyc
 gassian_rationals.pyc
-__init__.pyc
 padic.pyc
+gaussian_rationals.pyc
+__init__.pyc
+__pycache__
