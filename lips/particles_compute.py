@@ -86,7 +86,7 @@ class Particles_Compute:
             Pi = (self.compute("s_" + "".join(map(unicode, nol[2] + [nol[0][0]]))) - self.compute("s_" + "".join(map(unicode, nol[2] + [nol[0][1]]))))
             return Pi
 
-        if pDijk.findall(temp_string) != []:                        # Δ_ijk or Δ_ij_kl_lm
+        if pDijk.findall(temp_string) != []:                        # Δ_ijk or Δ_ij|kl|lm
             match_list = pDijk.findall(temp_string)[0]
             if match_list[0] == '':
                 NonOverlappingLists = [list(map(int, corner)) for corner in match_list[1:]]
