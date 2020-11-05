@@ -30,6 +30,8 @@ pS2bis = re.compile(r'(?:\[)(\d)(\d)(?:\])')
 pSijk = re.compile(r'(?:s_|S_)(\d+)')
 pOijk = re.compile(r'(?:Ω_)(\d+)')
 pPijk = re.compile(r'(?:Π_)(\d+)')
+pDijk_adjacent = re.compile(r'(?:Δ_(\d+)(?![\d\|]))')
+pDijk_non_adjacent = re.compile(r'(?:Δ_(\d+)\|(\d+)\|(\d+))')
 p3B = re.compile(r'(?:\u27e8|\[)(\d+)(?:\|\({0,1})([\d+[\+|-]*]*)(?:\){0,1}\|)(\d+)(?:\u27e9|\])')
 
 
@@ -45,6 +47,8 @@ class Particles_Eval:
         string = pSijk.sub(r"self.compute('s_\1')", string)
         string = pOijk.sub(r"self.compute('Ω_\1')", string)
         string = pPijk.sub(r"self.compute('Π_\1')", string)
+        string = pDijk_adjacent.sub(r"self.compute('Δ_\1')", string)
+        string = pDijk_non_adjacent.sub(r"self.compute('Δ_\1|\2|\3')", string)
         string = p3B.sub(r"self.compute('⟨\1|(\2)|\3]')", string)
         string = re.sub(r'(\d)s', r'\1*s', string)
         string = string.replace(')s', ')*s')
