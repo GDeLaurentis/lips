@@ -19,81 +19,65 @@ import mpmath
 from .tools import flatten, pSijk, pDijk, pA2, pS2, p3B, pNB, myException
 
 local_directory = os.path.dirname(__file__)
-mpmath.mp.dps = 300
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 
 class Particles_SetPair:
 
-    def set_pair(self, t_s1, t_v1, t_s2, t_v2, itr=2, prec=0.1):
-        """Constructs a double collinear limit phase space."""
-        for i in range(itr):
-            new_invs = self.set_pair_inner(t_s1, t_v1, t_s2, t_v2)     # set it --- note: if a list is returned then switch invariants to those
-            if type(new_invs) is list:                                 # used for example for s_123&⟨1|(2+3)|1] ---> s_123&⟨2|3⟩
-                t_s1, t_s2 = new_invs[0], new_invs[1]
-            elif type(new_invs) is str:
-                if new_invs == "Not implemented.":
-                    break
-            actual1, target1 = abs(self.compute(t_s1)), abs(t_v1)
-            error1 = abs(100) * abs((actual1 - target1) / target1)
-            compatible_with_zero1 = abs(target1 - actual1) < 10 ** -(0.9 * 300)
-            if compatible_with_zero1 is False:
-                compatible_with_zero1 = str(0) == str(target1)
-            actual2, target2 = abs(self.compute(t_s2)), abs(t_v2)
-            error2 = abs(100) * abs((actual2 - target2) / target2)
-            compatible_with_zero2 = abs(target2 - actual2) < 10 ** -(0.9 * 300)
-            if compatible_with_zero2 is False:
-                compatible_with_zero2 = str(0) == str(target2)
-            mom_cons, on_shell, big_outliers, small_outliers = self.phasespace_consistency_check()
-            if ((error1 < abs(prec) or compatible_with_zero1 is True) and (error2 < abs(prec) or compatible_with_zero2 is True) and
-               mom_cons is not False and on_shell is not False):       # if error is less than 1 in 1000 or it is compatible with zero
-                if i == 0 and big_outliers == []:
-                    return True
-                elif big_outliers == []:
-                    # print("Succeded to set {} to {} and {} to {} but in {} tries.".format(t_s1, t_v1, t_s2, t_v2, i + 1))
-                    return True
-                else:
-                    self.randomise_all()                               # try to iterate and obtain a phase space without big outliers
-            if ("nan" in str(actual1) or "nan" in str(actual2)):
-                raise myException("NaN encountered in set pair!")
-                self.randomise_all()                                   # try to iterate and obtain a phase space without nan's
-        else:
-            raise myException("Failed to set {} to {} and {} to {}. Target1 was {}, target2 was {}. Actual1 was {}, actual2 was {}. Error1 was {}, error2 was {}.".format(
-                t_s1, t_v1, t_s2, t_v2, target1, target2, actual1, actual2, error1, error2))
-            return False
-        raise myException("Failed to set {} to {} and {} to {}. Pair not implemented.".format(t_s1, t_v1, t_s2, t_v2))
-        return False
+    # PUBLIC METHODS
 
-    def set_pair_inner(self, t_s1, t_v1, t_s2, t_v2):                  # Try to take care of all possible combinations
+    def set_pair(self, t_s1, t_v1, t_s2, t_v2):
+        """Constructs a doubly singular phase space point."""
+        new_invs = self._set_pair_inner(t_s1, t_v1, t_s2, t_v2)     # set it --- note: if a list is returned then switch invariants to those
+        if type(new_invs) is list:                                  # used for example for s_123&⟨1|(2+3)|1] ---> s_123&⟨2|3⟩
+            t_s1, t_s2 = new_invs[0], new_invs[1]
+        elif type(new_invs) is str and new_invs == "Not implemented.":
+            raise myException("Failed to set {} to {} and {} to {}. Pair not implemented.".format(t_s1, t_v1, t_s2, t_v2))
+        abs_diff1 = min(abs(self.compute(t_s1) - t_v1), abs(self.compute(t_s1) + t_v1))
+        abs_diff2 = min(abs(self.compute(t_s2) - t_v2), abs(self.compute(t_s2) + t_v2))
+        mom_cons, on_shell = self.momentum_conservation_check(), self.onshell_relation_check()
+        # mom_cons, on_shell, big_outliers, small_outliers = self.phasespace_consistency_check()  # this would be more thorough.. is it needed tho?
+        if mom_cons is False:
+            raise myException("Momentum conservation is not satisfied: ", max(map(abs, flatten(self.total_mom))))
+        elif on_shell is False:
+            raise myException("On shellness is not satisfied: ", max(map(abs, flatten(self.masses))))
+        elif not all([abs_diff1 <= self.field.tollerance, abs_diff2 <= self.field.tollerance]):
+            raise myException("Failed to set {} to {} and {} to {}. Instead got {} and {}. Absoute differences: {} and {}.".format(
+                t_s1, abs(t_v1), t_s2, abs(t_v2), abs(self.compute(t_s1)), abs(self.compute(t_s2)), abs_diff1, abs_diff2))
+
+    # PRIVATE METHODS
+
+    def _set_pair_inner(self, t_s1, t_v1, t_s2, t_v2):                  # Try to take care of all possible combinations
 
         if pA2.findall(t_s1) != [] or pS2.findall(t_s1) != []:         # First is: ⟨A|B⟩ or [A|B]
 
             if pA2.findall(t_s2) != [] or pS2.findall(t_s2) != []:               # Second is: ⟨C|D⟩ or [C|D]
 
-                return self.set_pair_A2_or_S2_and_A2_or_S2(t_s1, t_v1, t_s2, t_v2)
+                return self._set_pair_A2_or_S2_and_A2_or_S2(t_s1, t_v1, t_s2, t_v2)
 
             elif pNB.findall(t_s2) != []:                                        # Second is: ⟨i|(j+k)|...|l⟩
 
-                return self.set_pair_A2_or_S2_and_NB(t_s1, t_v1, t_s2, t_v2)
+                return self._set_pair_A2_or_S2_and_NB(t_s1, t_v1, t_s2, t_v2)
 
             elif pSijk.findall(t_s2) != []:                                      # Second is: S_ijk...
 
-                return self.set_pair_A2_or_S2_and_Sijk(t_s1, t_v1, t_s2, t_v2)
+                return self._set_pair_A2_or_S2_and_Sijk(t_s1, t_v1, t_s2, t_v2)
 
             elif pDijk.findall(t_s2) != []:                                      # Second is: Δ_ijk
 
-                return self.set_pair_A2_or_S2_and_Dijk(t_s1, t_v1, t_s2, t_v2)
+                return self._set_pair_A2_or_S2_and_Dijk(t_s1, t_v1, t_s2, t_v2)
 
         elif p3B.findall(t_s1) != []:                                  # First: ⟨i|(j+k)|l]
 
             if pA2.findall(t_s2) != [] or pS2.findall(t_s2) != []:               # Second: ⟨A|B⟩ or [A|B]
 
-                return self.set_pair_inner(t_s2, t_v2, t_s1, t_v1)
+                return self._set_pair_inner(t_s2, t_v2, t_s1, t_v1)
 
             elif p3B.findall(t_s2) != []:                                        # Second is: ⟨i|(j+k)|l]
 
-                return self.set_pair_3B_and_3B(t_s1, t_v1, t_s2, t_v2)
+                return self._set_pair_3B_and_3B(t_s1, t_v1, t_s2, t_v2)
 
             elif pNB.findall(t_s2) != []:                                        # Second is: ⟨i|(j+k)|...|l⟩
 
@@ -101,17 +85,17 @@ class Particles_SetPair:
 
             elif pSijk.findall(t_s2) != []:                                      # Second: S_ijk...
 
-                return self.set_pair_3B_and_Sijk(t_s1, t_v1, t_s2, t_v2)
+                return self._set_pair_3B_and_Sijk(t_s1, t_v1, t_s2, t_v2)
 
             elif pDijk.findall(t_s2) != []:                                      # Second is: Δ_ijk
 
-                return self.set_pair_3B_and_Dijk(t_s1, t_v1, t_s2, t_v2)
+                return self._set_pair_3B_and_Dijk(t_s1, t_v1, t_s2, t_v2)
 
         elif pNB.findall(t_s1) != []:                                  # First: ⟨i|(j+k)|...|l⟩
 
             if pA2.findall(t_s2) != [] or pS2.findall(t_s2) != []:               # Second: ⟨A|B⟩ or [A|B]
 
-                return self.set_pair_inner(t_s2, t_v2, t_s1, t_v1)
+                return self._set_pair_inner(t_s2, t_v2, t_s1, t_v1)
 
             elif p3B.findall(t_s2) != []:                                        # Second is: ⟨i|(j+k)|l]
 
@@ -127,17 +111,17 @@ class Particles_SetPair:
 
             elif pDijk.findall(t_s2) != []:                                      # Second is: Δ_ijk
 
-                return self.set_pair_NB_and_Dijk(t_s1, t_v1, t_s2, t_v2)
+                return self._set_pair_NB_and_Dijk(t_s1, t_v1, t_s2, t_v2)
 
         elif pSijk.findall(t_s1) != []:                                # First is: S_ijk...
 
             if pA2.findall(t_s2) != [] or pS2.findall(t_s2) != []:               # Second is: ⟨A|B⟩ or [A|B]
 
-                return self.set_pair_inner(t_s2, t_v2, t_s1, t_v1)
+                return self._set_pair_inner(t_s2, t_v2, t_s1, t_v1)
 
             elif p3B.findall(t_s2) != []:                                        # Second is: ⟨i|(j+k)|l]
 
-                return self.set_pair_inner(t_s2, t_v2, t_s1, t_v1)
+                return self._set_pair_inner(t_s2, t_v2, t_s1, t_v1)
 
             elif pNB.findall(t_s2) != []:                                        # Second is: ⟨i|(j+k)|...|l⟩
 
@@ -145,29 +129,29 @@ class Particles_SetPair:
 
             elif pSijk.findall(t_s2) != []:                                      # Second is: S_ijk...
 
-                return self.set_pair_Sijk_and_Sijk(t_s1, t_v1, t_s2, t_v2)
+                return self._set_pair_Sijk_and_Sijk(t_s1, t_v1, t_s2, t_v2)
 
             elif pDijk.findall(t_s2) != []:                                      # Second is: Δ_ijk
 
-                return self.set_pair_Sijk_and_Dijk(t_s1, t_v1, t_s2, t_v2)
+                return self._set_pair_Sijk_and_Dijk(t_s1, t_v1, t_s2, t_v2)
 
         elif pDijk.findall(t_s1) != []:                                # First: Δ_ijk
 
             if pA2.findall(t_s2) != [] or pS2.findall(t_s2) != []:               # Second: ⟨A|B⟩ or [A|B]
 
-                return self.set_pair_inner(t_s2, t_v2, t_s1, t_v1)
+                return self._set_pair_inner(t_s2, t_v2, t_s1, t_v1)
 
             elif p3B.findall(t_s2) != []:                                        # Second: ⟨a|(b+c)|d]
 
-                return self.set_pair_inner(t_s2, t_v2, t_s1, t_v1)
+                return self._set_pair_inner(t_s2, t_v2, t_s1, t_v1)
 
             elif pNB.findall(t_s2) != []:                                        # Second is: ⟨i|(j+k)|...|l⟩
 
-                return self.set_pair_NB_and_Dijk(t_s2, t_v2, t_s1, t_v1)
+                return self._set_pair_NB_and_Dijk(t_s2, t_v2, t_s1, t_v1)
 
             elif pSijk.findall(t_s2) != []:                                      # Second: S_ijk...
 
-                return self.set_pair_inner(t_s2, t_v2, t_s1, t_v1)
+                return self._set_pair_inner(t_s2, t_v2, t_s1, t_v1)
 
             elif pDijk.findall(t_s2) != []:                                      # Second: Δ_ijk
 
@@ -175,7 +159,7 @@ class Particles_SetPair:
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
-    def set_pair_A2_or_S2_and_A2_or_S2(self, t_s1, t_v1, t_s2, t_v2):     # Current failed: 0/870 @ 6pt
+    def _set_pair_A2_or_S2_and_A2_or_S2(self, t_s1, t_v1, t_s2, t_v2):     # Current failed: 0/870 @ 6pt
 
         if pA2.findall(t_s1) != []:
             ab = list(map(int, list(pA2.findall(t_s1)[0])))
@@ -197,16 +181,21 @@ class Particles_SetPair:
                 pass
             else:
                 cd_only = cd[i]
-        if ((t_s1[0] == "⟨" and t_s2[0] == "⟨") or             # if both ⟨⟩ or [] and overlap is not empty rearrange overlap in front
-           (t_s1[0] == "[" and t_s2[0] == "[")) and overlap != []:
+        # if both are ⟨⟩ or [] and overlap is not empty rearrange overlap in front
+        if ((t_s1[0] == "⟨" and t_s2[0] == "⟨") or (t_s1[0] == "[" and t_s2[0] == "[")) and overlap != []:
             if t_s1[0] == "⟨":
                 t_s1 = "⟨{}|{}⟩".format(overlap[0], ab_only)
                 t_s2 = "⟨{}|{}⟩".format(overlap[0], cd_only)
             else:
                 t_s1 = "[{}|{}]".format(overlap[0], ab_only)
                 t_s2 = "[{}|{}]".format(overlap[0], cd_only)
-        self.set(t_s1, t_v1, fix_mom=False)                    # set it
-        self.set(t_s2, t_v2, fix_mom=False)
+            # get the sign right too
+            flipped1 = False if overlap[0] == ab[0] else True
+            flipped2 = False if overlap[0] == cd[0] else True
+        else:
+            flipped1 = flipped2 = False
+        self.set(t_s1, t_v1 if flipped1 is False else -t_v1, fix_mom=False)
+        self.set(t_s2, t_v2 if flipped2 is False else -t_v2, fix_mom=False)
         plist = list(map(int, self._complementary(list(set([str(ab[0]), str(ab[1]), str(cd[0]), str(cd[1])])))))
         if len(plist) >= 2:
             self.fix_mom_cons(plist[0], plist[1])
@@ -223,7 +212,7 @@ class Particles_SetPair:
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
-    def set_pair_A2_or_S2_and_NB(self, t_s1, t_v1, t_s2, t_v2):    # Current failed: 48/4680 @ 6pt
+    def _set_pair_A2_or_S2_and_NB(self, t_s1, t_v1, t_s2, t_v2):    # Current failed: 48/4680 @ 6pt
 
         if pA2.findall(t_s1) != []:
             ab = list(map(int, list(pA2.findall(t_s1)[0])))
@@ -288,11 +277,10 @@ class Particles_SetPair:
         self.set(t_s2, t_v2, fix_mom=False, mode=use_mode)
         if _tuple is not False:
             self.fix_mom_cons(_tuple[0], _tuple[1], real_momenta=False, axis=use_axis)
-        return
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
-    def set_pair_A2_or_S2_and_Sijk(self, t_s1, t_v1, t_s2, t_v2):   # Current failed: 0/300 @ 6pt
+    def _set_pair_A2_or_S2_and_Sijk(self, t_s1, t_v1, t_s2, t_v2):   # Current failed: 0/300 @ 6pt
 
         if pA2.findall(t_s1) != []:
             ab = list(map(int, list(pA2.findall(t_s1)[0])))
@@ -316,7 +304,7 @@ class Particles_SetPair:
             if len(self) == 6 and len(ijk) == 3:                # six particles -> disjoint = overlapping
                 compl = self._complementary(list(map(str, ijk)))
                 t_s2 = 's_{}{}{}'.format(compl[0], compl[1], compl[2])
-                self.set_pair_inner(t_s1, t_v1, t_s2, t_v2)
+                self._set_pair_inner(t_s1, t_v1, t_s2, t_v2)
                 return
             elif len(self) > 6:                                 # more than six particles -> enough momenta for it not to be a problem
                 pass
@@ -340,11 +328,10 @@ class Particles_SetPair:
             self.fix_mom_cons(ab[0], ab[1])
             if not self.momentum_conservation_check():
                 raise myException("Not enough particles to fix mom cons!")
-        return
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
-    def set_pair_A2_or_S2_and_Dijk(self, t_s1, t_v1, t_s2, t_v2):   # Current failed: 0/60 @ 6pt
+    def _set_pair_A2_or_S2_and_Dijk(self, t_s1, t_v1, t_s2, t_v2):   # Current failed: 0/60 @ 6pt
 
         if pA2.findall(t_s1) != []:
             ab = list(map(int, list(pA2.findall(t_s1)[0])))
@@ -384,11 +371,10 @@ class Particles_SetPair:
             self.set(t_s2, t_v2, fix_mom=True, mode=2)
         else:
             self.set(t_s2, t_v2, fix_mom=True, mode=1)
-        return
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
-    def set_pair_3B_and_3B(self, t_s1, t_v1, t_s2, t_v2):     # Current failed: 180/6972 @ 6pt
+    def _set_pair_3B_and_3B(self, t_s1, t_v1, t_s2, t_v2):     # Current failed: 180/6972 @ 6pt
 
         def unpack(t_s):
             l3B = list(p3B.findall(t_s)[0])
@@ -576,8 +562,7 @@ class Particles_SetPair:
                     use_mode = 2
                     break
         elif l3Bm_0_only_list != [] and (l3Bm_0_only_list != [l3Bs_1] or l3Bm_0_only_list != [l3Be_1]):
-            self.set_pair_inner(t_s2, t_v2, t_s1, t_v1)  # flip them to trigger the above condition
-            return
+            return self._set_pair_inner(t_s2, t_v2, t_s1, t_v1)  # flip them to trigger the above condition
         else:                                            # if the overlap is 100% in the center must use the start and end entries
             if a_or_s_0 != a_or_s_1:                     # make sure they are both flipped the same way
                 t_s1 = reverse_order(t_s1)
@@ -588,6 +573,10 @@ class Particles_SetPair:
                 t_s1 = reverse_order(t_s1)
                 t_s2 = reverse_order(t_s2)
 
+        if len(t_s1) > len(t_s2):
+            t_s1, t_s2 = t_s2, t_s1
+            t_v1, t_v2 = t_v2, t_v1
+
         self.set(t_s1, t_v1, fix_mom=False)
         self.set(t_s2, t_v2, fix_mom=False, mode=use_mode)
 
@@ -595,11 +584,10 @@ class Particles_SetPair:
             self.fix_mom_cons(*how_to_fix_mom_cons(t_s1, t_s2))
         else:
             raise myException("Not enough particles to fix mom cons!")
-        return
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
-    def set_pair_3B_and_Sijk(self, t_s1, t_v1, t_s2, t_v2):   # Current failed: 0/840 @ 6pt
+    def _set_pair_3B_and_Sijk(self, t_s1, t_v1, t_s2, t_v2):   # Current failed: 0/840 @ 6pt
 
         ijk = list(map(int, list(pSijk.findall(t_s2)[0])))
         l3B = list(p3B.findall(t_s1)[0])
@@ -646,11 +634,11 @@ class Particles_SetPair:
             else:                                         # ijk contained in l3B and viceversa
                 t_s1 = t_s2                               # this is the s_ijk, s_ij+s_ik, hence s_jk case basically
                 t_s2 = '⟨{}|{}⟩'.format(l3Bm[0], l3Bm[1])
-                self.set_pair_inner(t_s2, t_v2, t_s1, t_v1)
+                self._set_pair_inner(t_s2, t_v2, t_s1, t_v1)
                 return [t_s2, t_s1]                       # cheeky fix
         elif len(free_first_flipped) >= 2:                # flip it and try again
             t_s2 = 's_{}'.format(''.join(self._complementary(list(map(str, ijk)))))
-            return self.set_pair_inner(t_s2, t_v2, t_s1, t_v1)
+            return self._set_pair_inner(t_s2, t_v2, t_s1, t_v1)
         elif len(free_second_flipped) >= 2:               # flip it and try again
             comp = list(map(int, self._complementary(list(map(str, list(set(l3B)))))))
             l3Bc = ""
@@ -661,7 +649,7 @@ class Particles_SetPair:
                 t_s1 = "⟨{}|({})|{}]".format(l3Bs, l3Bc, l3Be)
             else:
                 t_s1 = "[{}|({})|{}⟩".format(l3Bs, l3Bc, l3Be)
-            return self.set_pair_inner(t_s2, t_v2, t_s1, t_v1)
+            return self._set_pair_inner(t_s2, t_v2, t_s1, t_v1)
         l3B = list(p3B.findall(t_s1)[0])                  # recompute this stuff since it changes sometimes
         l3B[1] = l3B[1].split("+")
         l3Bs, l3Bm, l3Be = int(l3B[0]), list(map(int, l3B[1])), int(l3B[2])
@@ -684,11 +672,10 @@ class Particles_SetPair:
             self.fix_mom_cons(ijk[0], ijk[1])
             if not self.momentum_conservation_check():
                 raise myException("Not enough particles to fix mom cons!")
-        return
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
-    def set_pair_3B_and_Dijk(self, t_s1, t_v1, t_s2, t_v2):   # Current failed: 38/168 @ 6pt
+    def _set_pair_3B_and_Dijk(self, t_s1, t_v1, t_s2, t_v2):   # Current failed: 38/168 @ 6pt
 
         def unpack(t_s):
             l3B = list(p3B.findall(t_s)[0])
@@ -799,11 +786,10 @@ class Particles_SetPair:
         else:
             self.set(t_s2, t_v2, fix_mom=False, mode=1)
             self.fix_mom_cons(NonOverlappingLists[2][0], NonOverlappingLists[2][1], real_momenta=False, axis=2)
-        return
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
-    def set_pair_Sijk_and_Sijk(self, t_s1, t_v1, t_s2, t_v2):   # Current failed: 0/90 @ 6pt
+    def _set_pair_Sijk_and_Sijk(self, t_s1, t_v1, t_s2, t_v2):   # Current failed: 0/90 @ 6pt
 
         ijk = list(map(int, list(pSijk.findall(t_s1)[0])))
         lmn = list(map(int, list(pSijk.findall(t_s2)[0])))
@@ -837,8 +823,7 @@ class Particles_SetPair:
             t_s2 = 's_'
             for i in range(len(lmn)):
                 t_s2 += '{}'.format(lmn[i])
-            self.set_pair_inner(t_s1, t_v1, t_s2, t_v2)
-            return
+            return self._set_pair_inner(t_s1, t_v1, t_s2, t_v2)
         self.set(t_s1, t_v1, fix_mom=False, mode=1)       # set it
         self.set(t_s2, t_v2, fix_mom=False, mode=2)
         if len(plist) >= 2:
@@ -847,16 +832,13 @@ class Particles_SetPair:
             self.fix_mom_cons(ijk[0], ijk[1])
             if not self.momentum_conservation_check():
                 raise myException("Not enough particles to fix mom cons!")
-        return
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
-    def set_pair_Sijk_and_Dijk(self, t_s1, t_v1, t_s2, t_v2):  # Current failed: 8/20 @ 6pt
+    def _set_pair_Sijk_and_Dijk(self, t_s1, t_v1, t_s2, t_v2):  # Current failed: 8/20 @ 6pt
 
-        with open(os.path.join(local_directory, "DoubleCollinearLimit_D&S_a"), "r") as oFile:
-            expression_for_a = oFile.read()
-        with open(os.path.join(local_directory, "DoubleCollinearLimit_D&S_e"), "r") as oFile:
-            expression_for_e = oFile.read()
+        from .DoubleCollinearLimit_D_and_S_a import expression_for_a
+        from .DoubleCollinearLimit_D_and_S_e import expression_for_e
 
         Sijk = list(map(int, pSijk.findall(t_s1)[0]))
         match_list = pDijk.findall(t_s2)[0]
@@ -896,7 +878,7 @@ class Particles_SetPair:
                         break
 
         if FirstNonOverlappingList == -1 or SecondNonOverlappingList == -1:
-            return                                         # Not implemented
+            return "Not implemented."
 
         A, B, = NonOverlappingLists[FirstNonOverlappingList][0], NonOverlappingLists[FirstNonOverlappingList][1]
         C, D = NonOverlappingLists[SecondNonOverlappingList][0], NonOverlappingLists[SecondNonOverlappingList][1]
@@ -916,16 +898,18 @@ class Particles_SetPair:
         k, l = self[C].l_sp_d[0, 0], self[C].l_sp_d[0, 1]  # noqa --- used in eval
         m, n = self[D].r_sp_d[0, 0], self[D].r_sp_d[1, 0]  # noqa --- used in eval
         o, p = self[D].l_sp_d[0, 0], self[D].l_sp_d[0, 1]  # noqa --- used in eval
-        Y, X = t_v1, t_v2                                  # noqa --- used in eval
-        a, e = eval(expression_for_a.replace("sqrt", "mpmath.sqrt")), eval(expression_for_e.replace("sqrt", "mpmath.sqrt"))
+        if type(t_v1) == type(t_v2) == float:
+            Y, X = mpmath.mpf(t_v1), mpmath.mpf(t_v2)      # noqa --- used in eval
+        else:
+            Y, X = t_v1, t_v2
+        a, e = expression_for_a(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, Y, X), expression_for_e(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, Y, X)
         self[A].r_sp_d = numpy.array([a, b])
         self[B].r_sp_d = numpy.array([e, f])
         self.fix_mom_cons(E, F)
-        return
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
-    def set_pair_NB_and_Dijk(self, t_s1, t_v1, t_s2, t_v2):  # Current failed: 8/20 @ 6pt
+    def _set_pair_NB_and_Dijk(self, t_s1, t_v1, t_s2, t_v2):  # Current failed: 8/20 @ 6pt
 
         if t_s1 == "⟨2|(1+7)|(3+4)|2⟩" and t_s2 == "Δ_735":
             self.set("⟨2|(1+7)|(3+4)|2⟩", t_v1, fix_mom=False)
@@ -933,3 +917,81 @@ class Particles_SetPair:
             self.fix_mom_cons(5, 6)
         else:
             return "Not implemented."
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+    def _can_fix_mom_cons(self, t_s1, t_s2):
+        """Checks if momentum conservation can be restored, without spoiling the collinear limit."""
+        # If possible returns how to fix mom cons (tuple & axis), otherwise returns false.
+        if ((pA2.findall(t_s1) != [] or pS2.findall(t_s1) != []) and pNB.findall(t_s2) != []):
+            if pA2.findall(t_s1) != []:
+                ab = list(map(int, list(pA2.findall(t_s1)[0])))
+            elif pS2.findall(t_s1) != []:
+                ab = list(map(int, list(pS2.findall(t_s1)[0])))
+            lNB, lNBs, lNBms, lNBe = self._get_lNB(t_s2)
+            plist = self._complementary(ab + lNB)
+            if len(plist) >= 2:                                     # easy momentum fix: two free particles
+                return (plist[0], plist[1]), 1
+            elif len(plist) == 1:                                   # complicated momentum fix: one free particle
+                if ab[0] not in lNB:
+                    if t_s1[0] == "⟨":
+                        return (plist[0], ab[0]), 2                 # plist[0] and ab[0]
+                    else:
+                        return (plist[0], ab[0]), 1
+                elif ab[1] not in lNB:
+                    if t_s1[-1] == "⟩":
+                        return (plist[0], ab[1]), 2                 # plist[0] and ab[1]
+                    else:
+                        return (plist[0], ab[1]), 1
+                elif (lNBs not in ab or t_s1[0] == t_s2[0]) and (lNBs != lNBe or len(lNBms) % 2 == 0) and all(lNBs not in lNBm for lNBm in lNBms):
+                    if t_s2[0] == "⟨":
+                        return (plist[0], lNBs), 2                  # plist[0] and lNBs
+                    else:
+                        return (plist[0], lNBs), 1
+                elif (lNBe not in ab or t_s1[-1] == t_s2[-1]) and (lNBs != lNBe or len(lNBms) % 2 == 0) and all(lNBe not in lNBm for lNBm in lNBms):
+                    if t_s2[-1] == "⟩":
+                        return (plist[0], lNBe), 2                  # plist[0] and lNBe
+                    else:
+                        return (plist[0], lNBe), 1
+                else:
+                    myException("Not enough particles to fix mom cons! (One free particle)")
+                    return False, 0
+            else:                                                   # almost impossible momentum fix: no free particles
+                if ab[0] not in lNB and ab[1] not in lNB:
+                    if t_s1[0] == "⟨":
+                        return False, 0                             # ab[0] and ab[1] would result in big outliers
+                    else:
+                        return False, 0
+                elif (ab[0] not in lNB and lNBs not in ab and t_s1[0] == t_s2[0] and
+                      (lNBs != lNBe or len(lNBms) % 2 == 0) and all(lNBs not in lNBm for lNBm in lNBms)):
+                    if t_s1[0] == "⟨":
+                        return (ab[0], lNBs), 2                     # ab[0] and lNBs
+                    else:
+                        return (ab[0], lNBs), 1
+                elif (ab[1] not in lNB and lNBs not in ab and t_s1[0] == t_s2[0] and
+                      (lNBs != lNBe or len(lNBms) % 2 == 0) and all(lNBs not in lNBm for lNBm in lNBms)):
+                    if t_s1[0] == "⟨":
+                        return (ab[1], lNBs), 2                     # ab[1] and lNBs
+                    else:
+                        return (ab[1], lNBs), 1
+                elif (ab[0] not in lNB and lNBe not in ab and t_s1[-1] == t_s2[-1] and
+                      (lNBe != lNBs or len(lNBms) % 2 == 0) and all(lNBe not in lNBm for lNBm in lNBms)):
+                    if t_s1[-1] == "⟩":
+                        return (ab[0], lNBe), 2                     # ab[0] and lNBe
+                    else:
+                        return (ab[0], lNBe), 1
+                elif (ab[1] not in lNB and lNBe not in ab and t_s1[-1] == t_s2[-1] and
+                      (lNBe != lNBs or len(lNBms) % 2 == 0) and all(lNBe not in lNBm for lNBm in lNBms)):
+                    if t_s1[-1] == "⟩":
+                        return (ab[1], lNBe), 2                     # ab[1] and lNBe
+                    else:
+                        return (ab[1], lNBe), 1
+                elif (((lNBs not in ab or t_s1[0] == t_s2[0]) and all(lNBs not in lNBm for lNBm in lNBms)) and (lNBs != lNBe) and
+                      ((lNBe not in ab or t_s1[-1] == t_s2[-1]) and all(lNBe not in lNBm for lNBm in lNBms)) and len(lNBms) % 2 == 0):
+                    if t_s2[0] == "⟨":
+                        return (lNBs, lNBe), 2
+                    else:
+                        return (lNBs, lNBe), 1
+                else:
+                    myException("Not enough particles to fix mom cons! (Zero free particles)")
+                    return False, 0

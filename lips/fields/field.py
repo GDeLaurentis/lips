@@ -11,6 +11,9 @@ import mpmath
 
 from lips.fields.padic import PAdic
 
+mpmath.mp.dps = 300
+
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 
@@ -82,7 +85,7 @@ class Field(object):
         if self.name in ['gaussian rational', 'finite field']:
             return 0
         elif self.name == 'mpc':
-            return 10 ** - (min([0.95 * mpmath.mp.dps, mpmath.mp.dps - 4]))
+            return mpmath.mpf('10e-{}'.format(int(min([0.95 * mpmath.mp.dps, mpmath.mp.dps - 4]))))
         elif self.name == 'padic':
             return PAdic(0, self.characteristic, 0, self.digits)
 

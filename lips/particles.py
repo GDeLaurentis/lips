@@ -19,10 +19,11 @@ import os
 import copy
 import itertools
 import mpmath
+import sympy
 
 from .fields.field import Field
 from .fields.padic import PAdic
-from .tools import MinkowskiMetric, flatten, pA2, pS2, pNB, myException
+from .tools import MinkowskiMetric, flatten, pNB, myException, indexing_decorator
 from .particle import Particle
 from .particles_compute import Particles_Compute
 from .particles_eval import Particles_Eval
@@ -33,27 +34,10 @@ from .particles_set_pair import Particles_SetPair
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 
-def indexing_decorator(func):
-    """Rebases a list to start from index 1."""
-
-    def decorated(self, index, *args):
-        if index < 1:
-            raise IndexError('Indices start from 1')
-        elif index > 0 and index < len(self) + 1:
-            index -= 1
-        elif index > len(self):
-            raise IndexError('Indices can\'t exceed {}'.format(len(self)))
-
-        return func(self, index, *args)
-
-    return decorated
-
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
-
-
 class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetPair, list):
     """Describes the kinematics of n particles. Base one list of Particle objects."""
+
+    # MAGIC METHODS
 
     def __init__(self, number_of_particles_or_particles=None, seed=None, real_momenta=False, field=Field('mpc', 0, 300), fix_mom_cons=True):
         """Initialisation. Requires either multiplicity of phace space or list of Particle objects."""
@@ -83,6 +67,18 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
         """Hash function: hash string of concatenated momenta."""
         return hash("".join(flatten([map(str, oParticle.four_mom) for oParticle in self])))
 
+    # PUBLIC METHODS
+
+    @property
+    def total_mom(self):
+        """Total momentum of the given phase space as a rank two spinor."""
+        return sum([oParticle.r2_sp for oParticle in self])
+
+    @property
+    def masses(self):
+        """Masses of all particles in phase space."""
+        return [self.ldot(i, i) for i in range(1, len(self) + 1)]
+
     def randomise_all(self, real_momenta=False):
         """Randomises all particles. Breaks momentum conservation."""
         for oParticle in self:
@@ -105,6 +101,37 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
     def image(self, permutation):
         """Returns the image of self under a given permutation. Remember, this is a passive transformation."""
         return copy.deepcopy(Particles(sorted(self, key=lambda x: permutation[self.index(x)])))
+
+    def cluster(self, llIntegers):
+        """Returns clustered particle objects according to lists of lists of integers (e.g. corners of one loop diagram)."""
+        oKs = Particles(len(llIntegers), fix_mom_cons=False)
+        r2_spinors = [sum([self[i].r2_sp for i in corner_as_integers]) for corner_as_integers in llIntegers]
+        for i, iK in enumerate(oKs):
+            iK.r2_sp = r2_spinors[i]
+        return oKs
+
+    def make_analytical_d(self, indepVars=None):
+        """ """
+        if indepVars is None:
+            indepVars = tuple(numpy.zeros(4 * len(self), dtype=int))
+        la = sympy.symbols('a1:{}'.format(len(self) + 1))
+        lb = sympy.symbols('b1:{}'.format(len(self) + 1))
+        lc = sympy.symbols('c1:{}'.format(len(self) + 1))
+        ld = sympy.symbols('d1:{}'.format(len(self) + 1))
+        for i, oParticle in enumerate(self):
+            if indepVars[i * 4 + 0] == 0:
+                oParticle._r_sp_d[0, 0] = la[i]
+            if indepVars[i * 4 + 1] == 0:
+                oParticle._r_sp_d[1, 0] = lb[i]
+            if indepVars[i * 4 + 2] == 0:
+                oParticle._l_sp_d[0, 0] = lc[i]
+            if indepVars[i * 4 + 3] == 0:
+                oParticle._l_sp_d[0, 1] = ld[i]
+            oParticle._r_sp_d_to_r_sp_u()
+            oParticle._l_sp_d_to_l_sp_u()
+            oParticle._r1_sp_to_r2_sp()
+            oParticle._r1_sp_to_r2_sp_b()
+            oParticle._r2_sp_b_to_four_momentum()
 
     def fix_mom_cons(self, A=0, B=0, real_momenta=False, axis=1):   # using real momenta changes both |⟩ and |] of A & B
         """Fixes momentum conservation using particles A and B."""
@@ -138,7 +165,7 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
 
     def onshell_relation_check(self, silent=True):
         """Returns true if all on-shell relations are satisfied."""
-        onshell_violation = max([abs(self.ldot(i, i)) for i in range(1, len(self) + 1)])
+        onshell_violation = max(map(abs, flatten(self.masses)))
         if silent is False:
             print("The largest on shell violation is {}".format(float(onshell_violation) if type(onshell_violation) is mpmath.mpf else onshell_violation))
         if onshell_violation > self.field.tollerance:
@@ -208,7 +235,7 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
                     print("{} = {}".format(_invars[i], float(values[i]) if type(values[i]) is mpmath.mpf else values[i]))
         return mom_cons, on_shell, big_outliers, small_outliers
 
-    # BASE ONE LIST
+    # BASE ONE LIST METHODS
 
     @indexing_decorator
     def __getitem__(self, index):
@@ -226,83 +253,7 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
     def insert(self, index, value):
         list.insert(self, index, value)
 
-    # MISCELLANEOUS
-
-    def _can_fix_mom_cons(self, t_s1, t_s2):
-        """Checks if momentum conservation can be restored, without spoiling the collinear limit."""
-        # If possible returns how to fix mom cons (tuple & axis), otherwise returns false.
-        if ((pA2.findall(t_s1) != [] or pS2.findall(t_s1) != []) and pNB.findall(t_s2) != []):
-            if pA2.findall(t_s1) != []:
-                ab = list(map(int, list(pA2.findall(t_s1)[0])))
-            elif pS2.findall(t_s1) != []:
-                ab = list(map(int, list(pS2.findall(t_s1)[0])))
-            lNB, lNBs, lNBms, lNBe = self._get_lNB(t_s2)
-            plist = self._complementary(ab + lNB)
-            if len(plist) >= 2:                                     # easy momentum fix: two free particles
-                return (plist[0], plist[1]), 1
-            elif len(plist) == 1:                                   # complicated momentum fix: one free particle
-                if ab[0] not in lNB:
-                    if t_s1[0] == "⟨":
-                        return (plist[0], ab[0]), 2                 # plist[0] and ab[0]
-                    else:
-                        return (plist[0], ab[0]), 1
-                elif ab[1] not in lNB:
-                    if t_s1[-1] == "⟩":
-                        return (plist[0], ab[1]), 2                 # plist[0] and ab[1]
-                    else:
-                        return (plist[0], ab[1]), 1
-                elif (lNBs not in ab or t_s1[0] == t_s2[0]) and (lNBs != lNBe or len(lNBms) % 2 == 0) and all(lNBs not in lNBm for lNBm in lNBms):
-                    if t_s2[0] == "⟨":
-                        return (plist[0], lNBs), 2                  # plist[0] and lNBs
-                    else:
-                        return (plist[0], lNBs), 1
-                elif (lNBe not in ab or t_s1[-1] == t_s2[-1]) and (lNBs != lNBe or len(lNBms) % 2 == 0) and all(lNBe not in lNBm for lNBm in lNBms):
-                    if t_s2[-1] == "⟩":
-                        return (plist[0], lNBe), 2                  # plist[0] and lNBe
-                    else:
-                        return (plist[0], lNBe), 1
-                else:
-                    myException("Not enough particles to fix mom cons! (One free particle)")
-                    return False, 0
-            else:                                                   # almost impossible momentum fix: no free particles
-                if ab[0] not in lNB and ab[1] not in lNB:
-                    if t_s1[0] == "⟨":
-                        return False, 0                             # ab[0] and ab[1] would result in big outliers
-                    else:
-                        return False, 0
-                elif (ab[0] not in lNB and lNBs not in ab and t_s1[0] == t_s2[0] and
-                      (lNBs != lNBe or len(lNBms) % 2 == 0) and all(lNBs not in lNBm for lNBm in lNBms)):
-                    if t_s1[0] == "⟨":
-                        return (ab[0], lNBs), 2                     # ab[0] and lNBs
-                    else:
-                        return (ab[0], lNBs), 1
-                elif (ab[1] not in lNB and lNBs not in ab and t_s1[0] == t_s2[0] and
-                      (lNBs != lNBe or len(lNBms) % 2 == 0) and all(lNBs not in lNBm for lNBm in lNBms)):
-                    if t_s1[0] == "⟨":
-                        return (ab[1], lNBs), 2                     # ab[1] and lNBs
-                    else:
-                        return (ab[1], lNBs), 1
-                elif (ab[0] not in lNB and lNBe not in ab and t_s1[-1] == t_s2[-1] and
-                      (lNBe != lNBs or len(lNBms) % 2 == 0) and all(lNBe not in lNBm for lNBm in lNBms)):
-                    if t_s1[-1] == "⟩":
-                        return (ab[0], lNBe), 2                     # ab[0] and lNBe
-                    else:
-                        return (ab[0], lNBe), 1
-                elif (ab[1] not in lNB and lNBe not in ab and t_s1[-1] == t_s2[-1] and
-                      (lNBe != lNBs or len(lNBms) % 2 == 0) and all(lNBe not in lNBm for lNBm in lNBms)):
-                    if t_s1[-1] == "⟩":
-                        return (ab[1], lNBe), 2                     # ab[1] and lNBe
-                    else:
-                        return (ab[1], lNBe), 1
-                elif (((lNBs not in ab or t_s1[0] == t_s2[0]) and all(lNBs not in lNBm for lNBm in lNBms)) and (lNBs != lNBe) and
-                      ((lNBe not in ab or t_s1[-1] == t_s2[-1]) and all(lNBe not in lNBm for lNBm in lNBms)) and len(lNBms) % 2 == 0):
-                    if t_s2[0] == "⟨":
-                        return (lNBs, lNBe), 2
-                    else:
-                        return (lNBs, lNBe), 1
-                else:
-                    myException("Not enough particles to fix mom cons! (Zero free particles)")
-                    return False, 0
+    # PRIVATE METHODS
 
     @staticmethod
     def _lNB_to_string(start, lNBs, lNBms, lNBe, end):
@@ -395,11 +346,6 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
         elif alte == -1 and init == "[" and clos != "⟩":
             myException("Expected closing \']\'. Found \'{}\'".format(clos))
 
-    @property
-    def total_mom(self):
-        """Total momentum of the given phase space as a rank two spinor."""
-        return sum([oParticle.r2_sp for oParticle in self])
-
     def _r_sp_d_for_mathematica(self):
         msg = ""
         i = 1
@@ -474,11 +420,3 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
         with open(path, "w") as oFile:
             oFile.write(self._r_sp_d_for_mathematica())
             oFile.write(self._l_sp_d_for_mathematica())
-
-    def cluster(self, llIntegers):
-        """Returns clustered particle objects according to lists of lists of integers (e.g. corners of one loop diagram)."""
-        oKs = Particles(len(llIntegers), fix_mom_cons=False)
-        r2_spinors = [sum([self[i].r2_sp for i in corner_as_integers]) for corner_as_integers in llIntegers]
-        for i, iK in enumerate(oKs):
-            iK.r2_sp = r2_spinors[i]
-        return oKs

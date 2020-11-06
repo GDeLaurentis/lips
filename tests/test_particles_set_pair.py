@@ -53,6 +53,9 @@ def test_particles_set(multiplicity, type1, type2, expected_failures, expected_l
 @retry((myException,), max_tries=2, silent=True)
 def DoubleScalingsTestingInner(n, invariants, _tuple):
     oParticles = Particles(n)
-    return oParticles.set_pair(_tuple[0], 10 ** -28, _tuple[1], 10 ** -28)
-    # if invariants is not None:
-    #     _, _, _, small_invs = oParticles.phasespace_consistency_check(invariants)
+    try:
+        oParticles.set_pair(_tuple[0], 10 ** -28, _tuple[1], 10 ** -28)
+        return True
+    except Exception as e:
+        print(e)
+        return False

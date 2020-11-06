@@ -23,14 +23,14 @@ from .fields.finite_field import ModP
 from .fields.padic import PAdic
 from .tools import MinkowskiMetric, LeviCivita, rand_frac, Pauli, Pauli_bar
 
-mpmath.mp.dps = 300
-
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 
 class Particle(object):
     """Describes the kinematics of a single particle."""
+
+    # MAGIC METHODS
 
     def __init__(self, four_mom=None, r2_sp=None, real_momentum=False, field=Field('mpc', 0, 300)):
         """Initialisation. Calls randomise if None, else initialises the four momentum."""
@@ -49,8 +49,6 @@ class Particle(object):
             self.r2_sp = r2_sp
         else:
             raise Exception('Bad Particle Constructor')
-
-    # ALGEBRA
 
     def __eq__(self, other):
         """Equality: checks equality of four momenta."""
@@ -100,8 +98,6 @@ class Particle(object):
     def __truediv__(self, other):
         """Div: divide momentum by number."""
         return Particle(r2_sp=self.r2_sp / other)
-
-    # IDEXING
 
     def __getitem__(self, key):
         return self.four_mom[key]
@@ -342,22 +338,6 @@ class Particle(object):
 
     # PRIVATE METHODS
 
-    # def _four_mom_to_r_sp_d(self):     # r_sp_d is \lambda_\alpha
-    #     if lips.spinor_convention == 'symmetric':
-    #         lambda_one = mpmath.sqrt(self._four_mom[0] + self._four_mom[3])
-    #         if abs(lambda_one) == 0:
-    #             if self._four_mom[1] == 0 and self._four_mom[2] == 0:
-    #                 lambda_two = lambda_one  # i.e. zero
-    #             else:
-    #                 raise ValueError("Encountered zero denominator in spinor.")
-    #         else:
-    #             lambda_two = (self._four_mom[1] + self._four_mom[2] * 1j) / lambda_one
-    #     elif lips.spinor_convention == 'asymmetric':
-    #         lambda_one = self._four_mom[0] + self._four_mom[3]
-    #         lambda_two = (self._four_mom[1] + self._four_mom[2] * 1j)
-    #     self._r_sp_d = numpy.array([lambda_one, lambda_two])
-    #     self._r_sp_d.shape = (2, 1)    # column vector
-
     def _r2_sp_to_r_sp_d(self):
         self._set_r_sp_d(self.r2_sp[1, 1], - self.r2_sp[1, 0])
 
@@ -375,22 +355,6 @@ class Particle(object):
             lambda_two = P1_plus_iP2
         self._r_sp_d = numpy.array([lambda_one, lambda_two], dtype=object)
         self._r_sp_d.shape = (2, 1)    # column vector
-
-    # def _four_mom_to_l_sp_d(self):     # l_sp_d is \bar{\lambda}_{\dot\alpha}
-    #     if lips.spinor_convention == 'symmetric':
-    #         lambdabar_one = mpmath.sqrt(self._four_mom[0] + self._four_mom[3])
-    #         if abs(lambdabar_one) == 0:
-    #             if self._four_mom[1] == 0 and self._four_mom[2] == 0:
-    #                 lambdabar_two = lambdabar_one  # i.e. zero
-    #             else:
-    #                 raise ValueError("Encountered zero denominator in spinor.")
-    #         else:
-    #             lambdabar_two = (self._four_mom[1] - self._four_mom[2] * 1j) / lambdabar_one
-    #     elif lips.spinor_convention == 'asymmetric':
-    #         lambdabar_one = 1
-    #         lambdabar_two = (self._four_mom[1] - self._four_mom[2] * 1j) / (self._four_mom[0] + self._four_mom[3])
-    #     self._l_sp_d = numpy.array([lambdabar_one, lambdabar_two])
-    #     self._l_sp_d.shape = (1, 2)    # row vector
 
     def _r2_sp_to_l_sp_d(self):
         self._set_l_sp_d(self.r2_sp[1, 1], - self.r2_sp[0, 1])

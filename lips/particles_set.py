@@ -18,70 +18,68 @@ import mpmath
 
 from .tools import flatten, pSijk, pDijk, pOijk, pPijk, pA2, pS2, pNB, ptr5, myException
 
-mpmath.mp.dps = 300
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 
 class Particles_Set:
 
-    def set(self, temp_string, temp_value, fix_mom=True, mode=1, itr=2, prec=0.1):
-        """Constructs a given collinear limit phase space."""
-        for i in range(itr):
-            self.set_inner(temp_string, temp_value, fix_mom, mode)
-            # check it worked
-            abs_diff = abs(self.compute(temp_string) - temp_value)
-            # error = abs(100) * abs(abs_diff / temp_value)
-            if abs_diff < self.field.tollerance:    # error < prec:   # if error is less than 1 in 1000 or it is compatible with zero
-                if i == 0:
-                    return True
-                else:
-                    print("Succeded to set {} to {} but in {} tries.".format(temp_string, temp_value, i + 1))
-                    return True
-            if "nan" in str(self.compute(temp_string)):
-                myException("NaN encountered in set!")
-                break
-        myException("Failed to set {} to {}. The target was {}, the actual value was {}, the error was {}.".format(temp_string, temp_value, temp_value, self.compute(temp_string), abs_diff))
-        return False
+    # PUBLIC METHODS
 
-    def set_inner(self, temp_string, temp_value, fix_mom=True, mode=1):
+    def set(self, temp_string, temp_value, fix_mom=True, mode=1):
+        """Constructs a singular phase space point."""
+        self._set_inner(temp_string, temp_value, fix_mom, mode)
+        abs_diff = abs(self.compute(temp_string) - temp_value)
+        if fix_mom is True:
+            mom_cons, on_shell = self.momentum_conservation_check(), self.onshell_relation_check()
+            if mom_cons is False:
+                raise myException("Momentum conservation is not satisfied: ", max(map(abs, flatten(self.total_mom))))
+            elif on_shell is False:
+                raise myException("On shellness is not satisfied: ", max(map(abs, flatten(self.masses))))
+        if not abs_diff <= self.field.tollerance:
+            raise myException("Failed to set {} to {}. Instead got {}. Absolute difference {}.".format(
+                temp_string, temp_value, self.compute(temp_string), abs_diff))
+
+    # PRIVATE METHODS
+
+    def _set_inner(self, temp_string, temp_value, fix_mom=True, mode=1):
         self.check_consistency(temp_string)                          # Check consistency of string
 
         if pA2.findall(temp_string) != []:                           # Sets ⟨A|B⟩  --- Changes: |B⟩, Don't touch: ⟨A|
 
-            self.set_A2(temp_string, temp_value, fix_mom)
+            self._set_A2(temp_string, temp_value, fix_mom)
 
         elif pS2.findall(temp_string) != []:                         # Sets [A|B]  --- Changes: |B], Don't touch: [A|
 
-            self.set_S2(temp_string, temp_value, fix_mom)
+            self._set_S2(temp_string, temp_value, fix_mom)
 
         elif pNB.findall(temp_string) != []:                         # Sets ⟨a|(b+c)|...|d]  --- Changes: ⟨a| (mode=1), |b⟩ (mode=2)
 
-            self.set_NB(temp_string, temp_value, fix_mom, mode)
+            self._set_NB(temp_string, temp_value, fix_mom, mode)
 
         elif pSijk.findall(temp_string) != []:                       # Sets S_ijk  --- Changes: ⟨i| (mode=1) or |i] (mode=2), Don't touch ijk...
 
-            self.set_Sijk(temp_string, temp_value, fix_mom, mode)
+            self._set_Sijk(temp_string, temp_value, fix_mom, mode)
 
         elif pDijk.findall(temp_string) != []:                       # Sets Δ_ijk  --- Changes: last two [j] moment, Don't touch [j]'s or [i]'s
 
-            self.set_Dijk(temp_string, temp_value, fix_mom, mode)
+            self._set_Dijk(temp_string, temp_value, fix_mom, mode)
 
         elif pOijk.findall(temp_string) != []:
 
-            self.set_Oijk(temp_string, temp_value, fix_mom)
+            self._set_Oijk(temp_string, temp_value, fix_mom)
 
         elif pPijk.findall(temp_string) != []:
 
-            self.set_Pijk(temp_string, temp_value, fix_mom)
+            self._set_Pijk(temp_string, temp_value, fix_mom)
 
         elif ptr5.findall(temp_string) != []:
 
-            self.set_tr5(temp_string, temp_value, fix_mom)
+            self._set_tr5(temp_string, temp_value, fix_mom)
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
-    def set_A2(self, temp_string, temp_value, fix_mom=True):       # ⟨A|B⟩ = (a, b).(c, d) = ac+bd = X ----> c = (X - bd)/a
+    def _set_A2(self, temp_string, temp_value, fix_mom=True):        # ⟨A|B⟩ = (a, b).(c, d) = ac+bd = X ----> c = (X - bd)/a
 
         A, B = map(int, pA2.findall(temp_string)[0])
         X = temp_value
@@ -97,7 +95,7 @@ class Particles_Set:
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
-    def set_S2(self, temp_string, temp_value, fix_mom=True):       # [A|B] = (a, b).(c, d) = ac+bd = X ----> c = (X - bd)/a
+    def _set_S2(self, temp_string, temp_value, fix_mom=True):       # [A|B] = (a, b).(c, d) = ac+bd = X ----> c = (X - bd)/a
 
         A, B = map(int, pS2.findall(temp_string)[0])
         X = temp_value
@@ -113,7 +111,7 @@ class Particles_Set:
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
-    def set_NB(self, temp_string, temp_value, fix_mom=True, mode=1):
+    def _set_NB(self, temp_string, temp_value, fix_mom=True, mode=1):
         if "-" in temp_string:                                  # a minus sign would mess up inversion
             myException("Detected minus in string. Not implemented.")
 
@@ -125,7 +123,7 @@ class Particles_Set:
                 _lNBms = [entry for entry in lNBms]
                 if i == 0:                                      # this is close to the head, what I call extremum of middle
                     alt = self._complementary(iNBm + [lNBs])
-                elif i == len(lNBms) - 1:                         # this is close to the tail, what I call extremum of middle
+                elif i == len(lNBms) - 1:                       # this is close to the tail, what I call extremum of middle
                     alt = self._complementary(iNBm + [lNBe])
                 else:                                           # this is not close to either head or tail
                     alt = self._complementary(iNBm)
@@ -158,7 +156,7 @@ class Particles_Set:
                 break
 
         for i, ientry in enumerate(temp_list):                  # identify a unique entry in extrema of middle
-            if i != 1 and i != len(temp_list) - 2:                # if it is head, tail or middle of middle skip it
+            if i != 1 and i != len(temp_list) - 2:              # if it is head, tail or middle of middle skip it
                 continue
             for j, jtem in enumerate(ientry):
                 for k, kentry in enumerate(temp_list):
@@ -187,7 +185,7 @@ class Particles_Set:
                 temp_string = temp_string.replace("(", "X").replace(")", "(").replace("X", ")")
                 temp_string = temp_string.replace("⟨", "X").replace("⟩", "⟨").replace("X", "⟩")
                 temp_string = temp_string.replace("[", "X").replace("]", "[").replace("X", "]")
-                self.set_inner(temp_string, temp_value, fix_mom, mode)
+                self._set_inner(temp_string, temp_value, fix_mom, mode)
                 return
             rest = numpy.array([[1, 0], [0, 1]])
             if temp_string[0] == "⟨":
@@ -217,13 +215,13 @@ class Particles_Set:
                 if temp_string[0] == "⟨":
                     _a, _b = self[a].r_sp_u[0, 0], self[a].r_sp_u[0, 1]  # ⟨A| = (a, b)
                     _c, _d = rest[0, 0], rest[1, 0]             # |rest⟩ = (c, d)
-                    _a = (temp_value - _b * _d) / _c                     # a = (X - b*d)/c
-                    self[a].r_sp_u = numpy.array([_a, _b])         # set ⟨A|
+                    _a = (temp_value - _b * _d) / _c            # a = (X - b*d)/c
+                    self[a].r_sp_u = numpy.array([_a, _b])      # set ⟨A|
                 else:
                     _a, _b = self[a].l_sp_d[0, 0], self[a].l_sp_d[0, 1]  # [A| = (a, b)
                     _c, _d = rest[0, 0], rest[1, 0]             # |rest⟩ = (c, d)
-                    _a = (temp_value - _b * _d) / _c                     # a = (X - b*d)/c
-                    self[a].l_sp_d = numpy.array([_a, _b])         # set [A|
+                    _a = (temp_value - _b * _d) / _c            # a = (X - b*d)/c
+                    self[a].l_sp_d = numpy.array([_a, _b])      # set [A|
 
         elif (unique_extrema_of_middle != []):                  # this sets the unique element in the middle
             _bc = bc[unique_extrema_of_middle[2]]               # start by rearranging the list so that the unique item is at the beginnig
@@ -264,9 +262,9 @@ class Particles_Set:
                 end_of_part = self.compute("⟨" + temp_string[4] + temp_string[temp_string.find("|"):])
             target = (temp_value - (total - part)) / end_of_part
             if a_or_s == '⟨':
-                self.set_A2("⟨{}|{}⟩".format(a, b), target, False)
+                self._set_A2("⟨{}|{}⟩".format(a, b), target, False)
             elif a_or_s == '[':
-                self.set_S2("[{}|{}]".format(a, b), target, False)
+                self._set_S2("[{}|{}]".format(a, b), target, False)
 
         if fix_mom is True:                                     # indentify which momenta to use to fix mom conservation.
             plist = self._complementary([lNBs] + lNBms + [lNBe])
@@ -292,7 +290,7 @@ class Particles_Set:
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
-    def set_Sijk(self, temp_string, temp_value, fix_mom=True, mode=1):
+    def _set_Sijk(self, temp_string, temp_value, fix_mom=True, mode=1):
 
         ijk = list(map(int, pSijk.findall(temp_string)[0]))
         if len(ijk) == 2:
@@ -312,11 +310,11 @@ class Particles_Set:
         elif mode == 2:
             str1 += ")|{}⟩".format(ijk[0])
         rest = rest - self.compute(str1)                        # str1 = ⟨i|j+k|i], hence rest -> ⟨j|k|j]     (Note: this example is for
-        self.set_inner(str1, temp_value - rest, fix_mom)        # set ⟨i|j+k|i] to (X - ⟨j|k|j])               len(ijk)==3, but it works for any ijk)
+        self._set_inner(str1, temp_value - rest, fix_mom)       # set ⟨i|j+k|i] to (X - ⟨j|k|j])               len(ijk)==3, but it works for any ijk)
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
-    def set_Dijk(self, temp_string, temp_value, fix_mom=True, mode=1):  # Set Dijk, change angle bracket (odd mode) or square bracket (even mode)
+    def _set_Dijk(self, temp_string, temp_value, fix_mom=True, mode=1):  # Set Dijk, change angle bracket (odd mode) or square bracket (even mode)
 
         match_list = pDijk.findall(temp_string)[0]
         if match_list[0] == '':
@@ -356,7 +354,7 @@ class Particles_Set:
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
-    def set_Oijk(self, temp_string, temp_value, fix_mom=True):
+    def _set_Oijk(self, temp_string, temp_value, fix_mom=True):
 
         ijk = list(map(int, pOijk.findall(temp_string)[0]))
         nol = self.ijk_to_3NonOverlappingLists(ijk)
@@ -435,7 +433,7 @@ class Particles_Set:
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
-    def set_Pijk(self, temp_string, temp_value, fix_mom=True):
+    def _set_Pijk(self, temp_string, temp_value, fix_mom=True):
 
         ijk = list(map(int, pPijk.findall(temp_string)[0]))
         nol = self.ijk_to_3NonOverlappingLists(ijk)
@@ -463,7 +461,7 @@ class Particles_Set:
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
-    def set_tr5(self, temp_string, temp_value, fix_mom=True):       # ⟨A|B⟩ = (a, b).(c, d) = ac+bd = X ----> c = (X - bd)/a
+    def _set_tr5(self, temp_string, temp_value, fix_mom=True):       # ⟨A|B⟩ = (a, b).(c, d) = ac+bd = X ----> c = (X - bd)/a
 
         a, b, c, d = [int(entry) for entry in ptr5.findall(temp_string)[0]]
         plist = list(map(int, self._complementary(map(str, [a, b, c, d]))))  # free momenta
