@@ -81,5 +81,24 @@ def ldot(oP1, oP2):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 
+def indexing_decorator(func):
+    """Rebases a list to start from index 1."""
+
+    def decorated(self, index, *args):
+        if index < 1:
+            raise IndexError('Indices start from 1')
+        elif index > 0 and index < len(self) + 1:
+            index -= 1
+        elif index > len(self):
+            raise IndexError('Indices can\'t exceed {}'.format(len(self)))
+
+        return func(self, index, *args)
+
+    return decorated
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+
 class myException(Exception):
     pass
