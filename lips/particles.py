@@ -29,12 +29,13 @@ from .particles_compute import Particles_Compute
 from .particles_eval import Particles_Eval
 from .particles_set import Particles_Set
 from .particles_set_pair import Particles_SetPair
+from .algebraic_geometry.variety import Particles_Variety
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 
-class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetPair, list):
+class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetPair, Particles_Variety, list):
     """Describes the kinematics of n particles. Base one list of Particle objects."""
 
     # MAGIC METHODS
@@ -132,6 +133,18 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
             oParticle._r1_sp_to_r2_sp()
             oParticle._r1_sp_to_r2_sp_b()
             oParticle._r2_sp_b_to_four_momentum()
+
+    def analytical_subs_d(self):
+        multiplicity = len(self)
+        la = sympy.symbols('a1:{}'.format(multiplicity + 1))
+        lb = sympy.symbols('b1:{}'.format(multiplicity + 1))
+        lc = sympy.symbols('c1:{}'.format(multiplicity + 1))
+        ld = sympy.symbols('d1:{}'.format(multiplicity + 1))
+        subs_dict = {}
+        for i, iParticle in enumerate(self):
+            subs_dict.update({la[i]: iParticle.r_sp_d[0, 0], lb[i]: iParticle.r_sp_d[1, 0]})
+            subs_dict.update({lc[i]: iParticle.l_sp_d[0, 0], ld[i]: iParticle.l_sp_d[0, 1]})
+        return subs_dict
 
     def fix_mom_cons(self, A=0, B=0, real_momenta=False, axis=1):   # using real momenta changes both |⟩ and |] of A & B
         """Fixes momentum conservation using particles A and B."""
@@ -317,7 +330,7 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
         init = temp_string[0]
         clos = temp_string[len(temp_string) - 1]
 
-        relist = re.split('[\(\)⟨⟩|\]\[]', temp_string)
+        relist = re.split(r'[\(\)⟨⟩|\]\[]', temp_string)
         relist = list(filter(None, relist))
 
         # consistency of s_ijk "Δ", "Ω", "Π"
@@ -358,8 +371,8 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
             b_real = repr(b.real)[5:-1]
             b_imag = repr(b.imag)[5:-1]
             b = (b_real + "+" + b_imag + "I").replace("e", "*^")
-            msg += 'Subscript[\[Lambda], ' + str(i) + ',1] = ' + a + ";\n"
-            msg += 'Subscript[\[Lambda], ' + str(i) + ',2] = ' + b + ";\n"
+            msg += r'Subscript[\[Lambda], ' + str(i) + ',1] = ' + a + ";\n"
+            msg += r'Subscript[\[Lambda], ' + str(i) + ',2] = ' + b + ";\n"
             i = i + 1
         return msg
 
@@ -375,8 +388,8 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
             b_real = repr(b.real)[5:-1]
             b_imag = repr(b.imag)[5:-1]
             b = (b_real + "+" + b_imag + "I").replace("e", "*^")
-            msg += "Subscript[\!\(\*OverscriptBox[\(\[Lambda]\), \(_\)]\), " + str(i) + ",1] = " + a + ";\n"
-            msg += "Subscript[\!\(\*OverscriptBox[\(\[Lambda]\), \(_\)]\), " + str(i) + ",2] = " + b + ";\n"
+            msg += r"Subscript[\!\(\*OverscriptBox[\(\[Lambda]\), \(_\)]\), " + str(i) + ",1] = " + a + ";\n"
+            msg += r"Subscript[\!\(\*OverscriptBox[\(\[Lambda]\), \(_\)]\), " + str(i) + ",2] = " + b + ";\n"
             i = i + 1
         return msg
 
