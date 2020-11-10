@@ -2,7 +2,7 @@
 
 ## Requirements
 ```
-numpy, mpmath
+numpy, mpmath, sympy
 ```
 Algebraic-gemetry tools require
 ```
