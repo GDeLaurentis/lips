@@ -65,6 +65,10 @@ class Particles_Compute:
     def compute(self, temp_string):
         """Computes spinor strings.\n
         Available variables: ⟨a|b⟩, [a|b], ⟨a|b+c|d], ⟨a|b+c|d+e|f], ..., s_ijk, Δ_ijk, Ω_ijk, Π_ijk, tr5_ijkl"""
+
+        temp_string = temp_string.replace("<", "⟨").replace(">", "⟩")
+        temp_string = re.sub(r"s(\d)", r"s_\1", temp_string)
+
         self.check_consistency(temp_string)                         # Check consistency of string
 
         if ptr5.findall(temp_string) != []:                         # tr5_ijkl [i|j|k|l|i⟩ - ⟨i|j|k|l|i]
@@ -152,4 +156,4 @@ class Particles_Compute:
                 return result.dot(self[d].l_sp_u)[0][0]
 
         else:
-            return self.eval(temp_string)
+            return self._eval(temp_string)
