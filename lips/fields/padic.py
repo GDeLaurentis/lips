@@ -7,7 +7,6 @@ from __future__ import unicode_literals
 
 import functools
 import numpy
-import random
 
 from .finite_field import ModP
 
@@ -210,7 +209,9 @@ class PAdic(object):
 
     def __pow__(self, n):
         assert(isinstance(n, int) or n.is_integer())
-        if n == 0:
+        if n < 0:
+            return 1 / self ** -n
+        elif n == 0:
             return PAdic(1, self.p, self.k)
         elif n % 2 == 0:
             root_2_res = self ** (n / 2)
