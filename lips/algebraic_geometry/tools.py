@@ -28,7 +28,7 @@ else:
 
 if which('Singular') is not None:
     singular_found = True
-    test = subprocess.Popen(["Singular", "--execute", ""], stdout=subprocess.PIPE)
+    test = subprocess.Popen(["Singular", "--execute", "$"], stdout=subprocess.PIPE)
     output = test.communicate()[0]
     singular_clean_up_lines = output.decode("utf-8").split("\n")
     singular_clean_up_lines = singular_clean_up_lines + ["empty list", "// ** groebner base computations with inexact coefficients can not be trusted due to rounding errors"]

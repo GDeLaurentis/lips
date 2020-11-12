@@ -29,13 +29,13 @@ Pauli_bar = numpy.array([Pauli_zero, -Pauli_x, -Pauli_y, -Pauli_z])
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 
-pSijk = re.compile(r'^(?:s_|S_)(\d+)$')
+pSijk = re.compile(r'^(?:s|S)(?:_){0,1}(\d+)$')
 pd5 = re.compile(r'^δ5$')
 ptr5 = re.compile(r'^(?:tr5_)(\d+)$')
 pDijk = re.compile(r'(?:^Δ_(\d+)$)|(?:^Δ_(\d+)\|(\d+)\|(\d+)$)')
 pOijk = re.compile(r'^(?:Ω_)(\d+)$')
 pPijk = re.compile(r'^(?:Π_)(\d+)$')
-pA2 = re.compile(r'^(?:⟨)(\d+)(?:\|)(\d+)(?:⟩)$')
+pA2 = re.compile(r'^(?:⟨|<)(\d+)(?:\|)(\d+)(?:⟩|>)$')
 pS2 = re.compile(r'^(?:\[)(\d+)(?:\|)(\d+)(?:\])$')
 p3B = re.compile(r'^(?:⟨|\[)(\d+)(?:\|\({0,1})([\d+[\+|-]*]*)(?:\){0,1}\|)(\d+)(?:⟩|\])$')
 pNB = re.compile(r'^(?:⟨|\[)(?P<start>\d+)(?:\|)(?P<middle>(?:(?:\([\d+\+|-]{1,}\))|(?:[\d+\+|-]{1,}))*)(?:\|)(?P<end>\d+)(?:⟩|\])$')

@@ -33,9 +33,9 @@ class Particles_Set:
         if fix_mom is True:
             mom_cons, on_shell = self.momentum_conservation_check(), self.onshell_relation_check()
             if mom_cons is False:
-                raise myException("Momentum conservation is not satisfied: ", max(map(abs, flatten(self.total_mom))))
+                raise myException("Setting: {} to {}. Momentum conservation is not satisfied: ", temp_string, temp_value, max(map(abs, flatten(self.total_mom))))
             elif on_shell is False:
-                raise myException("On shellness is not satisfied: ", max(map(abs, flatten(self.masses))))
+                raise myException("Setting: {} to {}. On shellness is not satisfied: ", temp_string, temp_value, max(map(abs, flatten(self.masses))))
         if not abs_diff <= self.field.tollerance:
             raise myException("Failed to set {} to {}. Instead got {}. Absolute difference {}.".format(
                 temp_string, temp_value, self.compute(temp_string), abs_diff))
