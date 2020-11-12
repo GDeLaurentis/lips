@@ -38,10 +38,11 @@ class LipsIdeal(object):
         singular_commands = ["ring r = " + self.oParticles.field.singular_notation + ", (" + ", ".join(map(str, lips_symbols(len(self.oParticles)))) + "), dp;",
                              "ideal i = " + ",".join(map(str, self.generators)) + ";",
                              "ideal gb = groebner(i);",
-                             "print(indepSet(gb, 1));"]
+                             "print(indepSet(gb, 1));",
+                             "$"]
         singular_command = "\n".join(singular_commands)
         # print(singular_command)
-        test = subprocess.Popen(["timeout", "2", "Singular", "--execute", singular_command], stdout=subprocess.PIPE)
+        test = subprocess.Popen(["timeout", "2", "Singular", "--quiet", "--execute", singular_command], stdout=subprocess.PIPE)
         output = test.communicate()[0]
         indepSets = [tuple(map(int, line.replace(" ", "").split(","))) for line in output.decode("utf-8").split("\n") if line not in singular_clean_up_lines and ":" not in line]
         return indepSets
@@ -51,10 +52,11 @@ class LipsIdeal(object):
         singular_commands = ["ring r = " + self.oParticles.field.singular_notation + ", (" + ", ".join(map(str, lips_symbols(len(self.oParticles)))) + "), lp;",
                              "ideal i = " + ",".join(map(str, self.generators)) + ";",
                              "ideal gb = groebner(i);",
-                             "print(gb);"]
+                             "print(gb);",
+                             "$"]
         singular_command = "\n".join(singular_commands)
         # print(singular_command)
-        test = subprocess.Popen(["timeout", "2", "Singular", "--execute", singular_command], stdout=subprocess.PIPE)
+        test = subprocess.Popen(["timeout", "2", "Singular", "--quiet", "--execute", singular_command], stdout=subprocess.PIPE)
         output = test.communicate()[0]
         output = [line.replace(",", "") for line in output.decode("utf-8").split("\n") if line not in singular_clean_up_lines]
         return output
