@@ -43,7 +43,7 @@ class Particles_Eval:
 
     @staticmethod
     def _parse(string, field):
-        string = string.replace("^", "**")
+        string = string.replace("^", "**").replace(" ", "").replace("\n", "")
         string = pA2bis.sub(r"⟨\1|\2⟩", string)
         string = pA2.sub(r"oPs.compute('⟨\1|\2⟩')", string)
         string = pS2bis.sub(r"[\1|\2]", string)
@@ -56,7 +56,8 @@ class Particles_Eval:
         string = pDijk_non_adjacent.sub(r"oPs.compute('Δ_\1|\2|\3')", string)
         string = p3B.sub(r"oPs.compute('⟨\1|(\2)|\3]')", string)
         string = re.sub(r'(\d)s', r'\1*s', string)
-        string = string.replace(')s', ')*s')
+        string = re.sub(r'(\d)o', r'\1*o', string)
+        string = string.replace(')s', ')*s').replace(')o', ')*o')
         string = string.replace(')(', ')*(')
         re_rat_nbr = re.compile(r"(?<!\*\*)(\d+)\/(\d+)")
         if field.name == "padic":

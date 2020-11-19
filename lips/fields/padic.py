@@ -7,10 +7,12 @@ from __future__ import unicode_literals
 
 import functools
 import numpy
+import random
 
 from .finite_field import ModP
 
 fixed_relative_precision = False
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
@@ -20,6 +22,28 @@ def to_base(num, p):
         return (num, )
     else:
         return (num % p, ) + (to_base(num // p, p))
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+
+def cached_function(func):
+    @functools.wraps(func)
+    def wrapper_cached_function(*args, **kwargs):
+        call_key = (args, tuple(sorted(kwargs.items())))
+        if not hasattr(func, 'cache_dict'):
+            func.cache_dict = {}
+        if call_key not in func.cache_dict.keys():
+            call_val = func(*args, **kwargs)
+            func.cache_dict[call_key] = call_val
+        return func.cache_dict[call_key]
+    return wrapper_cached_function
+
+
+@cached_function
+def full_range_random_padic_filling(p, k):
+    """Returns a random number which translates in a PAdic without any zero digit."""
+    return sum([random.randint(1, p - 1) * p ** i for i in range(k)])
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -60,12 +84,14 @@ class PAdic(object):
         if p is not None and k is not None:
             self.p = p
             factors_of_p = next((i for i, j in enumerate(to_base(num, p)) if j != 0), 0)
-            self.k = k - from_addition * factors_of_p
+            self.k = k - from_addition * factors_of_p  # this is the guaranteed precision
             num = int(num // p ** factors_of_p) % (p ** self.k)
             self.n = factors_of_p + n
             self.num = num
             if fixed_relative_precision is True and factors_of_p > 0:
-                # print("Warning: possible loss of a significant digit!")
+                # this emulates the behaviour of floating point numbers,
+                # where precision loss actually means random digits get added.
+                self.num = self.num + p ** self.k * full_range_random_padic_filling(self.p, factors_of_p)
                 self.k = self.k + factors_of_p
         else:
             raise Exception("Invalid p-adic initialisation")
