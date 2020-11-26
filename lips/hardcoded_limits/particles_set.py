@@ -16,7 +16,7 @@ import numpy
 import re
 import mpmath
 
-from .tools import flatten, pSijk, pDijk, pOijk, pPijk, pA2, pS2, pNB, ptr5, myException
+from ..tools import flatten, pSijk, pDijk, pOijk, pPijk, pA2, pS2, pNB, ptr5, myException
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -24,9 +24,9 @@ from .tools import flatten, pSijk, pDijk, pOijk, pPijk, pA2, pS2, pNB, ptr5, myE
 
 class Particles_Set:
 
-    # PUBLIC METHODS
+    # PRIVATE METHODS
 
-    def set(self, temp_string, temp_value, fix_mom=True, mode=1):
+    def _set(self, temp_string, temp_value, fix_mom=True, mode=1):
         """Constructs a singular phase space point."""
         self._set_inner(temp_string, temp_value, fix_mom, mode)
         abs_diff = abs(self.compute(temp_string) - temp_value)
@@ -39,8 +39,6 @@ class Particles_Set:
         if not abs_diff <= self.field.tollerance:
             raise myException("Failed to set {} to {}. Instead got {}. Absolute difference {}.".format(
                 temp_string, temp_value, self.compute(temp_string), abs_diff))
-
-    # PRIVATE METHODS
 
     def _set_inner(self, temp_string, temp_value, fix_mom=True, mode=1):
         self.check_consistency(temp_string)                          # Check consistency of string

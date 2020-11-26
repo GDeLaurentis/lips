@@ -27,15 +27,16 @@ from .tools import MinkowskiMetric, flatten, pNB, myException, indexing_decorato
 from .particle import Particle
 from .particles_compute import Particles_Compute
 from .particles_eval import Particles_Eval
-from .particles_set import Particles_Set
-from .particles_set_pair import Particles_SetPair
-from .algebraic_geometry.variety import Particles_Variety
+from .hardcoded_limits.particles_set import Particles_Set
+from .hardcoded_limits.particles_set_pair import Particles_SetPair
+from .algebraic_geometry.particles_singular_variety import Particles_SingularVariety
+from .particles_variety import Particles_Variety
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 
-class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetPair, Particles_Variety, list):
+class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetPair, Particles_SingularVariety, Particles_Variety, list):
     """Describes the kinematics of n particles. Base one list of Particle objects."""
 
     # MAGIC METHODS

@@ -19,9 +19,9 @@ from lips.algebraic_geometry.tools import lex_groebner_solve, check_solutions, l
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 
-class Particles_Variety:
+class Particles_SingularVariety:
 
-    def variety(self, invariants, valuations, verbose=False):
+    def _singular_variety(self, invariants, valuations, verbose=False):
         """Given generators and valuations, generates a variety of dimension zero and solves for a ps point valuations away from the zero surface."""
         assert all([valuation > 0 for valuation in valuations])
 
@@ -29,13 +29,16 @@ class Particles_Variety:
             prime, iterations = self.field.characteristic, self.field.digits
             padic_to_finite_field(self)  # work with p ** k finite field itaratively, since singular can only handle % p
         else:
-            iterations, prime, step = 1, None, 10 ** -30
-            invariants = [invariant + "-{}*{}".format(i + 1, step ** valuation) for i, (invariant, valuation) in enumerate(zip(invariants, valuations))]
+            prime, iterations = None, 1
+            invariants = [invariant + "-{}".format(valuation) for (invariant, valuation) in zip(invariants, valuations)]
 
         oAnalyticalIdeal = LipsIdeal(self, invariants)
         indepSets = oAnalyticalIdeal.indepSets
-        print("Codimension:", set(indepSet.count(0) - 4 for indepSet in indepSets))
+        if verbose:
+            print("Codimension:", set(indepSet.count(0) - 4 for indepSet in indepSets))
         indepSet = indepSets[0]
+        if verbose:
+            print("Chosen indepSet:", indepSet)
         oSemiNumericalIdeal = LipsIdeal(self, invariants, indepVars=indepSet, prime=prime)
 
         for iteration in range(iterations):
