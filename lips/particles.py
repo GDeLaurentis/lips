@@ -232,9 +232,9 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
         # If possible returns how to fix mom cons (tuple & axis), otherwise returns false.
         if ((pA2.findall(t_s1) != [] or pS2.findall(t_s1) != []) and pNB.findall(t_s2) != []):
             if pA2.findall(t_s1) != []:
-                ab = map(int, list(pA2.findall(t_s1)[0]))
+                ab = list(map(int, list(pA2.findall(t_s1)[0])))
             elif pS2.findall(t_s1) != []:
-                ab = map(int, list(pS2.findall(t_s1)[0]))
+                ab = list(map(int, list(pS2.findall(t_s1)[0])))
             lNB, lNBs, lNBms, lNBe = self._get_lNB(t_s2)
             plist = self._complementary(ab + lNB)
             if len(plist) >= 2:                                     # easy momentum fix: two free particles

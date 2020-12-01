@@ -10,6 +10,7 @@
 
 from __future__ import unicode_literals
 
+import sys
 import os
 import mpmath
 
@@ -17,6 +18,9 @@ from .tools import pSijk, pDijk, pA2, pS2, p3B, pNB, myException
 
 local_directory = os.path.dirname(__file__)
 mpmath.mp.dps = 300
+
+if sys.version_info[0] > 2:
+    unicode = str
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
@@ -175,14 +179,14 @@ class Particles_SetPair:
     def _set_pair_A2_or_S2_and_A2_or_S2(self, t_s1, t_v1, t_s2, t_v2):     # Current failed: 0/870 @ 6pt
 
         if pA2.findall(t_s1) != []:
-            ab = map(int, list(pA2.findall(t_s1)[0]))
+            ab = list(map(int, list(pA2.findall(t_s1)[0])))
         elif pS2.findall(t_s1) != []:
-            ab = map(int, list(pS2.findall(t_s1)[0]))
+            ab = list(map(int, list(pS2.findall(t_s1)[0])))
 
         if pA2.findall(t_s2) != []:
-            cd = map(int, list(pA2.findall(t_s2)[0]))
+            cd = list(map(int, list(pA2.findall(t_s2)[0])))
         elif pS2.findall(t_s2) != []:
-            cd = map(int, list(pS2.findall(t_s2)[0]))
+            cd = list(map(int, list(pS2.findall(t_s2)[0])))
 
         overlap = []
         for i in range(2):
@@ -204,7 +208,7 @@ class Particles_SetPair:
                 t_s2 = "[{}|{}]".format(overlap[0], cd_only)
         self.set(t_s1, t_v1, fix_mom=False)                    # set it
         self.set(t_s2, t_v2, fix_mom=False)
-        plist = map(int, self._complementary(list(set([unicode(ab[0]), unicode(ab[1]), unicode(cd[0]), unicode(cd[1])]))))
+        plist = list(map(int, self._complementary(list(set([unicode(ab[0]), unicode(ab[1]), unicode(cd[0]), unicode(cd[1])])))))
         if len(plist) >= 2:
             self.fix_mom_cons(plist[0], plist[1])
         elif len(plist) == 1:

@@ -79,9 +79,9 @@ class Particles_Set:
 
     def _set_A2(self, temp_string, temp_value, fix_mom=True):       # ⟨A|B⟩ = (a, b).(c, d) = ac+bd = X ----> c = (X - bd)/a
 
-        A, B = map(int, pA2.findall(temp_string)[0])
+        A, B = list(map(int, pA2.findall(temp_string)[0]))
         X = temp_value
-        plist = map(int, self._complementary(map(str, [A, B])))  # free momenta
+        plist = list(map(int, self._complementary(map(str, [A, B]))))  # free momenta
         if len(plist) < 2:                                           # need at least 4 particles to fix mom cons (i.e. two free ones)
             myException("Set_A2 called with less than 4 particles. Cound't fix momentum conservation.")
         a, b = self[A].r_sp_u[0, 0], self[A].r_sp_u[0, 1]            # ⟨A| = (a, b)
@@ -95,9 +95,9 @@ class Particles_Set:
 
     def _set_S2(self, temp_string, temp_value, fix_mom=True):       # [A|B] = (a, b).(c, d) = ac+bd = X ----> c = (X - bd)/a
 
-        A, B = map(int, pS2.findall(temp_string)[0])
+        A, B = list(map(int, pS2.findall(temp_string)[0]))
         X = temp_value
-        plist = map(int, self._complementary(map(str, [A, B])))  # free momenta
+        plist = list(map(int, self._complementary(map(str, [A, B]))))  # free momenta
         if len(plist) < 2:                                           # need at least 4 particles to fix mom cons (i.e. two free ones)
             myException("Set_S2 called with less than 4 particles. Cound't fix momentum conservation.")
         a, b = self[A].l_sp_d[0, 0], self[A].l_sp_d[0, 1]            # [A| = (a, b)

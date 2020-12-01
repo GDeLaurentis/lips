@@ -68,12 +68,12 @@ class Particles_Compute:
         self.check_consistency(temp_string)                         # Check consistency of string
 
         if ptr5.findall(temp_string) != []:                         # tr5_ijkl [i|j|k|l|i⟩ - ⟨i|j|k|l|i]
-            ijkl = map(int, ptr5.findall(temp_string)[0])
+            ijkl = list(map(int, ptr5.findall(temp_string)[0]))
             return (self.compute("[{a}|{b}|{c}|{d}|{a}⟩".format(a=ijkl[0], b=ijkl[1], c=ijkl[2], d=ijkl[3])) -
                     self.compute("⟨{a}|{b}|{c}|{d}|{a}]".format(a=ijkl[0], b=ijkl[1], c=ijkl[2], d=ijkl[3])))
 
         if pOijk.findall(temp_string) != []:                        # Ω_ijk
-            ijk = map(int, pOijk.findall(temp_string)[0])
+            ijk = list(map(int, pOijk.findall(temp_string)[0]))
             nol = self.ijk_to_3NonOverlappingLists(ijk)
             Omega = (2 * self.compute("s_" + "".join(map(unicode, nol[2]))) * self.compute("s_" + "".join(map(unicode, nol[1]))) -
                      (self.compute("s_" + "".join(map(unicode, nol[2]))) + self.compute("s_" + "".join(map(unicode, nol[1]))) -
@@ -81,13 +81,13 @@ class Particles_Compute:
             return Omega
 
         if pPijk.findall(temp_string) != []:                        # Π_ijk, eg: Π_351 = s_123-s124
-            ijk = map(int, pPijk.findall(temp_string)[0])
+            ijk = list(map(int, pPijk.findall(temp_string)[0]))
             nol = self.ijk_to_3NonOverlappingLists(ijk)
             Pi = (self.compute("s_" + "".join(map(unicode, nol[2] + [nol[0][0]]))) - self.compute("s_" + "".join(map(unicode, nol[2] + [nol[0][1]]))))
             return Pi
 
         if pDijk.findall(temp_string) != []:                        # Δ_ijk
-            ijk = map(int, pDijk.findall(temp_string)[0])
+            ijk = list(map(int, pDijk.findall(temp_string)[0]))
             temp_oParticles = self.ijk_to_3Ks(ijk)
             Delta = temp_oParticles.ldot(1, 2)**2 - temp_oParticles.ldot(1, 1) * temp_oParticles.ldot(2, 2)
             return Delta
@@ -118,11 +118,11 @@ class Particles_Compute:
             return s
 
         elif pA2.findall(temp_string) != []:                        # ⟨A|B⟩ -- contraction is up -> down : lambda[A]^alpha.lambda[B]_alpha
-            A, B = map(int, pA2.findall(temp_string)[0])
+            A, B = list(map(int, pA2.findall(temp_string)[0]))
             return numpy.dot(self[A].r_sp_u, self[B].r_sp_d)[0, 0]
 
         elif pS2.findall(temp_string) != []:                        # [A|B] -- contraction is down -> up : lambda_bar[A]_alpha_dot.lambda_bar[B]^alpha_dot
-            A, B = map(int, pS2.findall(temp_string)[0])
+            A, B = list(map(int, pS2.findall(temp_string)[0]))
             return numpy.dot(self[A].l_sp_d, self[B].l_sp_u)[0, 0]
 
         elif pNB.findall(temp_string) != []:                        # ⟨A|(B+C+..)..|D]
