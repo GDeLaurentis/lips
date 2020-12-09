@@ -8,6 +8,7 @@ from __future__ import unicode_literals
 import functools
 import numpy
 import random
+import fractions
 
 from .finite_field import ModP
 
@@ -55,7 +56,9 @@ def padicfy(func):
         if type(other) is PAdic:
             return func(self, other)
         elif type(other) in [int, ModP, numpy.int64] or str(type(other)) == "long":
-            return func(self, PAdic(other, self.p, (self.k + self.n) if (self.k + self.n) > 0 else 0))
+            return func(self, PAdic(other, self.p, self.k if self.k > 0 else 0))
+        elif type(other) is fractions.Fraction:
+            return func(self, PAdic(other.numerator, self.p, self.k if self.k > 0 else 0) / PAdic(other.denominator, self.p, self.k if self.k > 0 else 0))
         else:
             return NotImplemented
     return wrapper_padicfy
