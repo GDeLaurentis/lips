@@ -108,7 +108,10 @@ class ModP(int):
 
     def __pow__(self, other):
         assert(type(other) is int)
-        return ModP(int(self) ** int(other), self.p)
+        if other > 0:
+            return ModP(int(self) ** int(other), self.p)
+        else:
+            return 1 / ModP(int(self) ** - int(other), self.p)
 
     def _inv(self):
         'Find multiplicative inverse of self in Z mod p using the extended Euclidean algorithm.'
