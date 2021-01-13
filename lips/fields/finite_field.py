@@ -40,7 +40,7 @@ class ModP(int):
         elif len(args) == 1:
             return int.__new__(cls, cls.__rstr__(args[0])[0])
         else:
-            raise Exception('Bad finite field constructor. args:{}, kwargs:{}.'.format(args, kwargs))
+            raise Exception('Bad finite field constructor. args:{} of type:{}, kwargs:{} of type:{}.'.format(args, list(map(type, args)), kwargs, list(map(type, kwargs))))
 
     def __init__(self, *args, **kwargs):
         from .padic import PAdic
@@ -114,19 +114,33 @@ class ModP(int):
             return 1 / ModP(int(self) ** - int(other), self.p)
 
     def _inv(self):
-        'Find multiplicative inverse of self in Z mod p using the extended Euclidean algorithm.'
+        """Find multiplicative inverse of self in Z_p (Z mod p) using the extended Euclidean algorithm."""
 
-        rcurr = self.p
-        rnext = int(self)
-        tcurr = 0
-        tnext = 1
+        s, t, gcd = extended_euclideal_algorithm(int(self), self.p)
 
-        while rnext:
-            q = rcurr // rnext
-            rcurr, rnext = rnext, rcurr - q * rnext
-            tcurr, tnext = tnext, tcurr - q * tnext
-
-        if rcurr != 1:
+        if gcd != 1:
             raise ZeroDivisionError("Inverse of {} mod {} does not exist. Are you sure {} is prime?".format(self, self.p, self.p))
 
-        return ModP(tcurr, self.p)
+        return ModP(s, self.p)
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+
+def extended_euclideal_algorithm(a, b):
+    """Returns Bezout coefficients (s,t) and gcd(a,b) such that: as+bt=gcd(a,b). - Pseudocode from https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm"""
+    (old_r, r) = (a, b)
+    (old_s, s) = (1, 0)
+    (old_t, t) = (0, 1)
+
+    while r != 0:
+        quotient = old_r // r
+        (old_r, r) = (r, old_r - quotient * r)
+        (old_s, s) = (s, old_s - quotient * s)
+        (old_t, t) = (t, old_t - quotient * t)
+
+    # output "Bézout coefficients:", (old_s, old_t)
+    # output "greatest common divisor:", old_r
+    # output "quotients by the gcd:", (t, s)
+
+    return (old_s, old_t, old_r)
