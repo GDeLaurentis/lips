@@ -29,6 +29,7 @@ class LipsIdeal(object):
             generators += [str(sympy.Poly(entry, modulus=prime)).replace("Poly(", "").split(", ")[0] for entry in flatten(oParticles.total_mom)]
 
         self.oParticles = oParticles
+        self.prime = prime
         self.invariants = invariants
         self.generators = generators
         self.momentum_conservation = momentum_conservation
@@ -67,3 +68,23 @@ class LipsIdeal(object):
         if self.momentum_conservation is True:
             generators += [str(sympy.Poly(entry / prime ** iteration, modulus=prime)).replace("Poly(", "").split(", ")[0] for entry in flatten(self.oParticles.total_mom)]
         self.generators = generators
+
+    def __contains__(self, invariant):
+        """Implements ideal membership."""
+        invariant = str(sympy.Poly(sympy.expand(4 * self.oParticles.compute(invariant)), modulus=self.prime)).replace("Poly(", "").split(", ")[0]
+        singular_commands = ["ring r = 0, (" + ", ".join(map(str, lips_symbols(len(self.oParticles)))) + "), dp;",
+                             "ideal i = " + ",".join(map(str, self.generators)) + ";",
+                             "ideal gb = groebner(i);",
+                             "poly f = " + invariant + ";",
+                             "print(reduce(f,gb));"
+                             "$"]
+        singular_command = "\n".join(singular_commands)
+        # print(singular_command)
+        test = subprocess.Popen(["timeout", "2", "Singular", "--quiet", "--execute", singular_command], stdout=subprocess.PIPE)
+        output = test.communicate()[0]
+        output = [line.replace(",", "") for line in output.decode("utf-8").split("\n") if line not in singular_clean_up_lines]
+        # print(output)
+        if output == ['0']:
+            return True
+        else:
+            return False
