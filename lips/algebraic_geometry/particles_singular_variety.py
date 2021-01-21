@@ -27,7 +27,7 @@ class Particles_SingularVariety:
 
         if self.field.name == "padic":
             prime, iterations = self.field.characteristic, self.field.digits
-            padic_to_finite_field(self)  # work with p ** k finite field itaratively, since singular can only handle % p
+            padic_to_finite_field(self)  # work with p ** k finite field itaratively, since Singular can only handle % p
         else:
             prime, iterations = None, 1
             invariants = [invariant + "-{}".format(valuation) for (invariant, valuation) in zip(invariants, valuations)]
