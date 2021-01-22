@@ -10,6 +10,7 @@ from __future__ import unicode_literals
 import random
 import numpy
 import sympy
+import mpmath
 
 from lips.fields import ModP, PAdic
 from lips.algebraic_geometry.ideal import LipsIdeal
@@ -21,25 +22,38 @@ from lips.algebraic_geometry.tools import lex_groebner_solve, check_solutions, l
 
 class Particles_SingularVariety:
 
-    def _singular_variety(self, invariants, valuations, verbose=False):
-        """Given generators and valuations, generates a variety of dimension zero and solves for a ps point valuations away from the zero surface."""
-        assert all([valuation > 0 for valuation in valuations])
+    def _singular_variety(self, invariants, valuations=tuple(), generators=[], verbose=False):
+        """Given invariants and valuations, generates a variety of dimension zero and solves for a ps point valuations away from the zero surface.
+        If generators are given, they are used to construct the zero surface first, otherwise it is picked at random."""
+        assert all([valuation > 0 for valuation in valuations])  # if valuations == tuple() return zero surface
 
         if self.field.name == "padic":
             prime, iterations = self.field.characteristic, self.field.digits
             padic_to_finite_field(self)  # work with p ** k finite field itaratively, since Singular can only handle % p
-        else:
-            prime, iterations = None, 1
-            invariants = [invariant + "-{}".format(valuation) for (invariant, valuation) in zip(invariants, valuations)]
+            if valuations == tuple():
+                valuations = tuple(self.field.digits for inv in invariants)
+        elif self.field.name == "mpc":
+            prime, iterations = None, 1 if valuations == tuple() else 2
 
-        oAnalyticalIdeal = LipsIdeal(self, invariants)
-        indepSets = oAnalyticalIdeal.indepSets
+        if generators == []:
+            oIdeal = LipsIdeal(len(self), invariants)
+        else:
+            oIdeal = LipsIdeal(len(self), generators)
+
+        # print(oIdeal.generators)
+
+        indepSets = oIdeal.indepSets
         if verbose:
-            print("Codimension:", set(indepSet.count(0) - 4 for indepSet in indepSets))
+            print("Codimensions:", set(indepSet.count(0) - 4 for indepSet in indepSets))
         indepSet = indepSets[0]
+        indepSymbols = [symbol for i, symbol in enumerate(lips_symbols(len(self))) if indepSet[i] == 1]
         if verbose:
             print("Chosen indepSet:", indepSet)
-        oSemiNumericalIdeal = LipsIdeal(self, invariants, indepVars=indepSet, prime=prime)
+
+        self.make_analytical_d(indepVars=indepSet)
+        oSemiNumericalIdeal = oIdeal.zero_dimensional_slice(self, invariants, valuations, prime=prime, iteration=0)
+
+        # print(oSemiNumericalIdeal.generators)
 
         for iteration in range(iterations):
 
@@ -47,26 +61,40 @@ class Particles_SingularVariety:
             check_solutions(oSemiNumericalIdeal.groebner_basis, root_dicts, prime=prime)
 
             root_dict = root_dicts[0]
+            root_dict = {key: root_dict[key] for key in root_dict.keys() if key not in indepSymbols}
 
             if iteration < iterations - 1:
                 for key in root_dict.keys():
-                    root_dict[key] = root_dict[key] + prime * key
+                    root_dict[key] = root_dict[key] + (prime if prime is not None else 1) * key
+
+            # print(root_dict)
 
             update_particles(self, root_dict)
 
             if iteration < iterations - 1:
-                current_valuations = [valuation - (iteration + 1) for valuation in valuations]
-                current_invariants = [invariant for i, invariant in enumerate(invariants) if current_valuations[i] > 0]
+                if prime is not None:
+                    valuations = [valuation - 1 for valuation in valuations]
+                invariants_valuations = list(filter(lambda x: x[1] > 0, zip(invariants, valuations)))
+                if invariants_valuations != []:
+                    invariants, valuations = zip(*invariants_valuations)
+                else:
+                    invariants, valuations = (), ()
+                if verbose:
+                    print("Invariants, valuations:", invariants, valuations)
 
-                oSemiNumericalIdeal.update_generators(current_invariants, iteration + 1, prime)
+                oSemiNumericalIdeal = oIdeal.zero_dimensional_slice(self, invariants, valuations, prime=prime, iteration=iteration + 1)
+
+                # print(oSemiNumericalIdeal.generators)
 
                 currentIndepSet = oSemiNumericalIdeal.indepSets[0]
-                if currentIndepSet != indepSet:
+                if verbose:
+                    print("Chosen indepSet:", currentIndepSet)
+                if currentIndepSet != indepSet:  # this happens only with padics
                     newIndepSymbols = tuple(symbol for i, symbol in enumerate(lips_symbols(len(self))) if currentIndepSet[i] == 1 and indepSet[i] == 0)
                     rand_dict = {newIndepSymbol: random.randrange(1, self.field.characteristic ** (self.field.digits - iteration)) for newIndepSymbol in newIndepSymbols}
                     update_particles(self, rand_dict)
                     indepSet = currentIndepSet
-                    oSemiNumericalIdeal.update_generators(current_invariants, iteration + 1, prime)
+                    oSemiNumericalIdeal = oIdeal.zero_dimensional_slice(self, invariants, valuations, prime=prime, iteration=iteration + 1)
         else:
             if self.field.name == "padic":
                 finite_field_to_padic(self)
@@ -100,6 +128,8 @@ def update_particles(oParticles, dictionary):
             sol[key] = dictionary[key]
         elif key in dictionary:
             sol[key] = sol[key].subs(dictionary)
+        if hasattr(sol[key], "free_symbols") and sol[key].free_symbols == set() and oParticles.field.name == "mpc":
+            sol[key] = mpmath.mpc(sol[key])
     for i in range(1, len(oParticles) + 1):
         oParticles[i]._l_sp_d = numpy.array([[sol[sympy.symbols('c%i' % i)], sol[sympy.symbols('d%i' % i)]]], dtype=object)
         oParticles[i]._l_sp_d_to_l_sp_u()
