@@ -57,11 +57,15 @@ class LipsIdeal(object):
         # print("Subs:", subs)
         oSemiNumericalIdeal.generators = sympy.sympify(oSemiNumericalIdeal.generators)
         oSemiNumericalIdeal.generators = [sympy.expand(generator.subs(subs)) for generator in oSemiNumericalIdeal.generators]
+        oSemiNumericalIdeal.generators = list(filter(lambda x: x != 0, oSemiNumericalIdeal.generators))
+
         if prime is None:
             oSemiNumericalIdeal.generators = [str(generator) for generator in oSemiNumericalIdeal.generators]
         else:
-            oSemiNumericalIdeal.generators = [str(sympy.Poly(generator / prime ** iteration, modulus=prime)).replace("Poly(", "").split(", ")[0]
+            oSemiNumericalIdeal.generators = [re.sub(r"(?<![a-z])(\d+)", lambda match: str(int(match.group(1)) // prime ** iteration % prime), str(generator))
                                               for generator in oSemiNumericalIdeal.generators]
+            oSemiNumericalIdeal.generators = sympy.sympify(oSemiNumericalIdeal.generators)
+            oSemiNumericalIdeal.generators = list(filter(lambda x: x != 0, oSemiNumericalIdeal.generators))
 
         oSemiNumericalIdeal.oParticles = oParticles
         return oSemiNumericalIdeal
@@ -111,10 +115,10 @@ class LipsIdeal(object):
                              "print(pr);"]
         singular_command = "\n".join(singular_commands)
         # print(singular_command)
-        test = subprocess.Popen(["timeout", "300", "Singular", "--quiet", "--execute", singular_command], stdout=subprocess.PIPE)
+        test = subprocess.Popen(["timeout", "600", "Singular", "--quiet", "--execute", singular_command], stdout=subprocess.PIPE)
         output = test.communicate()[0]
         output = [line.replace(",", "") for line in output.decode("utf-8").split("\n") if line not in singular_clean_up_lines]
-        print(output)  # ['halt 1']
+        # print(output)  # ['halt 1']
 
         def clean_up(string):
             string = re.sub(r"_\[\d+\]=", "", string)
