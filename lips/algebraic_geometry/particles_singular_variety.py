@@ -22,7 +22,7 @@ from lips.algebraic_geometry.tools import lex_groebner_solve, check_solutions, l
 
 class Particles_SingularVariety:
 
-    def _singular_variety(self, invariants, valuations=tuple(), generators=[], verbose=False):
+    def _singular_variety(self, invariants, valuations=tuple(), generators=[], indepSetNbr=0, verbose=False):
         """Given invariants and valuations, generates a variety of dimension zero and solves for a ps point valuations away from the zero surface.
         If generators are given, they are used to construct the zero surface first, otherwise it is picked at random."""
         assert all([valuation > 0 for valuation in valuations])  # if valuations == tuple() return zero surface
@@ -45,7 +45,8 @@ class Particles_SingularVariety:
         indepSets = oIdeal.indepSets
         if verbose:
             print("Codimensions:", set(indepSet.count(0) - 4 for indepSet in indepSets))
-        indepSet = indepSets[0]
+            print("Number of indepSets:", len(indepSets))
+        indepSet = indepSets[indepSetNbr]
         indepSymbols = [symbol for i, symbol in enumerate(lips_symbols(len(self))) if indepSet[i] == 1]
         if verbose:
             print("Chosen indepSet:", indepSet)
