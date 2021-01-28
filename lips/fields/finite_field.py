@@ -6,19 +6,23 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import functools
+import numpy
+import fractions
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 
-def TypeErrorCheck(func):
+def ModPfy(func):
     @functools.wraps(func)
-    def wrapper_TypeErrorCheck(self, other):
-        try:
-            return func(self, other)
-        except TypeError:
-            return NotImplemented
-    return wrapper_TypeErrorCheck
+    def wrapper_ModPfy(self, other):
+        if type(other) in [int, ModP, numpy.int64] or str(type(other)) == "long":
+            return func(self, ModP(other, self.p))
+        elif type(other) is fractions.Fraction:
+            return func(self, ModP(other.numerator, self.p) / ModP(other.denominator, self.p))
+        else:
+            return TypeError
+    return wrapper_ModPfy
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -72,37 +76,37 @@ class ModP(int):
     def __neg__(self):
         return ModP(self.p - int(self), self.p)
 
-    @TypeErrorCheck
+    @ModPfy
     def __add__(self, other):
         return ModP(int(self) + int(other), self.p)
 
-    @TypeErrorCheck
+    @ModPfy
     def __radd__(self, other):
         return ModP(int(other) + int(self), self.p)
 
-    @TypeErrorCheck
+    @ModPfy
     def __sub__(self, other):
         return ModP(int(self) - int(other), self.p)
 
-    @TypeErrorCheck
+    @ModPfy
     def __rsub__(self, other):
         return ModP(int(other) - int(self), self.p)
 
-    @TypeErrorCheck
+    @ModPfy
     def __mul__(self, other):
         return ModP(int(self) * int(other), self.p)
 
-    @TypeErrorCheck
+    @ModPfy
     def __rmul__(self, other):
         return ModP(int(other) * int(self), self.p)
 
-    @TypeErrorCheck
+    @ModPfy
     def __truediv__(self, other):
         if not isinstance(other, ModP):
             other = ModP(other, self.p)
         return self * other._inv()
 
-    @TypeErrorCheck
+    @ModPfy
     def __rtruediv__(self, other):
         return other * self._inv()
 
