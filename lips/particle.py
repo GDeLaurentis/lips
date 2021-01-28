@@ -345,7 +345,7 @@ class Particle(object):
         self._set_r_sp_d(self._four_mom[0] + self._four_mom[3], self._four_mom[1] + self._four_mom[2] * 1j)
 
     def _set_r_sp_d(self, P0_plus_P3, P1_plus_iP2):  # r_sp_d is \lambda_\alpha
-        if lips.spinor_convention == 'symmetric' and P0_plus_P3 == 0:
+        if lips.spinor_convention == 'symmetric' and abs(P0_plus_P3) <= self.field.tollerance:
             raise ValueError("Encountered zero denominator in spinor.")
         elif lips.spinor_convention == 'symmetric':
             lambda_one = mpmath.sqrt(P0_plus_P3)
@@ -363,7 +363,7 @@ class Particle(object):
         self._set_l_sp_d(self._four_mom[0] + self._four_mom[3], self._four_mom[1] - self._four_mom[2] * 1j)
 
     def _set_l_sp_d(self, P0_plus_P3, P1_minus_iP2):  # l_sp_d is \bar{\lambda}_{\dot\alpha}
-        if lips.spinor_convention == 'symmetric' and P0_plus_P3 == 0:
+        if lips.spinor_convention == 'symmetric' and abs(P0_plus_P3) <= self.field.tollerance:
             raise ValueError("Encountered zero denominator in spinor.")
         elif lips.spinor_convention == 'symmetric':
             lambda_one = mpmath.sqrt(P0_plus_P3)
