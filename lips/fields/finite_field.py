@@ -21,7 +21,7 @@ def ModPfy(func):
         elif type(other) is fractions.Fraction:
             return func(self, ModP(other.numerator, self.p) / ModP(other.denominator, self.p))
         else:
-            return TypeError
+            return NotImplemented
     return wrapper_ModPfy
 
 
@@ -148,3 +148,36 @@ def extended_euclideal_algorithm(a, b):
     # output "quotients by the gcd:", (t, s)
 
     return (old_s, old_t, old_r)
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+
+def rationalise(a, n=None):
+    """Given (a, n) returns a fraction r / s such that r/s % n = a, by lattice reduction. r = sa + mn  <-> r/s % n = a"""
+    if n is None:  # for FF argument
+        if type(a) is int:
+            return fractions.Fraction(a, 1)
+        elif type(a) is ModP:
+            return rationalise(int(a), a.p)
+    return fractions.Fraction(*LGreduction((a, 1), (n, 0))[0])
+
+
+def LGreduction(u, v):
+    u, v = numpy.array(u, dtype=object), numpy.array(v, dtype=object)
+    if v @ v > u @ u:
+        return LGreduction(v, u)
+    while v @ v < u @ u:
+        (u, v) = (v, u)
+        q = round(fractions.Fraction(u @ v, u @ u))
+        v = v - q * u
+    return (u, v)
+
+
+def chinese_remainder(a1, a2):
+    """Given a1 = a % n1 and a2 = a % n2 and assuming gcd(n1,n2)=1 (i.e. n1, n2 co-prime), returns a12 = a % (n1*n2)"""
+    a1, n1 = int(a1), a1.p
+    a2, n2 = int(a2), a2.p
+    q1, q2, gcd = extended_euclideal_algorithm(n1, n2)
+    assert gcd == 1
+    return ModP(a1 * (q2 * n2) + a2 * (q1 * n1), n1 * n2)

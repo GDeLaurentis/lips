@@ -72,7 +72,7 @@ def univariate_finite_field_solver(equation, root_dict, prime):
     linear_factors = [factor for factor in factors if sympy.diff(factor, symbol) == 1]
     if linear_factors == []:
         return False
-    solutions = [ModP(int(sympy.solve(factor)[0]), prime) for factor in factors]
+    solutions = [ModP(int(sympy.solve(factor)[0]), prime) for factor in linear_factors]
     return update_root_dict(symbol, solutions, root_dict)
 
 
