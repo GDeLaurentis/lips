@@ -67,7 +67,7 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
 
     def __hash__(self):
         """Hash function: hash string of concatenated momenta."""
-        return hash("".join(flatten([map(str, oParticle.four_mom) for oParticle in self])))
+        return hash("".join(flatten([map(str, oParticle.r2_sp) for oParticle in self])))
 
     # PUBLIC METHODS
 
@@ -100,9 +100,16 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
         for oParticle in self:
             oParticle.angles_for_squares()
 
-    def image(self, permutation):
-        """Returns the image of self under a given permutation. Remember, this is a passive transformation."""
-        return copy.deepcopy(Particles(sorted(self, key=lambda x: permutation[self.index(x)])))
+    def image(self, permutation_or_rule):
+        """Returns the image of self under a given permutation or rule. Remember, this is a passive transformation."""
+        if type(permutation_or_rule) is str:
+            return copy.deepcopy(Particles(sorted(self, key=lambda x: permutation_or_rule[self.index(x)]), field=self.field, fix_mom_cons=False))
+        else:
+            assert type(permutation_or_rule[0]) is str and type(permutation_or_rule[1]) is bool
+            oResParticles = self.image(permutation_or_rule[0])
+            if permutation_or_rule is True:
+                oResParticles.angles_for_squares()
+            return oResParticles
 
     def cluster(self, llIntegers):
         """Returns clustered particle objects according to lists of lists of integers (e.g. corners of one loop diagram)."""
