@@ -56,7 +56,7 @@ def padicfy(func):
         if type(other) is PAdic:
             return func(self, other)
         elif type(other) in [int, ModP, numpy.int64] or str(type(other)) == "long":
-            return func(self, PAdic(other, self.p, self.k if self.k > 0 else 0))
+            return func(self, PAdic(other, self.p, (self.n + self.k) if (self.n + self.k) > 0 else 0))
         elif type(other) is fractions.Fraction:
             return func(self, PAdic(other.numerator, self.p, self.k if self.k > 0 else 0) / PAdic(other.denominator, self.p, self.k if self.k > 0 else 0))
         else:
@@ -86,7 +86,10 @@ class PAdic(object):
         """0 ≤ num ≤ p ^ k - 1; p: prime; k: significant digits; n: power of prefactors of p (valuation)."""
         if p is not None and k is not None:
             self.p = p
-            factors_of_p = next((i for i, j in enumerate(to_base(num, p)) if j != 0), 0)
+            factors_of_p = next((i for i, j in enumerate(to_base(num, p)) if j != 0), None)
+            if factors_of_p is None:  # leading zeros are not significant digits under any situation
+                factors_of_p = k
+                from_addition = True
             self.k = k - from_addition * factors_of_p  # this is the guaranteed precision
             num = int(num // p ** factors_of_p) % (p ** self.k)
             self.n = factors_of_p + n
@@ -195,7 +198,7 @@ class PAdic(object):
         else:
             return PAdic((int(self) + int(other) * self.p ** (other.n - self.n)), self.p,
                          self.k if self.k < (other.n - self.n) + other.k else (other.n - self.n) + other.k, self.n, from_addition=True)
-#                         ((self.k + self.n) if (self.k + self.n) < (other.k + other.n) else (other.k + other.n)) - self.n, self.n, from_addition=True)
+        #                         ((self.k + self.n) if (self.k + self.n) < (other.k + other.n) else (other.k + other.n)) - self.n, self.n, from_addition=True)
 
     @padicfy
     def __radd__(self, other):

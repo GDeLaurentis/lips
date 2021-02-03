@@ -32,3 +32,9 @@ def test_addition():
     assert PAdic(a + b, p, k) == PAdic(a, p, k) + PAdic(b, p, k)
     assert PAdic(a + b, p, k) == a + PAdic(b, p, k)
     assert PAdic(a + b, p, k) == PAdic(a, p, k) + b
+
+
+def test_addition_with_zero():
+    p, k = 10007, 3
+    a = PAdic(random.randrange(0, 10000), p, k)
+    assert a + 0 == a
