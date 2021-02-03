@@ -53,13 +53,13 @@ class Particle(object):
     def __eq__(self, other):
         """Equality: checks equality of four momenta."""
         if type(self) == type(other):
-            return all(self.four_mom == other.four_mom)
+            return numpy.all(self.r2_sp == other.r2_sp)
         else:
             return False
 
     def __neg__(self):
         minus_self = Particle()
-        minus_self.four_mom = -1 * self.four_mom
+        minus_self.r2_sp = -1 * self.r2_sp
         return minus_self
 
     def __add__(self, other):
@@ -330,11 +330,16 @@ class Particle(object):
         self._l_sp_u.shape = (2, 1)
         self._r_sp_u.shape = (1, 2)
         self._l_sp_u_to_l_sp_d()
-        self._r_sp_u_to_r_sp_d()
+        self._r_sp_d_to_r_sp_u()
         self._r1_sp_to_r2_sp()
         self._r1_sp_to_r2_sp_b()
-        self._r2_sp_b_to_four_momentum()
-        self._four_mom_to_four_mom_d()
+        # should I check if four_mom is in the field?
+        try:
+            self._r2_sp_b_to_four_momentum()
+            self._four_mom_to_four_mom_d()
+        except (TypeError, SystemError):
+            self._four_mom = None
+            self._four_mom_d = None
 
     # PRIVATE METHODS
 
