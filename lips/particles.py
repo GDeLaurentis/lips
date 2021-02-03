@@ -107,7 +107,7 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
         else:
             assert type(permutation_or_rule[0]) is str and type(permutation_or_rule[1]) is bool
             oResParticles = self.image(permutation_or_rule[0])
-            if permutation_or_rule is True:
+            if permutation_or_rule[1] is True:
                 oResParticles.angles_for_squares()
             return oResParticles
 

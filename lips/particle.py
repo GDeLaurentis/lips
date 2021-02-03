@@ -330,7 +330,7 @@ class Particle(object):
         self._l_sp_u.shape = (2, 1)
         self._r_sp_u.shape = (1, 2)
         self._l_sp_u_to_l_sp_d()
-        self._r_sp_d_to_r_sp_u()
+        self._r_sp_u_to_r_sp_d()
         self._r1_sp_to_r2_sp()
         self._r1_sp_to_r2_sp_b()
         # should I check if four_mom is in the field?
