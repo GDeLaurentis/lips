@@ -153,3 +153,22 @@ class LipsIdeal(object):
             return True
         else:
             return False
+
+    def image(self, rule):
+        return LipsIdeal(self.multiplicity, [poly_image(poly, rule) for poly in self.generators])
+
+    def __hash__(self):
+        return hash(", ".join(self.groebner_basis))
+
+    def __eq__(self, other):
+        return self.groebner_basis == other.groebner_basis
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+
+def poly_image(polynomial, rule):
+    polynomial = re.sub(r"(\d)", lambda match: rule[0][int(match.group(0)) - 1], polynomial)
+    if rule[1] is True:
+        polynomial = polynomial.replace("a", "A").replace("b", "B").replace("c", "a").replace("d", "b").replace("A", "c").replace("B", "d")
+    return polynomial
