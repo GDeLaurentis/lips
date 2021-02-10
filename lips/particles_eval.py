@@ -43,7 +43,14 @@ class Particles_Eval:
 
     @staticmethod
     def _parse(string, field):
-        string = string.replace("^", "**").replace(" ", "").replace("\n", "")
+        string = string.replace(r"\scriptscriptstyle", "")
+        string = string.replace(r"\frac{", "(")
+        string = string.replace(r"}{", ")/(")
+        string = string.replace("}+\\", ")+")
+        string = string.replace(r"\n", "").replace(" ", "")
+        string = re.sub(r"}$", ")", string)
+        string = string.replace("^", "**")
+        string = re.sub(r"{([\d\|]+)}", r"\1", string)
         string = pA2bis.sub(r"⟨\1|\2⟩", string)
         string = pA2.sub(r"oPs.compute('⟨\1|\2⟩')", string)
         string = pS2bis.sub(r"[\1|\2]", string)
@@ -57,7 +64,7 @@ class Particles_Eval:
         string = p3B.sub(r"oPs.compute('⟨\1|(\2)|\3]')", string)
         string = re.sub(r'(\d)s', r'\1*s', string)
         string = re.sub(r'(\d)o', r'\1*o', string)
-        string = string.replace(')s', ')*s').replace(')o', ')*o')
+        string = re.sub(r'(\d)\(', r'\1*(', string)
         string = string.replace(')(', ')*(')
         re_rat_nbr = re.compile(r"(?<!\*\*)(\d+)\/(\d+)")
         if field.name == "padic":
