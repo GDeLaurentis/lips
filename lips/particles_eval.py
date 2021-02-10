@@ -37,7 +37,14 @@ class Particles_Eval:
 
     @staticmethod
     def _parse(string):
+        string = string.replace(r"\scriptscriptstyle", "")
+        string = string.replace(r"\frac{", "(")
+        string = string.replace(r"}{", ")/(")
+        string = string.replace("}+\\", ")+")
+        string = string.replace(r"\n", "").replace(" ", "")
+        string = re.sub(r"}$", ")", string)
         string = string.replace("^", "**")
+        string = re.sub(r"{([\d\|]+)}", r"\1", string)
         string = pA2bis.sub(r"⟨\1|\2⟩", string)
         string = pA2.sub(r"self.compute('⟨\1|\2⟩')", string)
         string = pS2bis.sub(r"[\1|\2]", string)
@@ -47,6 +54,7 @@ class Particles_Eval:
         string = pPijk.sub(r"self.compute('Π_\1')", string)
         string = p3B.sub(r"self.compute('⟨\1|(\2)|\3]')", string)
         string = re.sub(r'(\d)s', r'\1*s', string)
+        string = re.sub(r'(\d)\(', r'\1*(', string)
         string = string.replace(')s', ')*s')
         string = string.replace(')(', ')*(')
         return string
