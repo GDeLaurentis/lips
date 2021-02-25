@@ -14,6 +14,7 @@ import ast
 import mpmath
 import operator as op
 
+from fractions import Fraction
 from lips.fields import GaussianRational, ModP, PAdic
 
 operators = {ast.Add: op.add, ast.Sub: op.sub, ast.Mult: op.mul,
@@ -33,7 +34,8 @@ pOijk = re.compile(r'(?:Ω_)(\d+)')
 pPijk = re.compile(r'(?:Π_)(\d+)')
 pDijk_adjacent = re.compile(r'(?:Δ_(\d+)(?![\d\|]))')
 pDijk_non_adjacent = re.compile(r'(?:Δ_(\d+)\|(\d+)\|(\d+))')
-p3B = re.compile(r'(?:\u27e8|\[)(\d+)(?:\|\({0,1})([\d+[\+|-]*]*)(?:\){0,1}\|)(\d+)(?:\u27e9|\])')
+# p3B = re.compile(r'(?:\u27e8|\[)(\d+)(?:\|\({0,1})([\d+[\+|-]*]*)(?:\){0,1}\|)(\d+)(?:\u27e9|\])')
+pNB = re.compile(r'((?:⟨|\[)\d+\|(?:(?:\([\d+\+|-]{1,}\))|(?:[\d+\+|-]{1,}))*\|\d+(?:⟩|\]))')
 ptr5 = re.compile(r'(?:tr5_)(\d+)')
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -42,8 +44,8 @@ ptr5 = re.compile(r'(?:tr5_)(\d+)')
 class Particles_Eval:
 
     @staticmethod
-    def _parse(string, field):
-        string = string.replace(r"\scriptscriptstyle", "")
+    def _parse(string):
+        string = string.replace(r"\scriptscriptstyle", "").replace("<", "⟨").replace(">", "⟩")
         string = string.replace(r"\frac{", "(")
         string = string.replace(r"}{", ")/(")
         string = string.replace("}+\\", ")+")
@@ -61,24 +63,17 @@ class Particles_Eval:
         string = ptr5.sub(r"oPs.compute('tr5_\1')", string)
         string = pDijk_adjacent.sub(r"oPs.compute('Δ_\1')", string)
         string = pDijk_non_adjacent.sub(r"oPs.compute('Δ_\1|\2|\3')", string)
-        string = p3B.sub(r"oPs.compute('⟨\1|(\2)|\3]')", string)
+        string = pNB.sub(r"oPs.compute('\1')", string)
         string = re.sub(r'(\d)s', r'\1*s', string)
         string = re.sub(r'(\d)o', r'\1*o', string)
         string = re.sub(r'(\d)\(', r'\1*(', string)
-        string = string.replace(')(', ')*(')
+        string = string.replace(')(', ')*(').replace(")o", ")*o")
         re_rat_nbr = re.compile(r"(?<!\*\*)(\d+)\/(\d+)")
-        if field.name == "padic":
-            string = re_rat_nbr.sub(r"PAdic(\1,{characteristic},{digits})/PAdic(\2,{characteristic},{digits})".format(
-                characteristic=field.characteristic, digits=field.digits), string)
-        elif field.name == "finite field":
-            string = re_rat_nbr.sub(r"ModP(\1,{characteristic})/ModP(\2,{characteristic})".format(
-                characteristic=field.characteristic), string)
-        elif field.name == 'mpc':
-            string = re_rat_nbr.sub(r"mpmath.mpf(\1)/mpmath.mpf(\2)", string)
+        string = re_rat_nbr.sub(r"Fraction(\1,\2)", string)
         return string
 
     def _eval(self, string):
-        return ast_eval_expr(self._parse(string, self.field), {'oPs': self})
+        return ast_eval_expr(self._parse(string), {'oPs': self})
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -111,11 +106,14 @@ def _eval_node(node, locals_={}):
         elif isinstance(node.func, ast.Name) and node.func.id == 'PAdic':
             function, arguments = 'PAdic', [arg.n for arg in node.args]
             allowed_func_call = "{function}({arguments})".format(function=function, arguments=", ".join(map(str, arguments)))
+        elif isinstance(node.func, ast.Name) and node.func.id == 'Fraction':
+            function, arguments = 'Fraction', [arg.n for arg in node.args]
+            allowed_func_call = "{function}({arguments})".format(function=function, arguments=", ".join(map(str, arguments)))
         else:
             raise TypeError(node)
         return eval(allowed_func_call)
     elif isinstance(node, ast.Name):
-        if node.id in locals() and type(locals()[node.id]) in [int, float, GaussianRational, PAdic, ModP, mpmath.mpc, mpmath.mpc]:
+        if node.id in locals() and type(locals()[node.id]) in [int, float, GaussianRational, PAdic, ModP, mpmath.mpc, mpmath.mpc, Fraction]:
             return eval(node.id)
         else:
             raise TypeError(node)
