@@ -16,7 +16,7 @@ import fractions
 def ModPfy(func):
     @functools.wraps(func)
     def wrapper_ModPfy(self, other):
-        if type(other) in [int, ModP, numpy.int64] or str(type(other)) == "long":
+        if isinteger(other) or str(type(other)) == "long":
             return func(self, ModP(other, self.p))
         elif type(other) is fractions.Fraction:
             return func(self, ModP(other.numerator, self.p) / ModP(other.denominator, self.p))
@@ -25,35 +25,39 @@ def ModPfy(func):
     return wrapper_ModPfy
 
 
+def isinteger(x):
+    return isinstance(x, int) or type(x) in [numpy.int32, numpy.int64]
+
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 
 class ModP(int):
-    'Integers modulus p, with p prime.'
+    """Finite field with p elements ($\\mathbb{FF}_p$), i.e. integers modulus p, with p prime."""
 
     # __slots__ = 'p'
 
-    def __new__(cls, *args, **kwargs):
+    def __new__(cls, n, p=None):
         from .padic import PAdic
-        if len(args) == 2 and isinstance(args[0], int) and isinstance(args[1], int):  # usually this should get called
-            return int.__new__(cls, args[0] % args[1])
-        elif len(args) == 1 and isinstance(args[0], int):  # this is needed for pickling
-            return int.__new__(cls, args[0])
-        elif len(args) == 1 and isinstance(args[0], PAdic):
-            return int.__new__(cls, int(args[0]))
-        elif len(args) == 1:
-            return int.__new__(cls, cls.__rstr__(args[0])[0])
+        if p is not None and isinteger(n) and isinteger(p):  # usually this should get called
+            return int.__new__(cls, n % p)
+        elif p is None and isinteger(n):  # this is needed for pickling
+            return int.__new__(cls, n)
+        elif p is None and isinstance(n, PAdic):
+            return int.__new__(cls, int(n))
+        elif p is None:
+            return int.__new__(cls, cls.__rstr__(n)[0])
         else:
-            raise Exception('Bad finite field constructor. args:{} of type:{}, kwargs:{} of type:{}.'.format(args, list(map(type, args)), kwargs, list(map(type, kwargs))))
+            raise Exception('Bad finite field constructor, (n, p) of  value:({}, {}) and type:({}, {}).'.format(n, p, type(n), type(p)))
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, n, p=None):
         from .padic import PAdic
-        if len(args) == 2:
-            self.p = args[1]
-        elif len(args) == 1 and isinstance(args[0], PAdic):
-            self.p = args[0].p ** args[0].k
-        elif len(args) == 1:
-            self.p = self.__rstr__(args[0])[1]
+        if p is not None:
+            self.p = p
+        elif p is None and isinstance(n, PAdic):
+            self.p = n.p ** n.k
+        elif p is None:
+            self.p = self.__rstr__(n)[1]
         else:
             raise Exception('Bad finite field constructor.')
 

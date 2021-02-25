@@ -58,6 +58,9 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
         if fix_mom_cons is True and max(map(abs, flatten(self.total_mom))) > field.tollerance:
             self.fix_mom_cons(real_momenta=real_momenta)
 
+    def __call__(self, string_expression):
+        return self.compute(string_expression)
+
     def __eq__(self, other):
         """Checks equality of each particle in particles."""
         if type(self) == type(other):
