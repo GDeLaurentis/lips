@@ -9,6 +9,7 @@ import pickle
 import random
 import pytest
 
+from fractions import Fraction
 from lips.fields.finite_field import ModP, extended_euclideal_algorithm
 
 
@@ -28,6 +29,20 @@ def test_addition():
     assert (a + b) % p == ModP(a, p) + ModP(b, p)
     assert (a + b) % p == a + ModP(b, p)
     assert (a + b) % p == ModP(a, p) + b
+
+
+def test_failed_operation_different_FFs():
+    a = ModP('2 % 3')
+    b = ModP('2 % 5')
+    with pytest.raises(ValueError):
+        a + b
+
+
+def test_addition_with_fraction_is_symmetric():
+    a = ModP('2 % 5')
+    b = Fraction(1, 3)
+    assert a + b == b + a
+    assert isinstance(a + b, ModP) and isinstance(b + a, ModP)
 
 
 def test_subtraction():

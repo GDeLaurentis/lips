@@ -18,8 +18,12 @@ def ModPfy(func):
     def wrapper_ModPfy(self, other):
         if isinteger(other) or str(type(other)) == "long":
             return func(self, ModP(other, self.p))
-        elif type(other) is fractions.Fraction:
+        elif isinstance(other, fractions.Fraction):
             return func(self, ModP(other.numerator, self.p) / ModP(other.denominator, self.p))
+        elif isinstance(other, ModP):
+            if self.p != other.p:
+                raise ValueError("Numbers belong to different finite fields: FF{} and FF{}".format(self.p, other.p))
+            return func(self, other)
         else:
             return NotImplemented
     return wrapper_ModPfy
@@ -32,40 +36,37 @@ def isinteger(x):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 
-class ModP(int):
+class ModP(object):
     """Finite field with p elements ($\\mathbb{FF}_p$), i.e. integers modulus p, with p prime."""
 
-    # __slots__ = 'p'
-
-    def __new__(cls, n, p=None):
-        from .padic import PAdic
-        if p is not None and isinteger(n) and isinteger(p):  # usually this should get called
-            return int.__new__(cls, n % p)
-        elif p is None and isinteger(n):  # this is needed for pickling
-            return int.__new__(cls, n)
-        elif p is None and isinstance(n, PAdic):
-            return int.__new__(cls, int(n))
-        elif p is None:
-            return int.__new__(cls, cls.__rstr__(n)[0])
-        else:
-            raise Exception('Bad finite field constructor, (n, p) of  value:({}, {}) and type:({}, {}).'.format(n, p, type(n), type(p)))
+    __slots__ = 'n', 'p'
 
     def __init__(self, n, p=None):
         from .padic import PAdic
-        if p is not None:
-            self.p = p
+        if p is not None and isinteger(n) and isinteger(p):
+            self.n = int(n) % int(p)
+            self.p = int(p)
+        elif p is None and isinstance(n, ModP):
+            self = n
         elif p is None and isinstance(n, PAdic):
+            self.n = int(n)
             self.p = n.p ** n.k
         elif p is None:
-            self.p = self.__rstr__(n)[1]
+            self.n, self.p = self.__rstr__(n)
         else:
-            raise Exception('Bad finite field constructor.')
+            raise Exception('Bad finite field constructor, (n, p) of  value:({}, {}) and type:({}, {}).'.format(n, p, type(n), type(p)))
 
     def __getstate__(self):
         return (int(self), self.p)
 
     def __setstate__(self, state):
         self.__init__(*state)
+
+    def __int__(self):
+        return self.n
+
+    def __abs__(self):
+        return 0 if self.n == 0 else 1
 
     def __str__(self):
         return "%d %% %d" % (self, self.p)
@@ -79,6 +80,10 @@ class ModP(int):
 
     def __neg__(self):
         return ModP(self.p - int(self), self.p)
+
+    @ModPfy
+    def __eq__(self, other):
+        return self.n == other.n and self.p == other.p
 
     @ModPfy
     def __add__(self, other):
