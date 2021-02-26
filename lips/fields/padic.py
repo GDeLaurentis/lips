@@ -85,6 +85,7 @@ class PAdic(object):
 
     def __init__(self, num, p=None, k=None, n=0, from_addition=False):
         """0 ≤ num ≤ p ^ k - 1; p: prime; k: significant digits; n: power of prefactors of p (valuation)."""
+        num = int(num)  # might get passed as FF number
         if p is not None and k is not None:
             self.p = p
             factors_of_p = next((i for i, j in enumerate(to_base(num, p)) if j != 0), None)
@@ -223,7 +224,7 @@ class PAdic(object):
 
     @padicfy
     def __truediv__(self, other):
-        return PAdic((int(self) * ModP(int(other), other.p ** other.k)._inv()) % self.p ** self.k, self.p, min([self.k, other.k]), self.n - other.n)
+        return PAdic(int(int(self) * ModP(int(other), other.p ** other.k)._inv()) % self.p ** self.k, self.p, min([self.k, other.k]), self.n - other.n)
 
     @padicfy
     def __div__(self, other):

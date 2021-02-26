@@ -143,7 +143,12 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
             oParticle._l_sp_d_to_l_sp_u()
             oParticle._r1_sp_to_r2_sp()
             oParticle._r1_sp_to_r2_sp_b()
-            oParticle._r2_sp_b_to_four_momentum()
+            try:
+                oParticle._r2_sp_b_to_four_momentum()
+                oParticle._four_mom_to_four_mom_d()
+            except (TypeError, SystemError):
+                oParticle._four_mom = None
+                oParticle._four_mom_d = None
 
     def analytical_subs_d(self):
         multiplicity = len(self)

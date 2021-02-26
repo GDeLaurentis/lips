@@ -100,7 +100,7 @@ class LipsIdeal(object):
                              "$"]
         singular_command = "\n".join(singular_commands)
         # print(singular_command)
-        test = subprocess.Popen(["timeout", "2", "Singular", "--quiet", "--execute", singular_command], stdout=subprocess.PIPE)
+        test = subprocess.Popen(["timeout", "30", "Singular", "--quiet", "--execute", singular_command], stdout=subprocess.PIPE)
         output = test.communicate()[0]
         output = [line.replace(",", "") for line in output.decode("utf-8").split("\n") if line not in singular_clean_up_lines]
         return output
