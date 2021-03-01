@@ -12,6 +12,7 @@ import sympy
 import subprocess
 
 from copy import deepcopy
+from cached_property import cached_property
 from lips.tools import flatten
 from lips.algebraic_geometry.tools import lips_symbols, singular_clean_up_lines
 
@@ -77,7 +78,7 @@ class LipsIdeal(object):
         else:
             return "0"
 
-    @property
+    @cached_property
     def indepSets(self):
         singular_commands = ["ring r = " + self.singular_field_notation + ", (" + ", ".join(map(str, lips_symbols(self.multiplicity))) + "), dp;",
                              "ideal i = " + ",".join(map(str, self.generators)) + ";",
@@ -88,12 +89,15 @@ class LipsIdeal(object):
         # print(singular_command)
         test = subprocess.Popen(["timeout", "30", "Singular", "--quiet", "--execute", singular_command], stdout=subprocess.PIPE)
         output = test.communicate()[0]
+        if 'halt' in output.decode("utf-8"):
+            raise TimeoutError
         indepSets = [tuple(map(int, line.replace(" ", "").split(","))) for line in output.decode("utf-8").split("\n") if line not in singular_clean_up_lines and ":" not in line]
         return indepSets
 
-    @property
+    @cached_property
     def groebner_basis(self):
-        singular_commands = ["ring r = " + self.singular_field_notation + ", (" + ", ".join(map(str, lips_symbols(self.multiplicity))) + "), lp;",
+        singular_commands = ["option(redSB);",
+                             "ring r = " + self.singular_field_notation + ", (" + ", ".join(map(str, lips_symbols(self.multiplicity))) + "), lp;",
                              "ideal i = " + ",".join(map(str, self.generators)) + ";",
                              "ideal gb = groebner(i);",
                              "print(gb);",
@@ -102,10 +106,12 @@ class LipsIdeal(object):
         # print(singular_command)
         test = subprocess.Popen(["timeout", "30", "Singular", "--quiet", "--execute", singular_command], stdout=subprocess.PIPE)
         output = test.communicate()[0]
+        if 'halt' in output.decode("utf-8"):
+            raise TimeoutError
         output = [line.replace(",", "") for line in output.decode("utf-8").split("\n") if line not in singular_clean_up_lines]
         return output
 
-    @property
+    @cached_property
     def primary_decomposition(self):
         singular_commands = ["LIB \"primdec.lib\";",
                              "ring r = 0, (" + ", ".join(map(str, lips_symbols(self.multiplicity))) + "), dp;",
@@ -168,7 +174,7 @@ class LipsIdeal(object):
 
 
 def poly_image(polynomial, rule):
-    polynomial = re.sub(r"(\d)", lambda match: rule[0][int(match.group(0)) - 1], polynomial)
+    polynomial = re.sub(r"(?<=[abcd])(\d)", lambda match: rule[0][int(match.group(0)) - 1], polynomial)
     if rule[1] is True:
         polynomial = polynomial.replace("a", "A").replace("b", "B").replace("c", "a").replace("d", "b").replace("A", "c").replace("B", "d")
     return polynomial
