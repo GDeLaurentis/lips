@@ -65,6 +65,9 @@ class ModP(object):
     def __int__(self):
         return self.n
 
+    def __float__(self):
+        return float(self.n)
+
     def __abs__(self):
         return 0 if self.n == 0 else 1
 
