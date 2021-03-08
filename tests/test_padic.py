@@ -35,6 +35,30 @@ def test_addition():
 
 
 def test_addition_with_zero():
-    p, k = 10007, 3
-    a = PAdic(random.randrange(0, 10000), p, k)
+    # positive valuation
+    p, k, n = 10007, 3, 2
+    a = PAdic(random.randrange(0, 10000), p, k, n)
     assert a + 0 == a
+    # zero valuation
+    p, k, n = 10007, 3, 0
+    a = PAdic(random.randrange(0, 10000), p, k, n)
+    assert a + 0 == a
+    # negative valuation
+    p, k, n = 10007, 3, -2
+    a = PAdic(random.randrange(0, 10000), p, k, n)
+    assert a + 0 == a
+
+
+def test_multiplication_by_one():
+    # positive valuation
+    p, k, n = 10007, 3, 2
+    a = PAdic(random.randrange(0, 10000), p, k, n)
+    assert a * 1 == a
+    # zero valuation
+    p, k, n = 10007, 3, 0
+    a = PAdic(random.randrange(0, 10000), p, k, n)
+    assert a * 1 == a
+    # negative valuation
+    p, k, n = 10007, 3, -2
+    a = PAdic(random.randrange(0, 10000), p, k, n)
+    assert a * 1 == a
