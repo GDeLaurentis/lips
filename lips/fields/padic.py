@@ -13,6 +13,7 @@ import fractions
 from .finite_field import ModP
 
 fixed_relative_precision = False
+all_precision_loss_warning = False
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -56,10 +57,10 @@ def padicfy(func):
         if type(other) is PAdic:
             return func(self, other)
         elif type(other) in [int, ModP, numpy.int64] or str(type(other)) == "long":
-            return func(self, PAdic(other, self.p, (self.n + self.k) if (self.n + self.k) > 0 else 0))
+            return func(self, PAdic(other, self.p, max((self.n + self.k, self.k))))
         elif type(other) is fractions.Fraction:
-            return func(self, PAdic(other.numerator, self.p, (self.n + self.k) if (self.n + self.k) > 0 else 0) /
-                        PAdic(other.denominator, self.p, (self.n + self.k) if (self.n + self.k) > 0 else 0))
+            return func(self, PAdic(other.numerator, self.p, max((self.n + self.k, self.k))) /
+                        PAdic(other.denominator, self.p, max((self.n + self.k, self.k))))
         else:
             return NotImplemented
     return wrapper_padicfy
@@ -101,6 +102,8 @@ class PAdic(object):
                 # where precision loss actually means random digits get added.
                 self.num = self.num + p ** self.k * full_range_random_padic_filling(self.p, factors_of_p)
                 self.k = self.k + factors_of_p
+            if all_precision_loss_warning and self.k == 0:
+                print("Lost all precision @", self)
         else:
             raise Exception("Invalid p-adic initialisation")
 
