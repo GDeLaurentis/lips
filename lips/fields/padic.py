@@ -255,3 +255,17 @@ class PAdic(object):
             return root_2_res * root_2_res
         else:
             return self * (self ** (n - 1))
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+
+def padic_log(w, base=None):
+    """log_p(w) = log_p(w^(p - 1)) / (p - 1), with w^(p - 1) = 1 + x, x ~ O(p)."""
+    if base is None:
+        return padic_log(w, w.p)
+    if base is w.p:
+        x = w ** (w.p - 1) - 1
+        return sum([(-1) ** (n + 1) * x ** n / n for n in range(1, w.k)]) / (w.p - 1)
+    else:
+        return padic_log(w, base=w.p) / padic_log(PAdic(base, w.p, w.k), base=w.p)
