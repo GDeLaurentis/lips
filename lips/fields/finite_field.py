@@ -16,10 +16,8 @@ import fractions
 def ModPfy(func):
     @functools.wraps(func)
     def wrapper_ModPfy(self, other):
-        if isinteger(other) or str(type(other)) == "long":
+        if isinteger(other) or str(type(other)) == "long" or isinstance(other, fractions.Fraction):
             return func(self, ModP(other, self.p))
-        elif isinstance(other, fractions.Fraction):
-            return func(self, ModP(other.numerator, self.p) / ModP(other.denominator, self.p))
         elif isinstance(other, ModP):
             if self.p != other.p:
                 raise ValueError("Numbers belong to different finite fields: FF{} and FF{}".format(self.p, other.p))
@@ -46,8 +44,13 @@ class ModP(object):
         if p is not None and isinteger(n) and isinteger(p):
             self.n = int(n) % int(p)
             self.p = int(p)
+        elif p is not None and isinstance(n, fractions.Fraction):
+            self_ = ModP(n.numerator, p) / ModP(n.denominator, p)
+            self.n = self_.n
+            self.p = self_.p
         elif p is None and isinstance(n, ModP):
-            self = n
+            self.n = n.n
+            self.p = n.p
         elif p is None and isinstance(n, PAdic):
             self.n = int(n)
             self.p = n.p ** n.k
