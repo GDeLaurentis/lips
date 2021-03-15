@@ -13,5 +13,7 @@ setup(
     #                       'lips/hardcoded_limits/DoubleCollinearLimit_D&S_e', ])],
     install_requires=['numpy',
                       'mpmath',
-                      'sympy', ],
+                      'sympy',
+                      'cached_property',
+    ],
 )
