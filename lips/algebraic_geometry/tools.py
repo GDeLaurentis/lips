@@ -138,4 +138,4 @@ def lips_symbols(multiplicity):
     lc = sympy.symbols('c1:{}'.format(multiplicity + 1))
     ld = sympy.symbols('d1:{}'.format(multiplicity + 1))
     iters = map(iter, [la, lb, lc, ld])
-    return list(next(it) for it in itertools.cycle(iters))
+    return list(next(it) for it in itertools.islice(itertools.cycle(iters), 4 * multiplicity))
