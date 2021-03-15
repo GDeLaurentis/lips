@@ -35,6 +35,7 @@ if which('Singular') is not None:
                                                          "Auf Wiedersehen."]
 else:
     singular_found = False
+    singular_clean_up_lines = None
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
