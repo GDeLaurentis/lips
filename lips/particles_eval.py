@@ -19,7 +19,7 @@ from lips.fields import GaussianRational, ModP, PAdic
 
 operators = {ast.Add: op.add, ast.Sub: op.sub, ast.Mult: op.mul,
              ast.Div: op.truediv, ast.Pow: op.pow, ast.BitXor: op.xor,
-             ast.USub: op.neg}
+             ast.USub: op.neg, ast.UAdd: op.pos}
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -51,6 +51,7 @@ class Particles_Eval:
         string = string.replace("}+\\", ")+")
         string = string.replace("\n", "").replace(" ", "")
         string = re.sub(r"}$", ")", string)
+        string = string.replace("²", "^2", ).replace("³", "^3", ).replace("⁴", "^4")
         string = string.replace("^", "**")
         string = re.sub(r"{([\d\|]+)}", r"\1", string)
         string = pA2bis.sub(r"⟨\1|\2⟩", string)
