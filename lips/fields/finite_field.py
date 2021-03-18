@@ -40,7 +40,6 @@ class ModP(object):
     __slots__ = 'n', 'p'
 
     def __init__(self, n, p=None):
-        from .padic import PAdic
         if p is not None and isinteger(n) and isinteger(p):
             self.n = int(n) % int(p)
             self.p = int(p)
@@ -51,9 +50,6 @@ class ModP(object):
         elif p is None and isinstance(n, ModP):
             self.n = n.n
             self.p = n.p
-        elif p is None and isinstance(n, PAdic):
-            self.n = int(n)
-            self.p = n.p ** n.k
         elif p is None:
             self.n, self.p = self.__rstr__(n)
         else:

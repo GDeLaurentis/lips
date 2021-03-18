@@ -16,16 +16,15 @@ from lips import Particles
 
 mpc = Field('mpc', 0, 300)
 modp = Field('finite field', 2 ** 31 - 1, 1)
-padic = Field('padic', 2 ** 31 - 1, 6)
 
 
 @pytest.mark.parametrize(
     "multiplicity, field",
     [
-        (4, mpc), (4, modp), (4, padic),
-        (5, mpc), (5, modp), (5, padic),
-        (6, mpc), (6, modp), (6, padic),
-        (7, mpc), (7, modp), (7, padic),
+        (4, mpc), (4, modp),
+        (5, mpc), (5, modp),
+        (6, mpc), (6, modp),
+        (7, mpc), (7, modp),
     ]
 )
 def test_particles_instantiation(multiplicity, field):

@@ -25,7 +25,7 @@ class Particles_SetPair:
 
     # PRIVATE METHODS
 
-    def _set_pair(self, t_s1, t_v1, t_s2, t_v2):
+    def set_pair(self, t_s1, t_v1, t_s2, t_v2):
         """Constructs a doubly singular phase space point."""
         new_invs = self._set_pair_inner(t_s1, t_v1, t_s2, t_v2)     # set it --- note: if a list is returned then switch invariants to those
         if type(new_invs) is list:                                  # used for example for s_123&⟨1|(2+3)|1] ---> s_123&⟨2|3⟩
@@ -189,8 +189,8 @@ class Particles_SetPair:
             flipped2 = False if overlap[0] == cd[0] else True
         else:
             flipped1 = flipped2 = False
-        self._set(t_s1, t_v1 if flipped1 is False else -t_v1, fix_mom=False)
-        self._set(t_s2, t_v2 if flipped2 is False else -t_v2, fix_mom=False)
+        self.set(t_s1, t_v1 if flipped1 is False else -t_v1, fix_mom=False)
+        self.set(t_s2, t_v2 if flipped2 is False else -t_v2, fix_mom=False)
         plist = list(map(int, self._complementary(list(set([str(ab[0]), str(ab[1]), str(cd[0]), str(cd[1])])))))
         if len(plist) >= 2:
             self.fix_mom_cons(plist[0], plist[1])
@@ -268,8 +268,8 @@ class Particles_SetPair:
         lNB, lNBs, lNBms, lNBe = self._get_lNB(t_s2)
         _tuple, use_axis = self._can_fix_mom_cons(t_s1, t_s2)
         # print(_tuple, use_axis, t_s1, t_s2, use_mode)                   # debugging tool
-        self._set(t_s1, t_v1, fix_mom=False)
-        self._set(t_s2, t_v2, fix_mom=False, mode=use_mode)
+        self.set(t_s1, t_v1, fix_mom=False)
+        self.set(t_s2, t_v2, fix_mom=False, mode=use_mode)
         if _tuple is not False:
             self.fix_mom_cons(_tuple[0], _tuple[1], real_momenta=False, axis=use_axis)
 
@@ -306,11 +306,11 @@ class Particles_SetPair:
             else:                                               # less than 6 is not supposed to happen
                 raise myException("S_ijk called with 5 particles!")
         if t_s1[0] == "⟨":                                      # set it using mode 2 (this reduces the number of invariants that go to zero)
-            self._set(t_s1, t_v1, fix_mom=False)
-            self._set(t_s2, t_v2, fix_mom=False, mode=2)
+            self.set(t_s1, t_v1, fix_mom=False)
+            self.set(t_s2, t_v2, fix_mom=False, mode=2)
         elif t_s1[0] == "[":                                    # set it using mode 1 (this reduces the number of invariants that go to zero)
-            self._set(t_s1, t_v1, fix_mom=False)
-            self._set(t_s2, t_v2, fix_mom=False, mode=1)
+            self.set(t_s1, t_v1, fix_mom=False)
+            self.set(t_s2, t_v2, fix_mom=False, mode=1)
         plist = list(map(int, self._complementary(list(set([str(entry) for entry in ijk + ab])))))
         if len(plist) >= 2:
             self.fix_mom_cons(plist[0], plist[1])
@@ -361,11 +361,11 @@ class Particles_SetPair:
             t_s2 = "Δ_{}{}{}".format(NonOverlappingLists[0][0], NonOverlappingLists[1][0], NonOverlappingLists[2][0])
         else:
             t_s2 = "Δ_{}|{}|{}".format("".join(map(str, NonOverlappingLists[0])), "".join(map(str, NonOverlappingLists[1])), "".join(map(str, NonOverlappingLists[2])))
-        self._set(t_s1, t_v1, fix_mom=False)
+        self.set(t_s1, t_v1, fix_mom=False)
         if t_s1[0] == "⟨":
-            self._set(t_s2, t_v2, fix_mom=True, mode=2)
+            self.set(t_s2, t_v2, fix_mom=True, mode=2)
         else:
-            self._set(t_s2, t_v2, fix_mom=True, mode=1)
+            self.set(t_s2, t_v2, fix_mom=True, mode=1)
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
@@ -572,8 +572,8 @@ class Particles_SetPair:
             t_s1, t_s2 = t_s2, t_s1
             t_v1, t_v2 = t_v2, t_v1
 
-        self._set(t_s1, t_v1, fix_mom=False)
-        self._set(t_s2, t_v2, fix_mom=False, mode=use_mode)
+        self.set(t_s1, t_v1, fix_mom=False)
+        self.set(t_s2, t_v2, fix_mom=False, mode=use_mode)
 
         if can_fix_mom_cons(t_s1, t_s2):
             self.fix_mom_cons(*how_to_fix_mom_cons(t_s1, t_s2))
@@ -650,8 +650,8 @@ class Particles_SetPair:
         l3Bs, l3Bm, l3Be = int(l3B[0]), list(map(int, l3B[1])), int(l3B[2])
         l3B = list(map(int, [item for sublist in l3B for item in sublist]))
         free = list(map(int, self._complementary(list(map(str, list(set(ijk + l3B)))))))
-        self._set(t_s2, t_v2, fix_mom=False)               # set it
-        self._set(t_s1, t_v1, fix_mom=False, mode=use_mode)
+        self.set(t_s2, t_v2, fix_mom=False)               # set it
+        self.set(t_s1, t_v1, fix_mom=False, mode=use_mode)
         if len(free) >= 2:
             self.fix_mom_cons(free[0], free[1])
         elif len(free) == 1:
@@ -771,15 +771,15 @@ class Particles_SetPair:
         else:
             NonOverlappingLists = self.ijk_to_3NonOverlappingLists(list(map(int, match_list[0])))
 
-        self._set(t_s1, t_v1, fix_mom=False)
+        self.set(t_s1, t_v1, fix_mom=False)
         if t_s1[0] == "⟨":
             if NonOverlappingLists[0][0] in l3B[1:]:
-                self._set(t_s2, t_v2, fix_mom=False, mode=3)
+                self.set(t_s2, t_v2, fix_mom=False, mode=3)
             else:
-                self._set(t_s2, t_v2, fix_mom=False, mode=2)
+                self.set(t_s2, t_v2, fix_mom=False, mode=2)
             self.fix_mom_cons(NonOverlappingLists[2][0], NonOverlappingLists[2][1], real_momenta=False, axis=1)
         else:
-            self._set(t_s2, t_v2, fix_mom=False, mode=1)
+            self.set(t_s2, t_v2, fix_mom=False, mode=1)
             self.fix_mom_cons(NonOverlappingLists[2][0], NonOverlappingLists[2][1], real_momenta=False, axis=2)
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -819,8 +819,8 @@ class Particles_SetPair:
             for i in range(len(lmn)):
                 t_s2 += '{}'.format(lmn[i])
             return self._set_pair_inner(t_s1, t_v1, t_s2, t_v2)
-        self._set(t_s1, t_v1, fix_mom=False, mode=1)       # set it
-        self._set(t_s2, t_v2, fix_mom=False, mode=2)
+        self.set(t_s1, t_v1, fix_mom=False, mode=1)       # set it
+        self.set(t_s2, t_v2, fix_mom=False, mode=2)
         if len(plist) >= 2:
             self.fix_mom_cons(plist[0], plist[1])
         else:
@@ -907,8 +907,8 @@ class Particles_SetPair:
     def _set_pair_NB_and_Dijk(self, t_s1, t_v1, t_s2, t_v2):  # Current failed: 8/20 @ 6pt
 
         if t_s1 == "⟨2|(1+7)|(3+4)|2⟩" and t_s2 == "Δ_735":
-            self._set("⟨2|(1+7)|(3+4)|2⟩", t_v1, fix_mom=False)
-            self._set("Δ_735", t_v2, mode=6, fix_mom=False)
+            self.set("⟨2|(1+7)|(3+4)|2⟩", t_v1, fix_mom=False)
+            self.set("Δ_735", t_v2, mode=6, fix_mom=False)
             self.fix_mom_cons(5, 6)
         else:
             return "Not implemented."
