@@ -5,6 +5,7 @@ particles_compute.pyc
 particles_eval.pyc
 particles_set.pyc
 particles_set_pair.pyc
+particles_variety.pyc
 tools.pyc
 gaussian_rationals.pyc
 finite_field.pyc
