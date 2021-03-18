@@ -70,7 +70,7 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
 
     def __hash__(self):
         """Hash function: hash string of concatenated momenta."""
-        return hash("".join(flatten([map(str, oParticle.r2_sp) for oParticle in self])))
+        return hash(" ".join(flatten([list(map(str, flatten(oParticle.r2_sp))) for oParticle in self])))
 
     # PUBLIC METHODS
 
