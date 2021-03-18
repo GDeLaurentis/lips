@@ -9,8 +9,6 @@ from __future__ import unicode_literals
 
 import mpmath
 
-from lips.fields.padic import PAdic
-
 mpmath.mp.dps = 300
 
 
@@ -48,8 +46,8 @@ class Field(object):
 
     @name.setter
     def name(self, value):
-        if value not in ['mpc', 'gaussian rational', 'finite field', 'padic']:
-            raise Exception("Field must be one of 'mpc', 'gaussian rational', 'finite field', 'padic'.")
+        if value not in ['mpc', 'gaussian rational', 'finite field', ]:
+            raise Exception("Field must be one of 'mpc', 'gaussian rational', 'finite field'.")
         else:
             self._name = value
 
@@ -86,14 +84,12 @@ class Field(object):
             return 0
         elif self.name == 'mpc':
             return mpmath.mpf('10e-{}'.format(int(min([0.95 * mpmath.mp.dps, mpmath.mp.dps - 4]))))
-        elif self.name == 'padic':
-            return PAdic(0, self.characteristic, 0, self.digits)
 
     @property
     def singular_notation(self):
         if self.name == 'mpc':
             return '(complex,{},I)'.format(self.digits - 5)
-        elif self.name in ['finite field', 'padic']:
+        elif self.name in ['finite field', ]:
             return str(self.characteristic)
         else:
             return None

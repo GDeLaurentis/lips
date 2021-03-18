@@ -15,7 +15,7 @@ import mpmath
 import operator as op
 
 from fractions import Fraction
-from lips.fields import GaussianRational, ModP, PAdic
+from lips.fields import GaussianRational, ModP
 
 operators = {ast.Add: op.add, ast.Sub: op.sub, ast.Mult: op.mul,
              ast.Div: op.truediv, ast.Pow: op.pow, ast.BitXor: op.xor,
@@ -105,9 +105,6 @@ def _eval_node(node, locals_={}):
             else:
                 argument = _eval_node(node.args[0], locals_)
             allowed_func_call = "{function}.{method}('{argument}')".format(function=function, method=method, argument=argument)
-        elif isinstance(node.func, ast.Name) and node.func.id == 'PAdic':
-            function, arguments = 'PAdic', [arg.n for arg in node.args]
-            allowed_func_call = "{function}({arguments})".format(function=function, arguments=", ".join(map(str, arguments)))
         elif isinstance(node.func, ast.Name) and node.func.id == 'Fraction':
             function, arguments = 'Fraction', [arg.n for arg in node.args]
             allowed_func_call = "{function}({arguments})".format(function=function, arguments=", ".join(map(str, arguments)))
@@ -115,7 +112,7 @@ def _eval_node(node, locals_={}):
             raise TypeError(node)
         return eval(allowed_func_call)
     elif isinstance(node, ast.Name):
-        if node.id in locals() and type(locals()[node.id]) in [int, float, GaussianRational, PAdic, ModP, mpmath.mpc, mpmath.mpc, Fraction]:
+        if node.id in locals() and type(locals()[node.id]) in [int, float, GaussianRational, ModP, mpmath.mpc, mpmath.mpc, Fraction]:
             return eval(node.id)
         else:
             raise TypeError(node)

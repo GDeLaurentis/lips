@@ -20,7 +20,6 @@ import lips
 from .fields.field import Field
 from .fields.gaussian_rationals import GaussianRational, rand_rat_frac
 from .fields.finite_field import ModP
-from .fields.padic import PAdic
 from .tools import MinkowskiMetric, LeviCivita, rand_frac, Pauli, Pauli_bar
 
 
@@ -41,8 +40,6 @@ class Particle(object):
             self.randomise_rational()
         elif four_mom is None and r2_sp is None and field.name == "finite field":
             self.randomise_finite_field()
-        elif four_mom is None and r2_sp is None and field.name == "padic":
-            self.randomise_padic()
         elif four_mom is not None:
             self.four_mom = four_mom
         elif r2_sp is not None:
@@ -315,14 +312,6 @@ class Particle(object):
         self._r_sp_d_to_r_sp_u()
         self._four_mom = numpy.array([None, None, None, None])
         self.l_sp_d = numpy.array([ModP(random.randrange(0, p), p), ModP(random.randrange(0, p), p)], dtype=object)
-
-    def randomise_padic(self):
-        p, k = self.field.characteristic, self.field.digits
-        self._r_sp_d = numpy.array([PAdic(random.randrange(0, p ** k - 1), p, k), PAdic(random.randrange(0, p ** k - 1), p, k)], dtype=object)
-        self._r_sp_d.shape = (2, 1)
-        self._r_sp_d_to_r_sp_u()
-        self._four_mom = numpy.array([None, None, None, None])
-        self.l_sp_d = numpy.array([PAdic(random.randrange(0, p ** k - 1), p, k), PAdic(random.randrange(0, p ** k - 1), p, k)], dtype=object)
 
     def angles_for_squares(self):
         """Flips left and right spinors."""
