@@ -6,6 +6,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import pytest
+import mpmath
 
 from lips import Particles
 from lips.tools import myException
@@ -13,6 +14,7 @@ from lips.tools import myException
 from antares.core.invariants import Invariants
 from antares.core.tools import mapThreads, retry
 
+mpmath.mp.dps = 300
 UseParallelisation = True
 Cores = 6
 

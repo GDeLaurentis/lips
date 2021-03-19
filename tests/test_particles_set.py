@@ -7,12 +7,14 @@ from __future__ import unicode_literals
 
 import sympy
 import pytest
+import mpmath
 
 from lips import Particles
 
 from antares.core.invariants import Invariants
 from antares.core.tools import mapThreads
 
+mpmath.mp.dps = 300
 UseParallelisation = True
 Cores = 6
 
