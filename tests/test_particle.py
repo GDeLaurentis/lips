@@ -6,9 +6,12 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import numpy
+import mpmath
 
 from lips import Particle
 from lips.tools import flatten
+
+mpmath.mp.dps = 300
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
