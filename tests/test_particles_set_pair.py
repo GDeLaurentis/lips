@@ -10,8 +10,8 @@ import mpmath
 
 from lips import Particles
 from lips.tools import myException
+from lips.invariants import Invariants
 
-from antares.core.invariants import Invariants
 from antares.core.tools import mapThreads, retry
 
 mpmath.mp.dps = 300
