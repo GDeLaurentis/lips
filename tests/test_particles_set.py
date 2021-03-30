@@ -10,8 +10,8 @@ import pytest
 import mpmath
 
 from lips import Particles
+from lips.invariants import Invariants
 
-from antares.core.invariants import Invariants
 from antares.core.tools import mapThreads
 
 mpmath.mp.dps = 300
