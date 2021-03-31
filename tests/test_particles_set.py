@@ -12,7 +12,7 @@ import mpmath
 from lips import Particles
 from lips.invariants import Invariants
 
-from antares.core.tools import mapThreads
+from tools import mapThreads
 
 mpmath.mp.dps = 300
 UseParallelisation = True
