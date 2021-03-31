@@ -116,14 +116,15 @@ class Invariants(object):
 
     @property
     def pw_cache(self):
-        pw_cache = "~/.lips_cache/n={}".format(self.multiplicity)
+        home = os.path.expanduser("~")
+        pw_cache = home + "/.cache/lips/n={}".format(self.multiplicity)
         if not os.path.exists(pw_cache):
             os.makedirs(pw_cache)
         return pw_cache
 
     @property
     def pw_invariants(self):
-        return self.pw_cache + "/Invariants"
+        return self.pw_cache + "/invariants"
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -242,7 +243,7 @@ def all_strings(n, temp_string):
             a = abcd.group('start')
             bc = abcd.group('middle')
             d = abcd.group('end')
-            bc = re.split('[\)|\|]', bc)
+            bc = re.split(r'[\)|\|]', bc)
             bc = [entry.replace('|', '') for entry in bc]
             bc = [entry.replace('(', '') for entry in bc]
             bc = [entry for entry in bc if entry != '']
@@ -286,7 +287,7 @@ def all_strings(n, temp_string):
             d = abcd.group('end')
             if a != d:
                 continue
-            bc = re.split('[\)|\|]', bc)
+            bc = re.split(r'[\)|\|]', bc)
             bc = [entry.replace('|', '') for entry in bc]
             bc = [entry.replace('(', '') for entry in bc]
             bc = [entry for entry in bc if entry != '']
@@ -440,7 +441,7 @@ def Purge4Brackets(n, invs_4, FurtherRestrict4Brackets):
         a = int(abcd.group('start'))
         bc = abcd.group('middle')
         d = int(abcd.group('end'))
-        bc = re.split('[\)|\|]', bc)
+        bc = re.split(r'[\)|\|]', bc)
         bc = [entry.replace('|', '') for entry in bc]
         bc = [entry.replace('(', '') for entry in bc]
         bc = [entry for entry in bc if entry != '']
@@ -500,7 +501,7 @@ def Brackets4IsIndividuallyNeighbouring(n, invariant):
     a = int(abcd.group('start'))
     bc = abcd.group('middle')
     d = int(abcd.group('end'))
-    bc = re.split('[\)|\|]', bc)
+    bc = re.split(r'[\)|\|]', bc)
     bc = [entry.replace('|', '') for entry in bc]
     bc = [entry.replace('(', '') for entry in bc]
     bc = [entry for entry in bc if entry != '']
@@ -559,7 +560,7 @@ def Purge3Brackets(n, invs_3):
         a = int(abcd.group('start'))
         bc = abcd.group('middle')
         d = int(abcd.group('end'))
-        bc = re.split('[\)|\|]', bc)
+        bc = re.split(r'[\)|\|]', bc)
         bc = [entry.replace('|', '') for entry in bc]
         bc = [entry.replace('(', '') for entry in bc]
         bc = [entry for entry in bc if entry != '']
