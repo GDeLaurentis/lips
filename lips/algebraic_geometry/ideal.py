@@ -32,7 +32,15 @@ class LipsIdeal(object):
             from lips import Particles
             oParticles = Particles(multiplicity)
             oParticles.make_analytical_d()
-            self.generators = [str(sympy.Poly(sympy.expand(4 * oParticles.compute(invariant)))).replace("Poly(", "").split(", ")[0] for invariant in invariants_or_polynomials]
+            self.generators = []
+            for invariant in invariants_or_polynomials:
+                poly_or_polys = 4 * oParticles(invariant)
+                if hasattr(poly_or_polys, 'shape'):
+                    polys = flatten(poly_or_polys)
+                    for poly in polys:
+                        self.generators += [str(sympy.Poly(sympy.expand(poly))).replace("Poly(", "").split(", ")[0]]
+                else:
+                    self.generators += [str(sympy.Poly(sympy.expand(poly_or_polys))).replace("Poly(", "").split(", ")[0]]
             if momentum_conservation is True:
                 self.generators += [str(sympy.Poly(entry)).replace("Poly(", "").split(", ")[0] for entry in flatten(oParticles.total_mom)]
 
