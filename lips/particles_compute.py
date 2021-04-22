@@ -19,7 +19,7 @@ import re
 import mpmath
 import sys
 
-from .tools import pSijk, pd5, pDijk, pOijk, pPijk, pA2, pS2, pNB, ptr5
+from .tools import pSijk, pd5, pDijk, pOijk, pPijk, pA2, pAu, pAd, pS2, pSu, pSd, pNB, ptr5
 
 if sys.version_info[0] > 2:
     unicode = str
@@ -126,9 +126,25 @@ class Particles_Compute:
             A, B = map(int, pA2.findall(temp_string)[0])
             return numpy.dot(self[A].r_sp_u, self[B].r_sp_d)[0, 0]
 
+        elif pAu.findall(temp_string) != []:                        # ⟨A|
+            A = int(pAu.findall(temp_string)[0])
+            return self[A].r_sp_u
+
+        elif pAd.findall(temp_string) != []:                        # |B⟩
+            B = int(pAd.findall(temp_string)[0])
+            return self[B].r_sp_d
+
         elif pS2.findall(temp_string) != []:                        # [A|B] -- contraction is down -> up : lambda_bar[A]_alpha_dot.lambda_bar[B]^alpha_dot
             A, B = map(int, pS2.findall(temp_string)[0])
             return numpy.dot(self[A].l_sp_d, self[B].l_sp_u)[0, 0]
+
+        elif pSu.findall(temp_string) != []:                        # |A]
+            A = int(pSu.findall(temp_string)[0])
+            return self[A].l_sp_u
+
+        elif pSd.findall(temp_string) != []:                        # [B|
+            B = int(pSd.findall(temp_string)[0])
+            return self[B].l_sp_d
 
         elif pNB.findall(temp_string) != []:                        # ⟨A|(B+C+..)..|D]
             abcd = pNB.search(temp_string)
