@@ -10,6 +10,7 @@ from __future__ import unicode_literals
 import re
 import sympy
 import subprocess
+import itertools
 
 from copy import deepcopy
 from cached_property import cached_property
@@ -21,7 +22,7 @@ from lips.algebraic_geometry.tools import lips_symbols, singular_clean_up_lines
 
 
 class LipsIdeal(object):
-    """Lorentz Invariant Ideal - based on co-variant spinor compontens."""
+    """Lorentz Invariant Ideal - based on spinor components."""
 
     def __init__(self, multiplicity, invariants_or_polynomials, momentum_conservation=True):
         """Initialises a fully analytical exact Ideal, either from a tuple of invariants, or from a list of polynomials."""
@@ -176,6 +177,68 @@ class LipsIdeal(object):
 
     def __eq__(self, other):
         return self.groebner_basis == other.groebner_basis
+
+    def __truediv__(self, other):
+        """Quotient of ideals."""
+        assert self.multiplicity == other.multiplicity
+        singular_commands = ["ring r1 = " + self.singular_field_notation + ", (" + ", ".join(map(str, lips_symbols(self.multiplicity))) + "), dp;",
+                             "ideal i = " + ",".join(map(str, self.generators)) + ";",
+                             "ideal j = " + ",".join(map(str, other.generators)) + ";",
+                             "ideal k = quotient(i, j);",
+                             "print(k);",
+                             "$"]
+        singular_command = "\n".join(singular_commands)
+        test = subprocess.Popen(["timeout", "30", "Singular", "--quiet", "--execute", singular_command], stdout=subprocess.PIPE)
+        output = test.communicate()[0]
+        if 'halt' in output.decode("utf-8"):
+            raise TimeoutError
+        output = [line.replace(",", "") for line in output.decode("utf-8").split("\n") if line not in singular_clean_up_lines]
+        return LipsIdeal(self.multiplicity, output, momentum_conservation=False)
+
+    def to_mom_cons_quotient_ring(self):
+        """Returns the generators in the quotient ring to momentum conservation """
+        singular_commands = ["ring r1 = " + self.singular_field_notation + ", (" + ", ".join(map(str, lips_symbols(self.multiplicity))) + "), dp;",
+                             "ideal i = " + ",".join(map(str, LipsIdeal(self.multiplicity, ()).generators)) + ";",
+                             "qring q = std(i);",
+                             "ideal j = " + ",".join(map(str, self.generators)) + ";",
+                             "print(minbase(j));",
+                             "$"]
+        singular_command = "\n".join(singular_commands)
+        # print(singular_command)
+        test = subprocess.Popen(["timeout", "30", "Singular", "--quiet", "--execute", singular_command], stdout=subprocess.PIPE)
+        output = test.communicate()[0]
+        if 'halt' in output.decode("utf-8"):
+            raise TimeoutError
+        output = [line.replace(",", "") for line in output.decode("utf-8").split("\n") if line not in singular_clean_up_lines]
+        return output
+
+    def to_subring_of_spinor_brackets(self):
+        """Returns the generators in the Lorentz invariant subring of spinor brackets."""
+        # this is done by elimination of variable in a base ring with both spinor components and spinor brackets
+        from lips import Particles
+        oParticles = Particles(self.multiplicity)
+        oParticles.make_analytical_d()
+        indices = range(1, self.multiplicity + 1)
+        pairs = list(itertools.combinations(indices, 2))
+        spas = ["⟨{}|{}⟩".format(*pair) for pair in pairs]
+        spbs = ["[{}|{}]".format(*pair) for pair in pairs]
+        singular_commands = ["ring r1 = " + self.singular_field_notation + ", (" + ", ".join(map(str, lips_symbols(self.multiplicity))) + ", " +
+                             ", ".join("A{}".format(i + 1) for i, spa in enumerate(spas)) + ", " + ", ".join("B{}".format(i + 1) for i, spb in enumerate(spbs)) + "), dp;",
+                             "ideal i1 = " + ",".join(map(str, self.generators)) + ";",
+                             "ideal i2 = " + (", ".join([str(oParticles(spa)) + "-A{}".format(i + 1) for i, spa in enumerate(spas)]) + ", " +
+                                              ", ". join([str(oParticles(spb)) + "-B{}".format(i + 1) for i, spb in enumerate(spbs)])) + ";",
+                             "ideal i3 = i1 + i2;",
+                             "ideal j = eliminate(i3, 1 .. 4 * {});".format(self.multiplicity),
+                             "print(groebner(j));",
+                             "$"]
+        singular_command = "\n".join(singular_commands)
+        # print(singular_command)
+        test = subprocess.Popen(["timeout", "30", "Singular", "--quiet", "--execute", singular_command], stdout=subprocess.PIPE)
+        output = test.communicate()[0]
+        if 'halt' in output.decode("utf-8"):
+            raise TimeoutError
+        output = [line.replace(",", "") for line in output.decode("utf-8").split("\n") if line not in singular_clean_up_lines]
+        return output
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
