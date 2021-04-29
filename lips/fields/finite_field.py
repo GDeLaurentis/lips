@@ -41,11 +41,18 @@ class ModP(object):
 
     def __init__(self, n, p=None):
         from .padic import PAdic
+        from .gaussian_rationals import GaussianRational
         if p is not None and isinteger(n) and isinteger(p):
             self.n = int(n) % int(p)
             self.p = int(p)
         elif p is not None and isinstance(n, fractions.Fraction):
             self_ = ModP(n.numerator, p) / ModP(n.denominator, p)
+            self.n = self_.n
+            self.p = self_.p
+        elif p is not None and isinstance(n, GaussianRational):
+            if n.imag != 0:
+                raise ValueError("GaussianRational to ModP conversion requires zero part.")
+            self_ = ModP(n.real.numerator, p) / ModP(n.real.denominator, p)
             self.n = self_.n
             self.p = self_.p
         elif p is None and isinstance(n, ModP):
