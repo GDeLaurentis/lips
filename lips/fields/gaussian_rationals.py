@@ -57,6 +57,12 @@ class GaussianRational(object):
     __slots__ = ('real', 'imag')
 
     def __init__(self, fraction_real, fraction_imag):
+        if isinstance(fraction_real, int):
+            fraction_real = Fraction(fraction_real)
+        if isinstance(fraction_imag, int):
+            fraction_imag = Fraction(fraction_imag)
+        if not (isinstance(fraction_real, Fraction) and isinstance(fraction_imag, Fraction)):
+            raise ValueError("Gaussian Rational invalid initialisation", fraction_real, fraction_imag)
         self.real = fraction_real
         self.imag = fraction_imag
 
