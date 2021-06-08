@@ -2,7 +2,7 @@
 import re
 
 repo_owner = "GDeLaurentis"
-repo_name = "learning-github-badges"
+repo_name = "lips-dev"
 
 
 def update_coverage_badge():
@@ -15,10 +15,10 @@ def update_coverage_badge():
     # obtain colour of badge
     coverage_steps = {
         100: "brightgreen",
-        80: "green",
-        60: "greenyellow",
-        40: "yellow",
-        20: "orange",
+        90: "green",
+        80: "greenyellow",
+        70: "yellow",
+        50: "orange",
         0: "red",
     }
     for key in sorted(coverage_steps.keys())[::-1]:

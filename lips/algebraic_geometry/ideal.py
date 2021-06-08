@@ -133,6 +133,8 @@ class LipsIdeal(object):
         test = subprocess.Popen(["timeout", "600", "Singular", "--quiet", "--execute", singular_command], stdout=subprocess.PIPE)
         output = test.communicate()[0]
         output = [line.replace(",", "") for line in output.decode("utf-8").split("\n") if line not in singular_clean_up_lines]
+        if output == ['halt 1']:
+            raise TimeoutError
         # print(output)  # ['halt 1']
 
         def clean_up(string):

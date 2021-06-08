@@ -20,5 +20,6 @@ from .particle import Particle                   # noqa
 from .particles import Particles                 # noqa
 from .tools import myException, ldot, flatten    # noqa
 from .fields.field import field                  # noqa
+from .invariants import Invariants               # noqa
 
 spinor_convention = 'symmetric'  # or 'asymmetric'
