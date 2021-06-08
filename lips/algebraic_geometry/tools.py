@@ -55,7 +55,7 @@ def univariate_finite_field_solver(equation, root_dict, prime):
     """Returns all possible solutions of 'equation' over a finite field of cardinality 'prime'.
        If already satisfied returns True, if no solution exists returns False."""
     equation = sympy.sympify(equation).subs(root_dict)
-    if isinstance(equation, sympy.numbers.Integer) and equation % prime == 0:
+    if isinstance(equation, sympy.core.numbers.Integer) and equation % prime == 0:
         return True
     free_symbols = list(equation.free_symbols)
     if len(free_symbols) < 1:
