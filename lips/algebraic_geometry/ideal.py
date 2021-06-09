@@ -8,6 +8,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import re
+import numpy
 import sympy
 import subprocess
 import itertools
@@ -113,11 +114,8 @@ class LipsIdeal(object):
                              "$"]
         singular_command = "\n".join(singular_commands)
         # print(singular_command)
-        test = subprocess.Popen(["timeout", "30", "Singular", "--quiet", "--execute", singular_command], stdout=subprocess.PIPE)
-        output = test.communicate()[0]
-        if 'halt' in output.decode("utf-8"):
-            raise TimeoutError
-        output = [line.replace(",", "") for line in output.decode("utf-8").split("\n") if line not in singular_clean_up_lines]
+        output = execute_singular_command(singular_command)
+        output = [line.replace(",", "") for line in output.split("\n") if line not in singular_clean_up_lines]
         return output
 
     @cached_property
@@ -148,12 +146,23 @@ class LipsIdeal(object):
         primary_decomposed = [(entry[0].split(","), entry[1].split(",")) for entry in primary_decomposed]
         return primary_decomposed
 
-    def __contains__(self, invariant):
+    def __contains__(self, covariant):
         """Implements ideal membership."""
         from lips import Particles
         oParticles = Particles(self.multiplicity)
         oParticles.make_analytical_d()
-        invariant = str(sympy.expand(4 * oParticles.compute(invariant)))
+        poly_or_polys = 4 * oParticles(covariant)
+        if isinstance(poly_or_polys, numpy.ndarray):
+            return all(self.__scalar_contains__(poly) for poly in flatten(poly_or_polys))
+        else:
+            return self.__scalar_contains__(poly_or_polys)
+
+    def __scalar_contains__(self, covariant):
+        """Implements ideal membership at the scalar level."""
+        from lips import Particles
+        oParticles = Particles(self.multiplicity)
+        oParticles.make_analytical_d()
+        invariant = str(sympy.expand(covariant))
         singular_commands = ["ring r = 0, (" + ", ".join(map(str, lips_symbols(len(oParticles)))) + "), dp;",
                              "ideal i = " + ",".join(map(str, self.generators)) + ";",
                              "ideal gb = groebner(i);",
@@ -179,6 +188,26 @@ class LipsIdeal(object):
 
     def __eq__(self, other):
         return self.groebner_basis == other.groebner_basis
+
+    def __call__(self, *args):
+        if isinstance(args[0], str) and isinstance(args[1], bool):
+            return self.image(args)
+        else:
+            raise NotImplementedError("LipsIdeal called with args: ", args)
+
+    def __and__(self, other):
+        """Intersection of Ideals = Union of Varieties - This uses Python's set intersection operator '&'."""
+        assert self.multiplicity == other.multiplicity
+        singular_commands = ["ring r1 = " + self.singular_field_notation + ", (" + ", ".join(map(str, lips_symbols(self.multiplicity))) + "), dp;",
+                             "ideal i = " + ",".join(map(str, self.generators)) + ";",
+                             "ideal j = " + ",".join(map(str, other.generators)) + ";",
+                             "ideal k = intersect(i, j);",
+                             "print(k);",
+                             "$"]
+        singular_command = "\n".join(singular_commands)
+        output = execute_singular_command(singular_command)
+        output = [line.replace(",", "") for line in output.split("\n") if line not in singular_clean_up_lines]
+        return LipsIdeal(self.multiplicity, output, momentum_conservation=False)
 
     def __truediv__(self, other):
         """Quotient of ideals."""
@@ -207,11 +236,8 @@ class LipsIdeal(object):
                              "$"]
         singular_command = "\n".join(singular_commands)
         # print(singular_command)
-        test = subprocess.Popen(["timeout", "30", "Singular", "--quiet", "--execute", singular_command], stdout=subprocess.PIPE)
-        output = test.communicate()[0]
-        if 'halt' in output.decode("utf-8"):
-            raise TimeoutError
-        output = [line.replace(",", "") for line in output.decode("utf-8").split("\n") if line not in singular_clean_up_lines]
+        output = execute_singular_command(singular_command)
+        output = [line.replace(",", "") for line in output.split("\n") if line not in singular_clean_up_lines]
         return output
 
     def to_subring_of_spinor_brackets(self):
@@ -251,3 +277,20 @@ def poly_image(polynomial, rule):
     if rule[1] is True:
         polynomial = polynomial.replace("a", "A").replace("b", "B").replace("c", "a").replace("d", "b").replace("A", "c").replace("B", "d")
     return polynomial
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+
+def execute_singular_command(singular_command, timeout=60):
+    if len(singular_command) >= 131072:  # 2 ** 17
+        with open("/tmp/.singular_command", "w") as file:
+            file.write(singular_command)
+        test = subprocess.Popen(["timeout", str(timeout), "Singular", "--quiet", "/tmp/.singular_command"], stdout=subprocess.PIPE)
+    else:
+        test = subprocess.Popen(["timeout", str(timeout), "Singular", "--quiet", "--execute", singular_command], stdout=subprocess.PIPE)
+    output = test.communicate()[0]
+    output = output.decode("utf-8")
+    if 'halt' in output:
+        raise TimeoutError
+    return output
