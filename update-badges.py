@@ -30,7 +30,7 @@ def update_coverage_badge():
         lines = f.readlines()
     for i, line in enumerate(lines):
         if "![Coverage]" in line:
-            lines[i] = '[![Coverage](https://img.shields.io/badge/Coverage-{}%25-{}?labelColor=2a2f35)](https://github.com/{}/{}/actions)'.format(
+            lines[i] = '[![Coverage](https://img.shields.io/badge/Coverage-{}%25-{}?labelColor=2a2f35)](https://github.com/{}/{}/actions)\n'.format(
                 coverage_percentage, coverage_colour, repo_owner, repo_name)
     with open('README.md', 'w') as f:
         f.write("".join(lines))
