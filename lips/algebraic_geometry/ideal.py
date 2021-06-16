@@ -171,9 +171,8 @@ class LipsIdeal(object):
                              "$"]
         singular_command = "\n".join(singular_commands)
         # print(singular_command)
-        test = subprocess.Popen(["timeout", "2", "Singular", "--quiet", "--execute", singular_command], stdout=subprocess.PIPE)
-        output = test.communicate()[0]
-        output = [line.replace(",", "") for line in output.decode("utf-8").split("\n") if line not in singular_clean_up_lines]
+        output = execute_singular_command(singular_command)
+        output = [line.replace(",", "") for line in output.split("\n") if line not in singular_clean_up_lines]
         # print(output)
         if output == ['0']:
             return True
@@ -194,6 +193,20 @@ class LipsIdeal(object):
             return self.image(args)
         else:
             raise NotImplementedError("LipsIdeal called with args: ", args)
+
+    def __add__(self, other):
+        """Addition of Ideals = Intersection of Varieties."""
+        assert self.multiplicity == other.multiplicity
+        singular_commands = ["ring r1 = " + self.singular_field_notation + ", (" + ", ".join(map(str, lips_symbols(self.multiplicity))) + "), dp;",
+                             "ideal i = " + ",".join(map(str, self.generators)) + ";",
+                             "ideal j = " + ",".join(map(str, other.generators)) + ";",
+                             "ideal k = i + j;",
+                             "print(k);",
+                             "$"]
+        singular_command = "\n".join(singular_commands)
+        output = execute_singular_command(singular_command)
+        output = [line.replace(",", "") for line in output.split("\n") if line not in singular_clean_up_lines]
+        return LipsIdeal(self.multiplicity, output, momentum_conservation=False)
 
     def __and__(self, other):
         """Intersection of Ideals = Union of Varieties - This uses Python's set intersection operator '&'."""
@@ -219,11 +232,8 @@ class LipsIdeal(object):
                              "print(k);",
                              "$"]
         singular_command = "\n".join(singular_commands)
-        test = subprocess.Popen(["timeout", "30", "Singular", "--quiet", "--execute", singular_command], stdout=subprocess.PIPE)
-        output = test.communicate()[0]
-        if 'halt' in output.decode("utf-8"):
-            raise TimeoutError
-        output = [line.replace(",", "") for line in output.decode("utf-8").split("\n") if line not in singular_clean_up_lines]
+        output = execute_singular_command(singular_command)
+        output = [line.replace(",", "") for line in output.split("\n") if line not in singular_clean_up_lines]
         return LipsIdeal(self.multiplicity, output, momentum_conservation=False)
 
     def to_mom_cons_quotient_ring(self):
@@ -261,11 +271,8 @@ class LipsIdeal(object):
                              "$"]
         singular_command = "\n".join(singular_commands)
         # print(singular_command)
-        test = subprocess.Popen(["timeout", "30", "Singular", "--quiet", "--execute", singular_command], stdout=subprocess.PIPE)
-        output = test.communicate()[0]
-        if 'halt' in output.decode("utf-8"):
-            raise TimeoutError
-        output = [line.replace(",", "") for line in output.decode("utf-8").split("\n") if line not in singular_clean_up_lines]
+        output = execute_singular_command(singular_command)
+        output = [line.replace(",", "") for line in output.split("\n") if line not in singular_clean_up_lines]
         return output
 
 

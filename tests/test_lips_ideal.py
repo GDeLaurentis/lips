@@ -16,6 +16,24 @@ from lips.algebraic_geometry.tools import singular_found
 
 @pytest.mark.skipif(not singular_found, reason="singular not found")
 def test_LipsIdeal_membership():
-    assert "⟨1|3⟩" in LipsIdeal(5, ("⟨1|3⟩", "⟨3|(1+5)|3]", ))
-    assert "⟨2|4⟩" not in LipsIdeal(5, ("⟨1|3⟩", "⟨3|(1+5)|3]", ))
-    assert "⟨3|(1+5)|3]" in LipsIdeal(5, ("⟨1|3⟩", "⟨3|5⟩", ))
+    assert "⟨1|3⟩" in LipsIdeal(5, ("⟨1|3⟩", "⟨3|1+5|3]", ))
+    assert "⟨2|4⟩" not in LipsIdeal(5, ("⟨1|3⟩", "⟨3|1+5|3]", ))
+    assert "⟨3|1+5|3]" in LipsIdeal(5, ("⟨1|3⟩", "⟨3|5⟩", ))
+
+
+@pytest.mark.skipif(not singular_found, reason="singular not found")
+def test_LipsIdeal_intersection():
+    I1 = LipsIdeal(5, ('⟨1|2⟩', '⟨1|3⟩'))
+    P1 = LipsIdeal(5, ('⟨1|2⟩', '⟨1|3⟩', '⟨2|3⟩', '[4|5]'))
+    P2 = LipsIdeal(5, ('⟨1|', ))
+    P3 = LipsIdeal(5, ('⟨1|2⟩', '⟨1|3⟩', '⟨1|4⟩', '⟨1|5⟩', '⟨2|3⟩', '⟨2|4⟩', '⟨2|5⟩', '⟨3|4⟩', '⟨3|5⟩', '⟨4|5⟩'))
+    assert I1 == P1 & P2 & P3
+
+
+@pytest.mark.skipif(not singular_found, reason="singular not found")
+def test_LipsIdeal_quotient():
+    I1 = LipsIdeal(5, ('⟨1|2⟩', '⟨1|3⟩'))
+    P1 = LipsIdeal(5, ('⟨1|2⟩', '⟨1|3⟩', '⟨2|3⟩', '[4|5]'))
+    P2 = LipsIdeal(5, ('⟨1|', ))
+    P3 = LipsIdeal(5, ('⟨1|2⟩', '⟨1|3⟩', '⟨1|4⟩', '⟨1|5⟩', '⟨2|3⟩', '⟨2|4⟩', '⟨2|5⟩', '⟨3|4⟩', '⟨3|5⟩', '⟨4|5⟩'))
+    assert I1 / P1 / P2 == P3
