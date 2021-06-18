@@ -30,7 +30,7 @@ class LipsIdeal(Ideal):
         if isinstance(ring_or_multiplicity, int):
             self.multiplicity = ring_or_multiplicity
         elif isinstance(ring_or_multiplicity, Ring):
-            self.multiplicity = len(ring_or_multiplicity.variables) // 2
+            self.multiplicity = len(ring_or_multiplicity.variables) // 2 // 2
         else:
             raise Exception("Invalid LipsIdeal intialisation.")
 
@@ -112,7 +112,7 @@ class LipsIdeal(Ideal):
             raise NotImplementedError("LipsIdeal called with args: ", args)
 
     def image(self, rule):
-        return LipsIdeal(self.multiplicity, [poly_image(poly, rule) for poly in self.generators])
+        return LipsIdeal(self.ring, [covariant_poly_image(poly, rule) for poly in self.generators])
 
     def to_mom_cons_qring(self):
         oZeroIdeal = LipsIdeal(self.multiplicity, ())
@@ -129,7 +129,7 @@ class LipsIdeal(Ideal):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 
-def poly_image(polynomial, rule):
+def covariant_poly_image(polynomial, rule):
     polynomial = re.sub(r"(?<=[abcd])(\d)", lambda match: rule[0][int(match.group(0)) - 1], polynomial)
     if rule[1] is True:
         polynomial = polynomial.replace("a", "A").replace("b", "B").replace("c", "a").replace("d", "b").replace("A", "c").replace("B", "d")
