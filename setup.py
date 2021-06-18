@@ -12,6 +12,6 @@ setup(
     install_requires=['numpy',
                       'mpmath',
                       'sympy',
-                      'cached_property',
+                      'syngular',
     ],
 )

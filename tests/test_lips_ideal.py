@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 
 import pytest
 
-from lips.algebraic_geometry.ideal import LipsIdeal
+from lips.algebraic_geometry.covariant_ideal import LipsIdeal
 from lips.algebraic_geometry.tools import singular_found
 
 

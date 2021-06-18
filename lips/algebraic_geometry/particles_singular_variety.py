@@ -13,8 +13,8 @@ import sympy
 import mpmath
 
 from lips.fields import ModP, PAdic
-from lips.algebraic_geometry.ideal import LipsIdeal
-from lips.algebraic_geometry.tools import lex_groebner_solve, check_solutions, lips_symbols
+from lips.algebraic_geometry.covariant_ideal import LipsIdeal
+from lips.algebraic_geometry.tools import lex_groebner_solve, check_solutions, lips_covariant_symbols
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -47,7 +47,7 @@ class Particles_SingularVariety:
             print("Codimensions:", set(indepSet.count(0) - 4 for indepSet in indepSets))
             print("Number of indepSets:", len(indepSets))
         indepSet = indepSets[indepSetNbr]
-        indepSymbols = [symbol for i, symbol in enumerate(lips_symbols(len(self))) if indepSet[i] == 1]
+        indepSymbols = [symbol for i, symbol in enumerate(lips_covariant_symbols(len(self))) if indepSet[i] == 1]
         if verbose:
             print("Chosen indepSet:", indepSet)
 
@@ -91,7 +91,7 @@ class Particles_SingularVariety:
                 if verbose:
                     print("Chosen indepSet:", currentIndepSet)
                 if currentIndepSet != indepSet:  # this happens only with padics
-                    newIndepSymbols = tuple(symbol for i, symbol in enumerate(lips_symbols(len(self))) if currentIndepSet[i] == 1 and indepSet[i] == 0)
+                    newIndepSymbols = tuple(symbol for i, symbol in enumerate(lips_covariant_symbols(len(self))) if currentIndepSet[i] == 1 and indepSet[i] == 0)
                     rand_dict = {newIndepSymbol: random.randrange(1, self.field.characteristic ** (self.field.digits - iteration)) for newIndepSymbol in newIndepSymbols}
                     update_particles(self, rand_dict)
                     indepSet = currentIndepSet
