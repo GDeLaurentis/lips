@@ -39,6 +39,7 @@ class Particles_SingularVariety:
             oIdeal = LipsIdeal(len(self), invariants)
         else:
             oIdeal = LipsIdeal(len(self), generators)
+        oIdeal.ring.ordering = 'lp'
 
         # print(oIdeal.generators)
 
@@ -54,7 +55,7 @@ class Particles_SingularVariety:
         self.make_analytical_d(indepVars=indepSet)
         oSemiNumericalIdeal = oIdeal.zero_dimensional_slice(self, invariants, valuations, prime=prime, iteration=0)
 
-        # print(oSemiNumericalIdeal.generators)
+        # print(repr(oSemiNumericalIdeal))
 
         for iteration in range(iterations):
 
