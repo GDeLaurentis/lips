@@ -81,7 +81,7 @@ def indices_2d(multiplicity):
 def invariant_poly_image(polynomial, rule):
     permutation = tuple(entry - 1 for entry in map(int, tuple(rule[0])))
     multiplicity = len(rule[0])
-    signed_permutation_2d = indices_2d(6)[permutation, :][:, permutation][numpy.triu_indices(multiplicity, k=1)]
+    signed_permutation_2d = indices_2d(multiplicity)[permutation, :][:, permutation][numpy.triu_indices(multiplicity, k=1)]
     unsigned_permutation_2d = abs(signed_permutation_2d)
     polynomial = re.sub(r"([AB])(\d+)", lambda match: match.group(1) + str(unsigned_permutation_2d[int(match.group(2)) - 1])
                         if signed_permutation_2d[int(match.group(2)) - 1] > 0 else
