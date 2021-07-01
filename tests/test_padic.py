@@ -62,3 +62,15 @@ def test_multiplication_by_one():
     p, k, n = 10007, 3, -2
     a = PAdic(random.randrange(0, 10000), p, k, n)
     assert a * 1 == a
+
+
+def test_unary_neg():
+    p, k, n = 10007, 3, 2
+    a = PAdic(random.randrange(0, 10000), p, k, n)
+    assert - a == -1 * a
+
+
+def test_unary_pos():
+    p, k, n = 10007, 3, 2
+    a = PAdic(random.randrange(0, 10000), p, k, n)
+    assert + a == 1 * a
