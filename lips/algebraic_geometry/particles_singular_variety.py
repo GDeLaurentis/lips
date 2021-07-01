@@ -32,6 +32,8 @@ class Particles_SingularVariety:
             padic_to_finite_field(self)  # work with p ** k finite field itaratively, since Singular can only handle % p
             if valuations == tuple():
                 valuations = tuple(self.field.digits for inv in invariants)
+        elif self.field.name == "finite field":
+            prime, iterations = self.field.characteristic, 1
         elif self.field.name == "mpc":
             prime, iterations = None, 1 if valuations == tuple() else 2
 

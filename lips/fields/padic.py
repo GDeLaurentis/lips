@@ -242,7 +242,12 @@ class PAdic(object):
         return self.__rtruediv__(other)
 
     def __neg__(self):
+        """Unary '-' operation"""
         return PAdic((-1 * int(self)) % self.p ** self.k, self.p, self.k, self.n)
+
+    def __pos__(self):
+        """Unary '+' operation"""
+        return self
 
     def __pow__(self, n):
         assert(isinstance(n, int) or n.is_integer())
