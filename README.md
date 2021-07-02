@@ -1,7 +1,7 @@
 # Lorentz Invariant Phase Space
 
 [![Continuous Integration Status](https://github.com/GDeLaurentis/lips-dev/actions/workflows/continuous_integration.yml/badge.svg)](https://github.com/GDeLaurentis/lips-dev/actions)
-[![Coverage](https://img.shields.io/badge/Coverage-74%25-yellow?labelColor=2a2f35)](https://github.com/GDeLaurentis/lips-dev/actions)
+[![Coverage](https://img.shields.io/badge/Coverage-77%25-yellow?labelColor=2a2f35)](https://github.com/GDeLaurentis/lips-dev/actions)
 
 ## Requirements
 ```
