@@ -8,6 +8,7 @@ from __future__ import unicode_literals
 import functools
 import numpy
 import fractions
+import math
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -169,20 +170,45 @@ def extended_euclideal_algorithm(a, b):
     return (old_s, old_t, old_r)
 
 
+def gcd(a, b):
+    _, _, gcd = extended_euclideal_algorithm(a, b)
+    return gcd
+
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 
-def rationalise(a, n=None):
-    """Given (a, n) returns a fraction r / s such that r/s % n = a, by lattice reduction. r = sa + mn  <-> r/s % n = a"""
-    if n is None:  # for FF argument
-        if type(a) is int:
-            return fractions.Fraction(a, 1)
-        elif type(a) is ModP:
-            return rationalise(int(a), a.p)
-    return fractions.Fraction(*LGreduction((a, 1), (n, 0))[0])
+def MQRR(u, m, T=None):
+    """Maximal Quotient Rational Reconstruction (M. B. Monagan)"""
+    if T is None:
+        c = 1
+        T = 2 ** c * math.ceil(math.log(m, 2))
+    if u == 0:
+        if m > T:
+            return 0
+        else:
+            return False
+    (n, d) = (0, 0)
+    (t0, r0) = (0, m)
+    (t1, r1) = (1, u)
+    while r1 != 0 and r0 > T:
+        q = math.floor(r0 / r1)
+        if q > T:
+            (n, d, T) = (r1, t1, q)
+        (r0, r1) = (r1, r0 - q * r1)
+        (t0, t1) = (t1, t0 - q * t1)
+    if d < 0:
+        (n, d) = (-n, -d)
+    if d == 0 or gcd(n, d) not in (1, d):
+        return False
+    return fractions.Fraction(n, d)
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 
 def LGreduction(u, v):
+    """Lattice Gaussian Reduction - 2D version of LLL (Lenstra–Lenstra–Lovász)"""
     u, v = numpy.array(u, dtype=object), numpy.array(v, dtype=object)
     if v @ v > u @ u:
         return LGreduction(v, u)
@@ -191,6 +217,26 @@ def LGreduction(u, v):
         q = round(fractions.Fraction(u @ v, u @ u))
         v = v - q * u
     return (u, v)
+
+
+def LGRR(a, n):
+    """Lattice Gaussian Rational Reconstruction"""
+    return fractions.Fraction(*LGreduction((a, 1), (n, 0))[0])
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+
+def rationalise(a, n=None, algorithm=(LGRR, MQRR)[1]):
+    """Given (a, n) returns a fraction r / s such that r/s % n = a, by lattice reduction. r = sa + mn  <-> r/s % n = a"""
+    if n is None:  # for FF argument
+        if type(a) is int:
+            return fractions.Fraction(a, 1)
+        elif type(a) is ModP:
+            return rationalise(int(a), a.p)
+    return algorithm(a, n)
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 
 def chinese_remainder(a1, a2):
