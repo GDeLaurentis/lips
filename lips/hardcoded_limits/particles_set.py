@@ -134,6 +134,7 @@ class Particles_Set:
                     middle = "".join(string + "|" for string in ["(" + "".join(str(entry) + "+" for entry in item)[:-1] + ")" for item in lNBms])
                     middle = middle[:-1]
                     temp_string = start + middle + end
+                    temp_value = -temp_value                    # flip using mom cons causes a minus sign
                     break
 
         unique_head_or_tail = []                                # see if head or tail are unique,
