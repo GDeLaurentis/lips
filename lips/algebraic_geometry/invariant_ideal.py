@@ -13,7 +13,7 @@ import re
 
 from math import sqrt
 from lips.algebraic_geometry.tools import lips_invariant_symbols, conversionIdeal
-from syngular import Ideal, Ring, QuotientRing
+from syngular import Ideal, Ring
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
