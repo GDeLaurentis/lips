@@ -15,7 +15,7 @@ from copy import deepcopy
 from lips.tools import flatten
 from lips.algebraic_geometry.tools import lips_covariant_symbols, lips_invariant_symbols, conversionIdeal
 from lips.algebraic_geometry.invariant_ideal import SpinorIdeal
-from syngular import Ideal, Ring, QuotientRing
+from syngular import Ideal, Ring
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
