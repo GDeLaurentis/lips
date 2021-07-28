@@ -116,8 +116,7 @@ class LipsIdeal(Ideal):
 
     def to_mom_cons_qring(self):
         oZeroIdeal = LipsIdeal(self.multiplicity, ())
-        qring = QuotientRing(Ring('0', lips_covariant_symbols(self.multiplicity), 'dp'), oZeroIdeal)
-        self.ring = qring
+        self.to_qring(oZeroIdeal)
 
     def invariant_slice(self):
         oConversionIdeal = conversionIdeal(self.multiplicity)
