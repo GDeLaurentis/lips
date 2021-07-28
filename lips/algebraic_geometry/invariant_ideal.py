@@ -61,8 +61,7 @@ class SpinorIdeal(Ideal):
 
     def to_momentum_and_schouten_qring(self):
         oZeroIdeal = SpinorIdeal(self.multiplicity, ())
-        qring = QuotientRing(Ring('0', lips_invariant_symbols(self.multiplicity), 'dp'), oZeroIdeal)
-        self.ring = qring
+        self.to_qring(oZeroIdeal)
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
