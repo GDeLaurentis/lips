@@ -20,13 +20,14 @@ class Particles_Variety:
 
     # PUBLIC METHODS
 
-    def variety(self, invariants, valuations, verbose=False):
+    def variety(self, invariants, valuations, try_singular_variety_solver=False, verbose=False):
         """Constructs the required phase space point by first trying hardcoded limits and then the singular variety."""
         assert(len(invariants) == len(valuations))
         try:
             if verbose:
                 print("Trying hardcoded solutions...")
-            self_backup = deepcopy(self)
+            if try_singular_variety_solver:
+                self_backup = deepcopy(self)
             if self.field.name == 'padic':
                 _valuations = tuple(PAdic(self.field.characteristic ** valuation * full_range_random_padic_filling(self.field.characteristic, self.field.digits - valuation),
                                           self.field.characteristic, self.field.digits, from_addition=True) for valuation in valuations)
@@ -39,11 +40,12 @@ class Particles_Variety:
             else:
                 raise NotImplementedError
         except Exception:
-            for i, iParticle in enumerate(self_backup):
-                self[i + 1] = iParticle
-            if verbose:
-                print("Trying singular variety solver...")
-            self._singular_variety(invariants, valuations, verbose=verbose)
+            if try_singular_variety_solver:
+                for i, iParticle in enumerate(self_backup):
+                    self[i + 1] = iParticle
+                if verbose:
+                    print("Trying singular variety solver...")
+                self._singular_variety(invariants, valuations, verbose=verbose)
 
         if verbose:
             print("Checking result...")
