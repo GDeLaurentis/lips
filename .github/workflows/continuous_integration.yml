@@ -17,8 +17,9 @@ jobs:
 
     steps:
     - name: Install singular
-      run: sudo apt-get update
-      run: sudo apt-get install singular
+      run: |
+        sudo apt-get update
+        sudo apt-get install singular
     - uses: actions/checkout@v2
     - name: Set up Python 3.9
       uses: actions/setup-python@v2
