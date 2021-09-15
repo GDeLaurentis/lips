@@ -910,6 +910,10 @@ class Particles_SetPair:
             self._set("⟨2|(1+7)|(3+4)|2⟩", t_v1, fix_mom=False)
             self._set("Δ_735", t_v2, mode=6, fix_mom=False)
             self.fix_mom_cons(5, 6)
+        elif t_s1 == "⟨7|3+4|5+6|7⟩" and t_s2 == "Δ_735":
+            self._set("Δ_357", t_v2, fix_mom=False)
+            self._set("⟨7|3+4|5+6|7⟩", t_v1, fix_mom=False)
+            self.fix_mom_cons(1, 2)
         else:
             return "Not implemented."
 
