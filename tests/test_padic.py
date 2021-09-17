@@ -8,7 +8,7 @@ from __future__ import unicode_literals
 import pickle
 import random
 
-from lips.fields.padic import PAdic
+from lips.fields.padic import PAdic, padic_sqrt
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -74,3 +74,12 @@ def test_unary_pos():
     p, k, n = 10007, 3, 2
     a = PAdic(random.randrange(0, 10000), p, k, n)
     assert + a == 1 * a
+
+
+def test_sqrt_in_field():
+    p, k, n = 10007, 10, 0
+    a = PAdic(random.randrange(0, 10000), p, k, n)
+    b = a ** 2
+    c = padic_sqrt(b)
+    assert a == c or a == -c
+    

@@ -5,6 +5,8 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import math
+import sympy
 import functools
 import numpy
 import random
@@ -274,3 +276,34 @@ def padic_log(w, base=None):
         return sum([(-1) ** (n + 1) * x ** n / n for n in range(1, w.k)]) / (w.p - 1)
     else:
         return padic_log(w, base=w.p) / padic_log(PAdic(base, w.p, w.k), base=w.p)
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+
+def padic_sqrt_first_digit(x):
+    """Returns either False or the first digit of the root in the field."""
+    from lips.algebraic_geometry.tools import univariate_finite_field_solver
+    assert type(x) is PAdic
+    root = univariate_finite_field_solver(f"x^2-{x.as_tuple[0]}", dict(), x.p)
+    if root is False:
+        raise ValueError
+    else:
+        return PAdic(int(root[0][sympy.symbols('x')]), x.p, x.k)
+
+
+def refine_precision(x, s):
+    """Given (s | s^2 - x << 1), makes s^2 closer to x."""
+    return s + (x - s ** 2) / (2 * s)
+
+
+def padic_sqrt(x):
+    """Working precision padic sqrt."""
+    from .field_extension import FieldExtension
+    try:
+        root = padic_sqrt_first_digit(x)
+    except ValueError:
+        return FieldExtension(x)
+    for i in range(math.ceil(math.log(x.k, 2))):
+        root = refine_precision(x, root)
+    return root
