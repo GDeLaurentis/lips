@@ -82,4 +82,3 @@ def test_sqrt_in_field():
     b = a ** 2
     c = padic_sqrt(b)
     assert a == c or a == -c
-    
