@@ -8,9 +8,9 @@ import numpy
 
 
 class FieldExtension(object):
-    
+
     """Field extension by sqrt."""
-    
+
     def __new__(cls, square, tuple_=None):
         fe_obj = super(FieldExtension, cls).__new__(cls)
         fe_obj.__init__(square, tuple_)
@@ -18,7 +18,7 @@ class FieldExtension(object):
             return fe_obj.tuple[0]
         else:
             return fe_obj
-    
+
     def __init__(self, square, tuple_=None):
         if tuple_ is None:
             zero = square * 0
@@ -28,7 +28,7 @@ class FieldExtension(object):
             self.tuple = tuple_
         self.square = square
         self.base_type = type(square)
-        
+
     def __repr__(self):
         return "(" + str(self.tuple[0]) + ") + (" + str(self.tuple[1]) + ")·√(" + str(self.square) + ")"
 
@@ -43,7 +43,7 @@ class FieldExtension(object):
 
     def __eq__(self, other):
         return self.square == other.square and self.tuple[0] == other.tuple[0] and self.tuple[1] == other.tuple[1]
-    
+
     def __add__(self, other):
         if type(other) in [self.base_type, int, numpy.int64, fractions.Fraction] or str(type(other)) == "long":
             return FieldExtension(self.square, (self.tuple[0] + other, self.tuple[1]))
@@ -55,13 +55,13 @@ class FieldExtension(object):
 
     def __radd__(self, other):
         return self + other
-    
+
     def __mul__(self, other):
         if type(other) in [self.base_type, int, numpy.int64, fractions.Fraction] or str(type(other)) == "long":
             return FieldExtension(self.square, (self.tuple[0] * other, self.tuple[1] * other))
         elif isinstance(other, FieldExtension):
             assert self.square == other.square
-            return FieldExtension(self.square, (self.tuple[0] * other.tuple[0] + self.square * self.tuple[1] * other.tuple[1], 
+            return FieldExtension(self.square, (self.tuple[0] * other.tuple[0] + self.square * self.tuple[1] * other.tuple[1],
                                                 self.tuple[0] * other.tuple[1] + self.tuple[1] * other.tuple[0]))
         else:
             raise TypeError
@@ -86,13 +86,13 @@ class FieldExtension(object):
 
     def __rdiv__(self, other):
         return self.__rtruediv__(other)
-    
+
     def __sub__(self, other):
         return self + (- other)
 
     def __rsub__(self, other):
         return - (self - other)
-    
+
     def __neg__(self):
         """Unary '-' operation"""
         return -1 * self
@@ -100,7 +100,7 @@ class FieldExtension(object):
     def __pos__(self):
         """Unary '+' operation"""
         return self
-    
+
     def _inverse(self):
         return FieldExtension(self.square, (self.tuple[0], -self.tuple[1])) / (self.tuple[0] ** 2 - self.square * self.tuple[1] ** 2)
 

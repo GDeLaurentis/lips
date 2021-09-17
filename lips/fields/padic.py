@@ -283,7 +283,7 @@ def padic_log(w, base=None):
 
 def padic_sqrt_first_digit(x):
     """Returns either False or the first digit of the root in the field."""
-    from lips.algebraic_geometry.tools import univariate_finite_field_solver
+    from ..algebraic_geometry.tools import univariate_finite_field_solver
     assert type(x) is PAdic
     root = univariate_finite_field_solver(f"x^2-{x.as_tuple[0]}", dict(), x.p)
     if root is False:
