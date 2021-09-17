@@ -61,6 +61,10 @@ class Particles_SingularVariety:
 
         for iteration in range(iterations):
 
+            # make sure ordering is lexicographical and there is no cached groebner_basis
+            oSemiNumericalIdeal.ring.ordering = 'lp'
+            if hasattr(oSemiNumericalIdeal, "groebner_basis"):
+                del oSemiNumericalIdeal.groebner_basis 
             root_dicts = lex_groebner_solve(oSemiNumericalIdeal.groebner_basis, prime=prime)
             check_solutions(oSemiNumericalIdeal.groebner_basis, root_dicts, prime=prime)
 
