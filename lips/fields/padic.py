@@ -6,13 +6,12 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import math
-import sympy
 import functools
 import numpy
 import random
 import fractions
 
-from .finite_field import ModP
+from .finite_field import ModP, finite_field_sqrt
 
 fixed_relative_precision = False
 all_precision_loss_warning = False
@@ -281,18 +280,7 @@ def padic_log(w, base=None):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 
-def padic_sqrt_first_digit(x):
-    """Returns either False or the first digit of the root in the field."""
-    from ..algebraic_geometry.tools import univariate_finite_field_solver
-    assert type(x) is PAdic
-    root = univariate_finite_field_solver(f"x^2-{x.as_tuple[0]}", dict(), x.p)
-    if root is False:
-        raise ValueError
-    else:
-        return PAdic(int(root[0][sympy.symbols('x')]), x.p, x.k)
-
-
-def refine_precision(x, s):
+def refine_sqrt_precision(x, s):
     """Given (s | s^2 - x << 1), makes s^2 closer to x."""
     return s + (x - s ** 2) / (2 * s)
 
@@ -300,10 +288,12 @@ def refine_precision(x, s):
 def padic_sqrt(x):
     """Working precision padic sqrt."""
     from .field_extension import FieldExtension
-    try:
-        root = padic_sqrt_first_digit(x)
-    except ValueError:
+    assert isinstance(x, PAdic)
+    ffx = ModP(x.as_tuple[0], x.p)
+    root = finite_field_sqrt(ffx)
+    if isinstance(root, FieldExtension):
         return FieldExtension(x)
+    root = PAdic(int(root), x.p, x.k, x.n)
     for i in range(math.ceil(math.log(x.k, 2))):
-        root = refine_precision(x, root)
+        root = refine_sqrt_precision(x, root)
     return root

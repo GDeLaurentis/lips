@@ -9,6 +9,7 @@ import functools
 import numpy
 import fractions
 import math
+import sympy
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -90,7 +91,12 @@ class ModP(object):
         return str(self)
 
     def __neg__(self):
+        """Unary '-' operation"""
         return ModP(self.p - int(self), self.p)
+
+    def __pos__(self):
+        """Unary '+' operation"""
+        return self
 
     @ModPfy
     def __eq__(self, other):
@@ -131,7 +137,7 @@ class ModP(object):
         return other * self._inv()
 
     def __pow__(self, other):
-        assert(type(other) is int)
+        assert(type(other) is int or hasattr(other, "is_integer") and other.is_integer() is True)
         if other > 0:
             return ModP(int(self) ** int(other), self.p)
         else:
@@ -246,3 +252,18 @@ def chinese_remainder(a1, a2):
     q1, q2, gcd = extended_euclideal_algorithm(n1, n2)
     assert gcd == 1
     return ModP(a1 * (q2 * n2) + a2 * (q1 * n1), n1 * n2)
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+
+def finite_field_sqrt(x):
+    """Returns either False or the first digit of the root in the field."""
+    from ..algebraic_geometry.tools import univariate_finite_field_solver
+    from .field_extension import FieldExtension
+    assert isinstance(x, ModP)
+    root = univariate_finite_field_solver(f"x^2-{int(x)}", dict(), x.p)
+    if root is False:
+        return FieldExtension(x)
+    else:
+        return ModP(int(root[0][sympy.symbols('x')]), x.p)
