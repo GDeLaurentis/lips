@@ -200,11 +200,11 @@ class Particles_Set:
                 K11, K12, K21, K22 = rest[0, 0], rest[0, 1], rest[1, 0], rest[1, 1]
                 if temp_string[0] == "⟨":
                     B = self[a].r_sp_d[1, 0]
-                    A = (B * K11 - B * K22 + mpmath.sqrt((B * K11 - B * K22) * (B * K11 - B * K22) + 4 * K21 * (B * B * K12 - temp_value))) / (2 * K21)
+                    A = (B * K11 - B * K22 + self.field.sqrt((B * K11 - B * K22) * (B * K11 - B * K22) + 4 * K21 * (B * B * K12 - temp_value))) / (2 * K21)
                     self[a].r_sp_d = numpy.array([A, B])
                 else:
                     B = self[a].l_sp_d[0, 1]
-                    A = (B * K11 - B * K22 + mpmath.sqrt((B * K11 - B * K22) * (B * K11 - B * K22) + 4 * K12 * (B * B * K21 - temp_value))) / (2 * K12)
+                    A = (B * K11 - B * K22 + self.field.sqrt((B * K11 - B * K22) * (B * K11 - B * K22) + 4 * K12 * (B * B * K21 - temp_value))) / (2 * K12)
                     self[a].l_sp_d = numpy.array([A, B])
             else:
                 if temp_string[-1] == "⟩":
@@ -341,7 +341,7 @@ class Particles_Set:
         QB = alpha * b * beta / 2 + alpha * oQs.ldot(1, 2) - gamma * oQs.ldot(2, 2)
         QC = b ** 2 * beta ** 2 / 4 + b * beta * oQs.ldot(1, 2) - b * delta * oQs.ldot(2, 2) + oQs.ldot(1, 2) ** 2 - oQs.ldot(1, 1) * oQs.ldot(2, 2) - X
 
-        a = (-QB + mpmath.sqrt(QB**2 - 4 * QA * QC)) / (2 * QA)
+        a = (-QB + self.field.sqrt(QB**2 - 4 * QA * QC)) / (2 * QA)
 
         if mode % 2 == 1:
             self[to_be_changed].r_sp_u = numpy.array([[a, b]])
@@ -425,7 +425,7 @@ class Particles_Set:
               e**2 * g * h * j * k * n * p + b * c * e * g * i * l * n * p + e * f * g**2 * i * l * n * p -
               e**2 * g**2 * j * l * n * p - X)
 
-        a = (-QB - mpmath.sqrt(QB**2 - 4 * QA * QC)) / (2 * QA)
+        a = (-QB - self.field.sqrt(QB**2 - 4 * QA * QC)) / (2 * QA)
 
         self[A].r_sp_d = numpy.array([a, b])
         self.fix_mom_cons(E, F)
