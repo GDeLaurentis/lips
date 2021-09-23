@@ -264,6 +264,10 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
                     print("{} = {}".format(_invars[i], float(values[i]) if type(values[i]) is mpmath.mpf else values[i]))
         return mom_cons, on_shell, big_outliers, small_outliers
 
+    @property
+    def spinors_are_in_field_extension(self):
+        return any([oP.spinors_are_in_field_extension for oP in self])
+
     # BASE ONE LIST METHODS
 
     @indexing_decorator
