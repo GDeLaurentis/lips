@@ -41,7 +41,7 @@ class Particles_SingularVariety:
             oIdeal = LipsIdeal(len(self), invariants)
         else:
             oIdeal = LipsIdeal(len(self), generators)
-        oIdeal.ring.ordering = 'lp'
+        # oIdeal.ring.ordering = 'lp'  # no need to set lex ordering here - it just tanks the performance
 
         # print(oIdeal.generators)
 

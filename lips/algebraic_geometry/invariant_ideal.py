@@ -57,7 +57,10 @@ class SpinorIdeal(Ideal):
             raise NotImplementedError("LipsIdeal called with args: ", args)
 
     def image(self, rule):
-        return SpinorIdeal(self.ring, [invariant_poly_image(poly, rule) for poly in self.generators])
+        image_ideal = SpinorIdeal(self.ring, [invariant_poly_image(poly, rule) for poly in self.generators])
+        if hasattr(self, "__name__"):
+            image_ideal.__name__ = self.__name__ + str(rule)
+        return image_ideal
 
     def to_momentum_and_schouten_qring(self):
         oZeroIdeal = SpinorIdeal(self.multiplicity, ())
