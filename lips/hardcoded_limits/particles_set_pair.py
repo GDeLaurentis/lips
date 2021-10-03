@@ -906,14 +906,22 @@ class Particles_SetPair:
 
     def _set_pair_NB_and_Dijk(self, t_s1, t_v1, t_s2, t_v2):  # Current failed: 8/20 @ 6pt
 
-        if t_s1 == "⟨2|(1+7)|(3+4)|2⟩" and t_s2 == "Δ_735":
-            self._set("⟨2|(1+7)|(3+4)|2⟩", t_v1, fix_mom=False)
+        if t_s1 == "⟨2|1+7|3+4|2⟩" and t_s2 == "Δ_735":
+            self._set("⟨2|1+7|3+4|2⟩", t_v1, fix_mom=False)
             self._set("Δ_735", t_v2, mode=6, fix_mom=False)
             self.fix_mom_cons(5, 6)
         elif t_s1 == "⟨7|3+4|5+6|7⟩" and t_s2 == "Δ_735":
             self._set("Δ_357", t_v2, fix_mom=False)
             self._set("⟨7|3+4|5+6|7⟩", t_v1, fix_mom=False)
             self.fix_mom_cons(1, 2)
+        elif t_s1 == "⟨7|1+2|5+6|7⟩" and t_s2 == "Δ_12|347|56":
+            self._set("Δ_56|12|347", t_v2, fix_mom=False)
+            self._set("⟨7|1+2|5+6|7⟩", t_v1, fix_mom=False)
+            self.fix_mom_cons(3, 4)
+        elif t_s1 == "[7|1+2|5+6|7]" and t_s2 == "Δ_12|347|56":
+            self._set("Δ_56|12|347", t_v2, fix_mom=False)
+            self._set("[7|1+2|5+6|7]", t_v1, fix_mom=False)
+            self.fix_mom_cons(3, 4)
         else:
             return "Not implemented."
 
