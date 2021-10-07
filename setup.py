@@ -12,6 +12,5 @@ setup(
     install_requires=['numpy',
                       'mpmath',
                       'sympy',
-                      'syngular',
-    ],
+                      'syngular'],
 )

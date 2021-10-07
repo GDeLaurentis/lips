@@ -929,7 +929,6 @@ class Particles_SetPair:
         else:
             return "Not implemented."
 
-
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
     def _can_fix_mom_cons(self, t_s1, t_s2):
