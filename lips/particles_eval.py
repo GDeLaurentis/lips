@@ -49,6 +49,7 @@ class Particles_Eval:
 
     @staticmethod
     def _parse(string):
+        string = string.replace("−", "-")
         string = string.replace(r"\scriptscriptstyle", "").replace("<", "⟨").replace(">", "⟩")
         string = string.replace(r"\frac{", "(")
         string = string.replace(r"}{", ")/(")

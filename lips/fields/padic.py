@@ -293,7 +293,9 @@ def padic_sqrt(x):
     root = finite_field_sqrt(ffx)
     if isinstance(root, FieldExtension):
         return FieldExtension(x)
-    root = PAdic(int(root), x.p, x.k, x.n)
+    if x.n % 2 != 0:  # sqrt(x) with x ~ O(p^(odd power))
+        raise NotImplementedError("Unramified field extension")
+    root = PAdic(int(root), x.p, x.k, x.n // 2)
     for i in range(math.ceil(math.log(x.k, 2))):
         root = refine_sqrt_precision(x, root)
     return root
