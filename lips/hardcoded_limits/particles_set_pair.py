@@ -922,8 +922,13 @@ class Particles_SetPair:
             self._set("Δ_56|12|347", t_v2, fix_mom=False)
             self._set("[7|1+2|5+6|7]", t_v1, fix_mom=False)
             self.fix_mom_cons(3, 4)
+        elif t_s1 == "⟨3|5+6|1+2|3⟩" and t_s2 == "Δ_12|347|56":
+            self._set("Δ_56|12|347", t_v2, fix_mom=False)
+            self._set("⟨3|5+6|1+2|3⟩", t_v1, mode=1, fix_mom=False)
+            self.fix_mom_cons(7, 4)
         else:
             return "Not implemented."
+
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
