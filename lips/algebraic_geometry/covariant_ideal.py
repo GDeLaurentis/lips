@@ -121,16 +121,8 @@ class LipsIdeal(Ideal):
     def invariant_slice(self):
         oConversionIdeal = conversionIdeal(self.multiplicity)
         I = oConversionIdeal + self
-        J = I.eliminate(range(1, self.multiplicity * 4))
+        J = I.eliminate(range(0, self.multiplicity * 4))
         return SpinorIdeal(Ring('0', lips_invariant_symbols(self.multiplicity), 'dp'), J.generators)
-
-    @property
-    def codims(self):
-        return {entry.count(0) - 4 for entry in self.indepSets}
-
-    @property
-    def codim(self):
-        return max(self.codims)
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
