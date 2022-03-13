@@ -153,6 +153,9 @@ class ModP(object):
 
         return ModP(s, self.p)
 
+    def __hash__(self):
+        return hash(self.n) + hash(self.p)
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
@@ -238,7 +241,7 @@ def rationalise(a, n=None, algorithm=(LGRR, MQRR)[1]):
         if type(a) is int:
             return fractions.Fraction(a, 1)
         elif type(a) is ModP:
-            return rationalise(int(a), a.p)
+            return rationalise(int(a), a.p, algorithm)
     return algorithm(a, n)
 
 
