@@ -319,7 +319,7 @@ class Particle(object):
         self._l_sp_d = numpy.dot(numpy.transpose(LeviCivita), self.l_sp_u)
         self._l_sp_d.shape = (1, 2)    # row vector
 
-    # EXPERIMENTAL METHODS
+    # TWISTOR METHODS
 
     def randomise_twist(self):
         self._twist_z = numpy.array([rand_frac(), rand_frac(), rand_frac(), rand_frac()])
@@ -346,3 +346,13 @@ class Particle(object):
         for i in range(4):
             self._four_mom[i] = numpy.trace(numpy.dot(Pauli[i], r_two_spinor)) / 2
         self.four_mom = self._four_mom
+
+    # OPERATIONS
+
+    def lsq(self):
+        """Lorentz dot product with itself: 2 trace(P^{α̇α}P̅\u0305_{αα̇}) = P^μ * η_μν * P^ν."""
+        return numpy.trace(numpy.dot(self.r2_sp, self.r2_sp_b)) / 2
+
+    @property
+    def mass(self):
+        return self.lsq()

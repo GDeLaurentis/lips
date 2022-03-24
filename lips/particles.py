@@ -19,10 +19,12 @@ import re
 import os
 import copy
 import itertools
+import sympy
 
-from .tools import MinkowskiMetric, flatten, pA2, pS2, pNB, myException
+from .tools import MinkowskiMetric, flatten, pA2, pS2, pNB, myException, indexing_decorator
 from .particle import Particle
 from .particles_compute import Particles_Compute
+from .particles_eval import Particles_Eval
 from .particles_set import Particles_Set
 from .particles_set_pair import Particles_SetPair
 
@@ -30,26 +32,7 @@ from .particles_set_pair import Particles_SetPair
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 
-def indexing_decorator(func):
-    """Rebases a list to start from index 1."""
-
-    def decorated(self, index, *args):
-        if index < 1:
-            raise IndexError('Indices start from 1')
-        elif index > 0 and index < len(self) + 1:
-            index -= 1
-        elif index > len(self):
-            raise IndexError('Indices can\'t exceed {}'.format(len(self)))
-
-        return func(self, index, *args)
-
-    return decorated
-
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
-
-
-class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
+class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetPair, list):
     """Describes the kinematics of n particles. Base one list of Particle objects."""
 
     def __init__(self, number_of_particles_or_particles=None, seed=None, real_momenta=False, fix_mom_cons=True):
@@ -68,6 +51,9 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
         if fix_mom_cons is True and max(map(abs, flatten(self.total_mom))) > 10 ** -(0.9 * 300):
             self.fix_mom_cons(real_momenta=real_momenta)
 
+    def __call__(self, string_expression):
+        return self.compute(string_expression)
+
     def __eq__(self, other):
         """Checks equality of each particle in particles."""
         if type(self) == type(other):
@@ -77,7 +63,19 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
 
     def __hash__(self):
         """Hash function: hash string of concatenated momenta."""
-        return hash("".join(flatten([map(str, oParticle.four_mom) for oParticle in self])))
+        return hash(" ".join(flatten([list(map(str, flatten(oParticle.r2_sp))) for oParticle in self])))
+
+    # PUBLIC METHODS
+
+    @property
+    def total_mom(self):
+        """Total momentum of the given phase space as a rank two spinor."""
+        return sum([oParticle.r2_sp for oParticle in self])
+
+    @property
+    def masses(self):
+        """Masses of all particles in phase space."""
+        return [oParticle.mass for oParticle in self]
 
     def randomise_all(self, real_momenta=False):
         """Randomises all particles. Breaks momentum conservation."""
@@ -98,9 +96,52 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
         for oParticle in self:
             oParticle.angles_for_squares()
 
-    def image(self, permutation):
-        """Returns the image of self under a given permutation. Remember, this is a passive transformation."""
-        return copy.deepcopy(Particles(sorted(self, key=lambda x: permutation[self.index(x)])))
+    def image(self, permutation_or_rule):
+        """Returns the image of self under a given permutation or rule. Remember, this is a passive transformation."""
+        if type(permutation_or_rule) is str:
+            return copy.deepcopy(Particles(sorted(self, key=lambda x: permutation_or_rule[self.index(x)]), fix_mom_cons=False))
+        else:
+            assert type(permutation_or_rule[0]) is str and type(permutation_or_rule[1]) is bool
+            oResParticles = self.image(permutation_or_rule[0])
+            if permutation_or_rule[1] is True:
+                oResParticles.angles_for_squares()
+            return oResParticles
+
+    def cluster(self, llIntegers):
+        """Returns clustered particle objects according to lists of lists of integers (e.g. corners of one loop diagram)."""
+        oKs = Particles(len(llIntegers), fix_mom_cons=False)
+        r2_spinors = [sum([self[i].r2_sp for i in corner_as_integers]) for corner_as_integers in llIntegers]
+        for i, iK in enumerate(oKs):
+            iK.r2_sp = r2_spinors[i]
+        return oKs
+
+    def make_analytical_d(self, indepVars=None):
+        """ """
+        if indepVars is None:
+            indepVars = tuple(numpy.zeros(4 * len(self), dtype=int))
+        la = sympy.symbols('a1:{}'.format(len(self) + 1))
+        lb = sympy.symbols('b1:{}'.format(len(self) + 1))
+        lc = sympy.symbols('c1:{}'.format(len(self) + 1))
+        ld = sympy.symbols('d1:{}'.format(len(self) + 1))
+        for i, oParticle in enumerate(self):
+            if indepVars[i * 4 + 0] == 0:
+                oParticle._r_sp_d[0, 0] = la[i]
+            if indepVars[i * 4 + 1] == 0:
+                oParticle._r_sp_d[1, 0] = lb[i]
+            if indepVars[i * 4 + 2] == 0:
+                oParticle._l_sp_d[0, 0] = lc[i]
+            if indepVars[i * 4 + 3] == 0:
+                oParticle._l_sp_d[0, 1] = ld[i]
+            oParticle._r_sp_d_to_r_sp_u()
+            oParticle._l_sp_d_to_l_sp_u()
+            oParticle._r1_sp_to_r2_sp()
+            oParticle._r1_sp_to_r2_sp_b()
+            try:
+                oParticle._r2_sp_b_to_four_momentum()
+                oParticle._four_mom_to_four_mom_d()
+            except (TypeError, SystemError):
+                oParticle._four_mom = None
+                oParticle._four_mom_d = None
 
     def fix_mom_cons(self, A=0, B=0, real_momenta=False, axis=1):   # using real momenta changes both |⟩ and |] of A & B
         """Fixes momentum conservation using particles A and B."""
@@ -365,7 +406,7 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
         init = temp_string[0]
         clos = temp_string[len(temp_string) - 1]
 
-        relist = re.split('[\(\)⟨⟩|\]\[]', temp_string)
+        relist = re.split(r'[\(\)⟨⟩|\]\[]', temp_string)
         relist = list(filter(None, relist))
 
         # consistency of s_ijk "Δ", "Ω", "Π"
@@ -393,11 +434,6 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
             myException("Expected closing \']\'. Found \'{}\'".format(clos))
         elif alte == -1 and init == "[" and clos != "⟩":
             myException("Expected closing \']\'. Found \'{}\'".format(clos))
-
-    @property
-    def total_mom(self):
-        """Total momentum of the given phase space as a rank two spinor."""
-        return sum([oParticle.r2_sp for oParticle in self])
 
     def _r_sp_d_for_mathematica(self):
         msg = ""
@@ -473,11 +509,3 @@ class Particles(Particles_Compute, Particles_Set, Particles_SetPair, list):
         with open(path, "w") as oFile:
             oFile.write(self._r_sp_d_for_mathematica())
             oFile.write(self._l_sp_d_for_mathematica())
-
-    def cluster(self, llIntegers):
-        """Returns clustered particle objects according to lists of lists of integers (e.g. corners of one loop diagram)."""
-        oKs = Particles(len(llIntegers), fix_mom_cons=False)
-        r2_spinors = [sum([self[i].r2_sp for i in corner_as_integers]) for corner_as_integers in llIntegers]
-        for i, iK in enumerate(oKs):
-            iK.r2_sp = r2_spinors[i]
-        return oKs

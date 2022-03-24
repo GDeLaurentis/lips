@@ -29,16 +29,20 @@ Pauli_bar = numpy.array([Pauli_zero, -Pauli_x, -Pauli_y, -Pauli_z])
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 
-pSijk = re.compile(r'^(?:s_|S_)(\d+)$')
+pSijk = re.compile(r'^(?:s|S)(?:_){0,1}(\d+)$')
 pd5 = re.compile(r'^δ5$')
 ptr5 = re.compile(r'^(?:tr5_)(\d+)$')
-pDijk = re.compile(r'^(?:Δ_)(\d+)$')
+pDijk = re.compile(r'(?:^Δ_(\d+)$)|(?:^Δ_(\d+)\|(\d+)\|(\d+)$)')
 pOijk = re.compile(r'^(?:Ω_)(\d+)$')
 pPijk = re.compile(r'^(?:Π_)(\d+)$')
-pA2 = re.compile(r'^(?:⟨)(\d+)(?:\|)(\d+)(?:⟩)$')
+pAu = re.compile(r'^(?:⟨|<)(\d+)(?:\|)$')
+pAd = re.compile(r'^(?:\|)(\d+)(?:⟩|>)$')
+pA2 = re.compile(r'^(?:⟨|<)(\d+)(?:\|)(\d+)(?:⟩|>)$')
 pS2 = re.compile(r'^(?:\[)(\d+)(?:\|)(\d+)(?:\])$')
-p3B = re.compile(r'^(?:⟨|\[)(\d+)(?:\|\({0,1})([\d+[\+|-]*]*)(?:\){0,1}\|)(\d+)(?:⟩|\])$')
-pNB = re.compile(r'^(?:⟨|\[)(?P<start>\d+)(?:\|)(?P<middle>(?:(?:\([\d+[\+|-]{1,}]{,1}\))|(?:[\d+[\+|-]{1,}]{,1}))*)(?:\|)(?P<end>\d+)(?:⟩|\])$')
+pSd = re.compile(r'^(?:\[)(\d+)(?:\|)$')
+pSu = re.compile(r'^(?:\|)(\d+)(?:\])$')
+p3B = re.compile(r'^(?:⟨|\[)(\d+)(?:\|\({0,1})([\d+[\+-]*]*)(?:\){0,1}\|)(\d+)(?:⟩|\])$')
+pNB = re.compile(r'^(?:⟨|\[)(?P<start>\d+)(?:\|)(?P<middle>(?:(?:\([\d+\+|-]{1,}\))|(?:[\d+\+|-]{1,}))*)(?:\|)(?P<end>\d+)(?:⟩|\])$')
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -76,6 +80,25 @@ def flatten(temp_list, recursion_level=0, treat_list_subclasses_as_list=True, tr
 
 def ldot(oP1, oP2):
     return numpy.trace(numpy.dot(oP1.r2_sp, oP2.r2_sp_b)) / 2
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+
+def indexing_decorator(func):
+    """Rebases a list to start from index 1."""
+
+    def decorated(self, index, *args):
+        if index < 1:
+            raise IndexError('Indices start from 1')
+        elif index > 0 and index < len(self) + 1:
+            index -= 1
+        elif index > len(self):
+            raise IndexError('Indices can\'t exceed {}'.format(len(self)))
+
+        return func(self, index, *args)
+
+    return decorated
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #

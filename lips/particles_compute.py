@@ -19,7 +19,7 @@ import re
 import mpmath
 import sys
 
-from .tools import pSijk, pd5, pDijk, pOijk, pPijk, pA2, pS2, pNB, ptr5, myException
+from .tools import pSijk, pd5, pDijk, pOijk, pPijk, pA2, pAu, pAd, pS2, pSu, pSd, pNB, ptr5
 
 if sys.version_info[0] > 2:
     unicode = str
@@ -65,6 +65,7 @@ class Particles_Compute:
     def compute(self, temp_string):
         """Computes spinor strings.\n
         Available variables: ⟨a|b⟩, [a|b], ⟨a|b+c|d], ⟨a|b+c|d+e|f], ..., s_ijk, Δ_ijk, Ω_ijk, Π_ijk, tr5_ijkl"""
+
         self.check_consistency(temp_string)                         # Check consistency of string
 
         if ptr5.findall(temp_string) != []:                         # tr5_ijkl [i|j|k|l|i⟩ - ⟨i|j|k|l|i]
@@ -86,9 +87,13 @@ class Particles_Compute:
             Pi = (self.compute("s_" + "".join(map(unicode, nol[2] + [nol[0][0]]))) - self.compute("s_" + "".join(map(unicode, nol[2] + [nol[0][1]]))))
             return Pi
 
-        if pDijk.findall(temp_string) != []:                        # Δ_ijk
-            ijk = list(map(int, pDijk.findall(temp_string)[0]))
-            temp_oParticles = self.ijk_to_3Ks(ijk)
+        if pDijk.findall(temp_string) != []:                        # Δ_ijk or Δ_ij|kl|lm
+            match_list = pDijk.findall(temp_string)[0]
+            if match_list[0] == '':
+                NonOverlappingLists = [list(map(int, corner)) for corner in match_list[1:]]
+            else:
+                NonOverlappingLists = self.ijk_to_3NonOverlappingLists(list(map(int, match_list[0])))
+            temp_oParticles = self.cluster(NonOverlappingLists)
             Delta = temp_oParticles.ldot(1, 2)**2 - temp_oParticles.ldot(1, 1) * temp_oParticles.ldot(2, 2)
             return Delta
 
@@ -118,12 +123,28 @@ class Particles_Compute:
             return s
 
         elif pA2.findall(temp_string) != []:                        # ⟨A|B⟩ -- contraction is up -> down : lambda[A]^alpha.lambda[B]_alpha
-            A, B = list(map(int, pA2.findall(temp_string)[0]))
+            A, B = map(int, pA2.findall(temp_string)[0])
             return numpy.dot(self[A].r_sp_u, self[B].r_sp_d)[0, 0]
 
+        elif pAu.findall(temp_string) != []:                        # ⟨A|
+            A = int(pAu.findall(temp_string)[0])
+            return self[A].r_sp_u
+
+        elif pAd.findall(temp_string) != []:                        # |B⟩
+            B = int(pAd.findall(temp_string)[0])
+            return self[B].r_sp_d
+
         elif pS2.findall(temp_string) != []:                        # [A|B] -- contraction is down -> up : lambda_bar[A]_alpha_dot.lambda_bar[B]^alpha_dot
-            A, B = list(map(int, pS2.findall(temp_string)[0]))
+            A, B = map(int, pS2.findall(temp_string)[0])
             return numpy.dot(self[A].l_sp_d, self[B].l_sp_u)[0, 0]
+
+        elif pSu.findall(temp_string) != []:                        # |A]
+            A = int(pSu.findall(temp_string)[0])
+            return self[A].l_sp_u
+
+        elif pSd.findall(temp_string) != []:                        # [B|
+            B = int(pSd.findall(temp_string)[0])
+            return self[B].l_sp_d
 
         elif pNB.findall(temp_string) != []:                        # ⟨A|(B+C+..)..|D]
             abcd = pNB.search(temp_string)
@@ -148,4 +169,4 @@ class Particles_Compute:
                 return result.dot(self[d].l_sp_u)[0][0]
 
         else:
-            myException("Invalid string in compute: string {} is not implemented.".format(temp_string))
+            return self._eval(temp_string)
