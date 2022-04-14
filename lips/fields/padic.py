@@ -168,13 +168,19 @@ class PAdic(object):
 
     def __str__(self):
         if self.k == 0:
-            return "O({}^{})".format(self.p, self.n)
+            if self.n == 0:
+                return "O(1)"
+            elif self.n == 1:
+                return f"O({self.p})"
+            else:
+                return f"O({self.p}^{self.n})"
         else:
-            return " + ".join(filter(lambda x: x is not None,
-                                     ["{}".format(i) if (j == 0 and i != 0) else
-                                      "{}*{}".format(i, self.p) if (j == 1 and i != 0) else
-                                      "{}*{}^{}".format(i, self.p, j) if (i != 0) else None
-                                      for i, j in zip(self.as_tuple, range(self.n, self.n + self.k))])) + " + O({}^{})".format(self.p, self.n + self.k)
+            return (" + ".join(filter(lambda x: x is not None,
+                                      ["{}".format(i) if (j == 0 and i != 0) else
+                                       "{}*{}".format(i, self.p) if (j == 1 and i != 0) else
+                                       "{}*{}^{}".format(i, self.p, j) if (i != 0) else None
+                                       for i, j in zip(self.as_tuple, range(self.n, self.n + self.k))])) +
+                    (" + O(1)" if self.n + self.k == 0 else f" + O({self.p})" if self.n + self.k == 1 else f" + O({self.p}^{self.n + self.k})"))
 
     def __repr__(self):
         return str(self)
@@ -184,6 +190,10 @@ class PAdic(object):
         """Constructor from string (inverse method to __str__ or __repr__)."""
         # get the prime
         prime = int(re.findall(r"O\((\d+)", string)[0])
+        if prime == 1:  # for the case with + O(1)
+            match = re.findall(r"\*(\d+)\^", string)
+            if match != []:
+                prime = int(match[0])
         # get the valuation
         valuation = string.split(" + ")[0]
         valuation = re.findall(rf"{prime}[\^\-\d+]*", valuation)
@@ -192,7 +202,7 @@ class PAdic(object):
         else:
             valuation = int(valuation[0].split("^")[1])
         # get the mantissa
-        mantissa = [int(re.sub(r"\*[\^\d+]{0,}", "", entry.replace(f"{prime}", "").replace(" ", ""))) for entry in string.split("+")[:-1]]
+        mantissa = [int(re.sub(r"\*[\^\-\d+]{0,}", "", entry.replace(f"{prime}", "").replace(" ", ""))) for entry in string.split("+")[:-1]]
         significant_digits = len(mantissa)
         mantissa = sum([entry * prime ** i for i, entry in enumerate(mantissa)])
         return cls(mantissa, p=prime, k=significant_digits, n=valuation)
