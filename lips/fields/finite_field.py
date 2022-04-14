@@ -260,7 +260,7 @@ def chinese_remainder(a1, a2):
 def chained_chinese_remainder(*vals, primes=None):
     if not (all([isinstance(val, ModP) for val in vals]) or len(vals) == len(primes)):
         raise Exception("Unrecognized input.")
-    if not primes is None:
+    if primes is not None:
         vals = tuple(map(lambda x: ModP(*x), list(zip(vals, primes))))
     if len(vals) == 1:
         return vals[0]

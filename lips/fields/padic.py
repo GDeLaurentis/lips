@@ -183,16 +183,16 @@ class PAdic(object):
     def __inv_str__(cls, string):
         """Constructor from string (inverse method to __str__ or __repr__)."""
         # get the prime
-        prime = int(re.findall("O\((\d+)", string)[0])
+        prime = int(re.findall(r"O\((\d+)", string)[0])
         # get the valuation
         valuation = string.split(" + ")[0]
-        valuation = re.findall(f"{prime}[\^\-\d+]*", valuation)
+        valuation = re.findall(rf"{prime}[\^\-\d+]*", valuation)
         if valuation == []:
             valuation = 0
         else:
             valuation = int(valuation[0].split("^")[1])
         # get the mantissa
-        mantissa = [int(re.sub("\*[\^\d+]{0,}", "", entry.replace(f"{prime}", "").replace(" ", ""))) for entry in string.split("+")[:-1]]
+        mantissa = [int(re.sub(r"\*[\^\d+]{0,}", "", entry.replace(f"{prime}", "").replace(" ", ""))) for entry in string.split("+")[:-1]]
         significant_digits = len(mantissa)
         mantissa = sum([entry * prime ** i for i, entry in enumerate(mantissa)])
         return cls(mantissa, p=prime, k=significant_digits, n=valuation)
