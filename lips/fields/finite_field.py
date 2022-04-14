@@ -30,7 +30,7 @@ def ModPfy(func):
 
 
 def isinteger(x):
-    return isinstance(x, int) or type(x) in [numpy.int32, numpy.int64]
+    return isinstance(x, int) or type(x) in [numpy.int32, numpy.int64, sympy.Integer, sympy.core.numbers.Zero]
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -255,6 +255,19 @@ def chinese_remainder(a1, a2):
     q1, q2, gcd = extended_euclideal_algorithm(n1, n2)
     assert gcd == 1
     return ModP(a1 * (q2 * n2) + a2 * (q1 * n1), n1 * n2)
+
+
+def chained_chinese_remainder(*vals, primes=None):
+    if not (all([isinstance(val, ModP) for val in vals]) or len(vals) == len(primes)):
+        raise Exception("Unrecognized input.")
+    if not primes is None:
+        vals = tuple(map(lambda x: ModP(*x), list(zip(vals, primes))))
+    if len(vals) == 1:
+        return vals[0]
+    res = chinese_remainder(*vals[:2])
+    for val in vals[2:]:
+        res = chinese_remainder(res, val)
+    return res
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
