@@ -6,12 +6,15 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import math
+import re
 import functools
 import numpy
 import random
 import fractions
 
 from .finite_field import ModP, finite_field_sqrt
+from .gaussian_rationals import GaussianRational
+
 
 fixed_relative_precision = False
 all_precision_loss_warning = False
@@ -87,6 +90,16 @@ class PAdic(object):
 
     def __init__(self, num, p=None, k=None, n=0, from_addition=False):
         """0 ≤ num ≤ p ^ k - 1; p: prime; k: significant digits; n: power of prefactors of p (valuation)."""
+        if isinstance(num, fractions.Fraction) or isinstance(num, GaussianRational):
+            if isinstance(num, GaussianRational):
+                assert num.imag == 0  # might want to consider a field extension or whether sqrt(-1) is in the field
+                num = num.real
+            res = PAdic(num.numerator, p, k, n, from_addition) / PAdic(num.denominator, p, k, n, from_addition)
+            self.p = res.p
+            self.k = res.k
+            self.n = res.n
+            self.num = res.num
+            return None
         num = int(num)  # might get passed as FF number
         if p is not None and k is not None:
             self.p = p
@@ -166,26 +179,44 @@ class PAdic(object):
     def __repr__(self):
         return str(self)
 
+    @classmethod
+    def __inv_str__(cls, string):
+        """Constructor from string (inverse method to __str__ or __repr__)."""
+        # get the prime
+        prime = int(re.findall("O\((\d+)", string)[0])
+        # get the valuation
+        valuation = string.split(" + ")[0]
+        valuation = re.findall(f"{prime}[\^\-\d+]*", valuation)
+        if valuation == []:
+            valuation = 0
+        else:
+            valuation = int(valuation[0].split("^")[1])
+        # get the mantissa
+        mantissa = [int(re.sub("\*[\^\d+]{0,}", "", entry.replace(f"{prime}", "").replace(" ", ""))) for entry in string.split("+")[:-1]]
+        significant_digits = len(mantissa)
+        mantissa = sum([entry * prime ** i for i, entry in enumerate(mantissa)])
+        return cls(mantissa, p=prime, k=significant_digits, n=valuation)
+
     # COMPARISON
 
-    @check_orderable
+    @padicfy
     def __eq__(self, other):
         return all([int(self) == int(other), self.p == other.p, self.k == other.k, self.n == other.n])
     #  or all([int(self) == int(other) == 0, self.p == other.p, self.k + self.n == other.k]))  # e.g. 0 * p + O(p^2) == 0 + O(p^2)
 
-    @check_orderable
+    @padicfy
     def __le__(self, other):
         return self.n >= other.n
 
-    @check_orderable
+    @padicfy
     def __lt__(self, other):
         return self.n > other.n
 
-    @check_orderable
+    @padicfy
     def __ge__(self, other):
         return self.n <= other.n
 
-    @check_orderable
+    @padicfy
     def __gt__(self, other):
         return self.n < other.n
 
