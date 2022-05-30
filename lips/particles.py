@@ -82,7 +82,7 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
     @property
     def masses(self):
         """Masses of all particles in phase space."""
-        return [self.ldot(i, i) for i in range(1, len(self) + 1)]
+        return [oParticle.mass for oParticle in self]
 
     def randomise_all(self, real_momenta=False):
         """Randomises all particles. Breaks momentum conservation."""
@@ -122,14 +122,14 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
             iK.r2_sp = r2_spinors[i]
         return oKs
 
-    def make_analytical_d(self, indepVars=None):
+    def make_analytical_d(self, indepVars=None, symbols=('a', 'b', 'c', 'd')):
         """ """
         if indepVars is None:
             indepVars = tuple(numpy.zeros(4 * len(self), dtype=int))
-        la = sympy.symbols('a1:{}'.format(len(self) + 1))
-        lb = sympy.symbols('b1:{}'.format(len(self) + 1))
-        lc = sympy.symbols('c1:{}'.format(len(self) + 1))
-        ld = sympy.symbols('d1:{}'.format(len(self) + 1))
+        la = sympy.symbols(f'{symbols[0]}1:{len(self) + 1}')
+        lb = sympy.symbols(f'{symbols[1]}1:{len(self) + 1}')
+        lc = sympy.symbols(f'{symbols[2]}1:{len(self) + 1}')
+        ld = sympy.symbols(f'{symbols[3]}1:{len(self) + 1}')
         for i, oParticle in enumerate(self):
             if indepVars[i * 4 + 0] == 0:
                 oParticle._r_sp_d[0, 0] = la[i]
