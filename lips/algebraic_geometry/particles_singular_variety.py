@@ -65,6 +65,7 @@ class Particles_SingularVariety:
             oSemiNumericalIdeal.ring.ordering = 'lp'
             if hasattr(oSemiNumericalIdeal, "groebner_basis"):
                 del oSemiNumericalIdeal.groebner_basis
+            # print(repr(oSemiNumericalIdeal), oSemiNumericalIdeal.primary_decomposition, oSemiNumericalIdeal.groebner_basis, len(oSemiNumericalIdeal.groebner_basis))
             root_dicts = lex_groebner_solve(oSemiNumericalIdeal.groebner_basis, prime=prime)
             check_solutions(oSemiNumericalIdeal.groebner_basis, root_dicts, prime=prime)
 
@@ -94,6 +95,8 @@ class Particles_SingularVariety:
 
                 # print(oSemiNumericalIdeal.generators)
 
+                if len(oSemiNumericalIdeal.indepSets) == 0:
+                    raise Exception("No independent set exists: is this the unit ideal?!")
                 currentIndepSet = oSemiNumericalIdeal.indepSets[0]
                 if verbose:
                     print("Chosen indepSet:", currentIndepSet)
