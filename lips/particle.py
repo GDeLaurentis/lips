@@ -478,8 +478,10 @@ class Particle(object):
 
     def lsq(self):
         """Lorentz dot product with itself: 2 trace(P^{α̇α}P̅\u0305_{αα̇}) = P^μ * η_μν * P^ν."""
+        # A possible test is that this should match the determinant of the rank 2 spinor
         return numpy.trace(numpy.dot(self.r2_sp, self.r2_sp_b)) / 2
 
     @property
     def mass(self):
+        # Technically this is the mass squared - might want to rename
         return self.lsq()
