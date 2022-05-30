@@ -14,6 +14,7 @@ import fractions
 
 from .finite_field import ModP, finite_field_sqrt
 from .gaussian_rationals import GaussianRational
+from .field_extension import FieldExtension
 
 
 fixed_relative_precision = False
@@ -90,36 +91,44 @@ class PAdic(object):
 
     def __init__(self, num, p=None, k=None, n=0, from_addition=False):
         """0 ≤ num ≤ p ^ k - 1; p: prime; k: significant digits; n: power of prefactors of p (valuation)."""
-        if isinstance(num, fractions.Fraction) or isinstance(num, GaussianRational):
-            if isinstance(num, GaussianRational):
-                assert num.imag == 0  # might want to consider a field extension or whether sqrt(-1) is in the field
-                num = num.real
+        if isinstance(num, fractions.Fraction):
             res = PAdic(num.numerator, p, k, n, from_addition) / PAdic(num.denominator, p, k, n, from_addition)
             self.p = res.p
             self.k = res.k
             self.n = res.n
             self.num = res.num
-            return None
-        num = int(num)  # might get passed as FF number
-        if p is not None and k is not None:
-            self.p = p
-            factors_of_p = next((i for i, j in enumerate(to_base(num, p)) if j != 0), None)
-            if factors_of_p is None:  # leading zeros are not significant digits under any situation
-                factors_of_p = k
-                from_addition = True
-            self.k = k - from_addition * factors_of_p  # this is the guaranteed precision
-            num = int(num // p ** factors_of_p) % (p ** self.k)
-            self.n = factors_of_p + n
-            self.num = num
-            if fixed_relative_precision is True and factors_of_p > 0:
-                # this emulates the behaviour of floating point numbers,
-                # where precision loss actually means random digits get added.
-                self.num = self.num + p ** self.k * full_range_random_padic_filling(self.p, factors_of_p)
-                self.k = self.k + factors_of_p
-            if all_precision_loss_warning and self.k == 0:
-                print("Lost all precision @", self)
+        elif isinstance(num, GaussianRational):
+            a = PAdic(num.real, p, k, n, from_addition)
+            b = PAdic(num.imag, p, k, n, from_addition)
+            i = padic_sqrt(PAdic(-1, p, k, n, from_addition))
+            res = a + i * b
+            if isinstance(res, FieldExtension):
+                raise ValueError(f"Can't create {p}-adic from {num}. A field extension is required.")
+            self.p = res.p
+            self.k = res.k
+            self.n = res.n
+            self.num = res.num
         else:
-            raise Exception("Invalid p-adic initialisation")
+            num = int(num)  # might get passed as FF number
+            if p is not None and k is not None:
+                self.p = p
+                factors_of_p = next((i for i, j in enumerate(to_base(num, p)) if j != 0), None)
+                if factors_of_p is None:  # leading zeros are not significant digits under any situation
+                    factors_of_p = k
+                    from_addition = True
+                self.k = k - from_addition * factors_of_p  # this is the guaranteed precision
+                num = int(num // p ** factors_of_p) % (p ** self.k)
+                self.n = factors_of_p + n
+                self.num = num
+                if fixed_relative_precision is True and factors_of_p > 0:
+                    # this emulates the behaviour of floating point numbers,
+                    # where precision loss actually means random digits get added.
+                    self.num = self.num + p ** self.k * full_range_random_padic_filling(self.p, factors_of_p)
+                    self.k = self.k + factors_of_p
+                if all_precision_loss_warning and self.k == 0:
+                    print("Lost all precision @", self)
+            else:
+                raise Exception("Invalid p-adic initialisation")
 
     # GETTERS and SETTERS
 
@@ -200,7 +209,10 @@ class PAdic(object):
         if valuation == []:
             valuation = 0
         else:
-            valuation = int(valuation[0].split("^")[1])
+            if "^" in valuation[0]:
+                valuation = int(valuation[0].split("^")[1])
+            else:
+                valuation = 1
         # get the mantissa
         mantissa = [int(re.sub(r"\*[\^\-\d+]{0,}", "", entry.replace(f"{prime}", "").replace(" ", ""))) for entry in string.split("+")[:-1]]
         significant_digits = len(mantissa)
@@ -303,6 +315,9 @@ class PAdic(object):
         else:
             return self * (self ** (n - 1))
 
+    def __hash__(self):
+        return hash(self.num) + hash(self.p) + hash(self.k) + hash(self.n)
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
@@ -328,7 +343,6 @@ def refine_sqrt_precision(x, s):
 
 def padic_sqrt(x):
     """Working precision padic sqrt."""
-    from .field_extension import FieldExtension
     assert isinstance(x, PAdic)
     ffx = ModP(x.as_tuple[0], x.p)
     root = finite_field_sqrt(ffx)
