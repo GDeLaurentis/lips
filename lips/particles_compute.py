@@ -19,7 +19,7 @@ import re
 import mpmath
 import sys
 
-from .tools import pSijk, pd5, pDijk, pOijk, pPijk, pA2, pAu, pAd, pS2, pSu, pSd, pNB, ptr5
+from .tools import pSijk, pMi, pd5, pDijk, pOijk, pPijk, pA2, pAu, pAd, pS2, pSu, pSd, pNB, ptr5
 
 if sys.version_info[0] > 2:
     unicode = str
@@ -114,13 +114,14 @@ class Particles_Compute:
                     1 * self.compute("s_34") * self.compute("s_34") * self.compute("s_45") * self.compute("s_45") +
                     1 * self.compute("s_45") * self.compute("s_45") * self.compute("s_51") * self.compute("s_51"))
 
+        elif pMi.findall(temp_string) != []:
+            """Mass of the i^{th} particle (m_i = s_i)."""
+            return self.compute(temp_string.replace("m", "s").replace("M", "S"))
+
         elif pSijk.findall(temp_string) != []:                      # S_ijk...
+            r"""Mandelstam variables: s_{i \dots k} = (P_i + \dots + P_k)^2."""
             ijk = list(map(int, pSijk.findall(temp_string)[0]))
-            s = 0
-            for i in range(len(ijk)):
-                for j in range(i + 1, len(ijk)):
-                    s = s + 2 * self.ldot(ijk[i], ijk[j])
-            return s
+            return sum([self[_i] for _i in ijk]).mass
 
         elif pA2.findall(temp_string) != []:                        # ⟨A|B⟩ -- contraction is up -> down : lambda[A]^alpha.lambda[B]_alpha
             A, B = map(int, pA2.findall(temp_string)[0])
