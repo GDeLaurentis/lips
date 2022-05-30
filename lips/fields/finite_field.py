@@ -136,12 +136,17 @@ class ModP(object):
     def __rtruediv__(self, other):
         return other * self._inv()
 
-    def __pow__(self, other):
-        assert(type(other) is int or hasattr(other, "is_integer") and other.is_integer() is True)
-        if other > 0:
-            return ModP(int(self) ** int(other), self.p)
+    def __pow__(self, n):
+        assert(isinstance(n, int) or n.is_integer())
+        if n < 0:
+            return 1 / self ** -n
+        elif n == 0:
+            return ModP(1, self.p)
+        elif n % 2 == 0:
+            root_2_res = self ** (n / 2)
+            return root_2_res * root_2_res
         else:
-            return 1 / ModP(int(self) ** - int(other), self.p)
+            return self * (self ** (n - 1))
 
     def _inv(self):
         """Find multiplicative inverse of self in Z_p (Z mod p) using the extended Euclidean algorithm."""
