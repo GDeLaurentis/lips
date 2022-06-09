@@ -96,6 +96,12 @@ class Particle(object):
     def __getitem__(self, key):
         return self.four_mom[key]
 
+    def __hash__(self):
+        if abs(self.mass) <= self.field.tollerance:
+            return hash(tuple([tuple(self.r_sp_d.flatten()), tuple(self.l_sp_d.flatten())]))
+        else:
+            return hash(tuple(self.r2_sp.flatten()))
+
     # GETTERS and SETTERS
 
     @property
