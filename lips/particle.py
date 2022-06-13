@@ -13,6 +13,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import numpy
+import sympy
 import mpmath
 import random
 import lips
@@ -485,7 +486,10 @@ class Particle(object):
     def lsq(self):
         """Lorentz dot product with itself: 2 trace(P^{α̇α}P̅\u0305_{αα̇}) = P^μ * η_μν * P^ν."""
         # A possible test is that this should match the determinant of the rank 2 spinor
-        return numpy.trace(numpy.dot(self.r2_sp, self.r2_sp_b)) / 2
+        lsq = numpy.trace(numpy.dot(self.r2_sp, self.r2_sp_b)) / 2
+        if isinstance(lsq, sympy.Basic):
+            lsq = sympy.expand(lsq)
+        return lsq
 
     @property
     def mass(self):
