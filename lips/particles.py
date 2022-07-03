@@ -23,7 +23,7 @@ import sympy
 
 from .fields.field import Field
 from .fields.padic import PAdic
-from .tools import MinkowskiMetric, flatten, pNB, myException, indexing_decorator
+from .tools import MinkowskiMetric, flatten, pNB, myException, indexing_decorator, pAu, pAd, pSu, pSd
 from .particle import Particle
 from .particles_compute import Particles_Compute
 from .particles_eval import Particles_Eval
@@ -274,11 +274,32 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
 
     @indexing_decorator
     def __getitem__(self, index):
+        if isinstance(index, str):
+            if pAu.findall(index) != [] or pAd.findall(index) != [] or pSu.findall(index) != [] or pSd.findall(index) != []:
+                return self.compute(index)
+            elif re.findall(r"(\d)", index) != []:
+                return self[int(re.findall(r"(\d)", index)[0])]
+            else:
+                raise IndexError(index)
         return list.__getitem__(self, index)
 
     @indexing_decorator
     def __setitem__(self, index, value):
-        list.__setitem__(self, index, value)
+        if isinstance(index, str):
+            if pAu.findall(index) != []:                        # ⟨A|
+                A = int(pAu.findall(index)[0])
+                self[A].r_sp_u = value
+            elif pAd.findall(index) != []:                      # |B⟩
+                B = int(pAd.findall(index)[0])
+                self[B].r_sp_d = value
+            elif pSu.findall(index) != []:                      # |A]
+                A = int(pSu.findall(index)[0])
+                self[A].l_sp_u = value
+            elif pSd.findall(index) != []:                      # [B|
+                B = int(pSd.findall(index)[0])
+                self[B].l_sp_d = value
+        else:
+            list.__setitem__(self, index, value)
 
     @indexing_decorator
     def __delitem__(self, index):
