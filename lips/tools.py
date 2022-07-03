@@ -94,7 +94,7 @@ def indexing_decorator(func):
         # for now do not decorate slices (might want to shift this as well)
         if isinstance(index, slice) or isinstance(index, str):
             return func(self, index, *args)
-        
+
         if index < 1:
             raise IndexError('Indices start from 1')
         elif index > 0 and index < len(self) + 1:
