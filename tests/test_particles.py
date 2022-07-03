@@ -5,6 +5,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import numpy
 import pytest
 
 from lips.fields import Field
@@ -56,3 +57,12 @@ def test_particles_fix_mom_cons(multiplicity, real_momenta, axis):
 
     assert(oParticles.momentum_conservation_check())
     assert(oParticles.onshell_relation_check())
+
+
+def test_spinor_item_setter():
+    oPs = Particles(8)
+    a, b, c, d = numpy.array([[1, 2]]), numpy.array([[2], [-1]]), numpy.array([[3, 4]]), numpy.array([[-4], [3]])
+    oPs["[5|"] = a
+    assert numpy.all(oPs["|5]"] == b)
+    oPs["|5⟩"] = d
+    assert numpy.all(oPs["⟨5|"] == c)
