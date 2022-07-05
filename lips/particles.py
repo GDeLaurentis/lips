@@ -281,7 +281,12 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
                 return self[int(re.findall(r"(\d)", index)[0])]
             else:
                 raise IndexError(index)
-        return list.__getitem__(self, index)
+        elif isinstance(index, slice):
+            oNewParticles = Particles(list.__getitem__(self, index), fix_mom_cons=False)
+            oNewParticles.oRefVec = self.oRefVec
+            return oNewParticles
+        else:
+            return list.__getitem__(self, index)
 
     @indexing_decorator
     def __setitem__(self, index, value):
