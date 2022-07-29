@@ -112,7 +112,9 @@ class LipsIdeal(Ideal):
             raise NotImplementedError("LipsIdeal called with args: ", args)
 
     def image(self, rule):
-        return LipsIdeal(self.ring, [covariant_poly_image(poly, rule) for poly in self.generators])
+        newIdeal = LipsIdeal(self.ring, [covariant_poly_image(poly, rule) for poly in self.generators])
+        newIdeal.rule = rule
+        return newIdeal
 
     def to_mom_cons_qring(self):
         oZeroIdeal = LipsIdeal(self.multiplicity, ())

@@ -100,7 +100,7 @@ class Invariants(object):
         if n == 6:
             self.invs_D += ["Δ_15|26|34"]
         if n == 7:
-            self.invs_4 += ["⟨1|(5+6)|(2+7)|1⟩", "Δ_12|347|56", ]
+            self.invs_4 += ["⟨1|(5+6)|(2+7)|1⟩", "[1|(5+6)|(2+7)|1]", "Δ_12|347|56", ]
 
     @property
     def full(self):

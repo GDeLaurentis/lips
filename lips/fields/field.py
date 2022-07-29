@@ -9,8 +9,11 @@ from __future__ import unicode_literals
 
 import mpmath
 
-from lips.fields.padic import PAdic, padic_sqrt
-from lips.fields.finite_field import finite_field_sqrt
+# from lips.fields.padic import PAdic, padic_sqrt
+# from lips.fields.finite_field import finite_field_sqrt
+from pyadic import PAdic
+from pyadic.padic import padic_sqrt
+from pyadic.finite_field import finite_field_sqrt
 
 mpmath.mp.dps = 300
 

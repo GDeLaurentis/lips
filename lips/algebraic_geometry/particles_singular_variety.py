@@ -11,8 +11,10 @@ import random
 import numpy
 import sympy
 import mpmath
+import syngular
 
-from lips.fields import ModP, PAdic
+# from lips.fields import ModP, PAdic
+from pyadic import ModP, PAdic
 from lips.algebraic_geometry.covariant_ideal import LipsIdeal
 from lips.algebraic_geometry.tools import lex_groebner_solve, check_solutions, lips_covariant_symbols
 
@@ -66,6 +68,7 @@ class Particles_SingularVariety:
             if hasattr(oSemiNumericalIdeal, "groebner_basis"):
                 del oSemiNumericalIdeal.groebner_basis
             # print(repr(oSemiNumericalIdeal), oSemiNumericalIdeal.primary_decomposition, oSemiNumericalIdeal.groebner_basis, len(oSemiNumericalIdeal.groebner_basis))
+            syngular.DEGBOUND.set(0)
             root_dicts = lex_groebner_solve(oSemiNumericalIdeal.groebner_basis, prime=prime)
             check_solutions(oSemiNumericalIdeal.groebner_basis, root_dicts, prime=prime)
 

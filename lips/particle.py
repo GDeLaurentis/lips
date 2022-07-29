@@ -20,8 +20,9 @@ import lips
 
 from .fields.field import Field
 from .fields.gaussian_rationals import GaussianRational, rand_rat_frac
-from .fields.finite_field import ModP
-from .fields.padic import PAdic
+# from .fields.finite_field import ModP
+# from .fields.padic import PAdic
+from pyadic import PAdic, ModP
 from .tools import MinkowskiMetric, LeviCivita, rand_frac, Pauli, Pauli_bar, flatten
 
 
@@ -486,6 +487,7 @@ class Particle(object):
     def lsq(self):
         """Lorentz dot product with itself: 2 trace(P^{α̇α}P̅\u0305_{αα̇}) = P^μ * η_μν * P^ν."""
         # A possible test is that this should match the determinant of the rank 2 spinor
+        # the determinant seems to be less operations, might be better - now used in compute s_ijk function
         lsq = numpy.trace(numpy.dot(self.r2_sp, self.r2_sp_b)) / 2
         if isinstance(lsq, sympy.Basic):
             lsq = sympy.expand(lsq)

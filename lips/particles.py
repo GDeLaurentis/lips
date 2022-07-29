@@ -22,7 +22,8 @@ import mpmath
 import sympy
 
 from .fields.field import Field
-from .fields.padic import PAdic
+# from .fields.padic import PAdic
+from pyadic import PAdic
 from .tools import MinkowskiMetric, flatten, pNB, myException, indexing_decorator, pAu, pAd, pSu, pSd
 from .particle import Particle
 from .particles_compute import Particles_Compute

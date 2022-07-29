@@ -98,7 +98,12 @@ class Particles_SetPair:
 
             elif pNB.findall(t_s2) != []:                                        # Second is: ⟨i|(j+k)|...|l⟩
 
-                return "Not implemented."
+                if t_s1 == "⟨7|3+4|5+6|7⟩" and t_s2 == "[7|3+4|5+6|7]":
+                    self._set("[7|3+4|5+6|7]", t_v2, fix_mom=False)
+                    self._set("⟨7|3+4|5+6|7⟩", t_v1, fix_mom=False)
+                    self.fix_mom_cons(1, 2)
+                else:
+                    return "Not implemented."
 
             elif pSijk.findall(t_s2) != []:                                      # Second: S_ijk...
 
@@ -906,7 +911,11 @@ class Particles_SetPair:
 
     def _set_pair_NB_and_Dijk(self, t_s1, t_v1, t_s2, t_v2):  # Current failed: 8/20 @ 6pt
 
-        if t_s1 == "⟨2|1+7|3+4|2⟩" and t_s2 == "Δ_735":
+        if t_s1 == "⟨1|3+4|5+6|1⟩" and t_s2 == "Δ_735":
+            self._set("Δ_357", t_v2, fix_mom=False)
+            self._set("⟨1|3+4|5+6|1⟩", t_v1, fix_mom=False)
+            self.fix_mom_cons(7, 2)
+        elif t_s1 == "⟨2|1+7|3+4|2⟩" and t_s2 == "Δ_735":
             self._set("⟨2|1+7|3+4|2⟩", t_v1, fix_mom=False)
             self._set("Δ_735", t_v2, mode=6, fix_mom=False)
             self.fix_mom_cons(5, 6)
@@ -926,6 +935,10 @@ class Particles_SetPair:
             self._set("Δ_56|12|347", t_v2, fix_mom=False)
             self._set("⟨3|5+6|1+2|3⟩", t_v1, mode=1, fix_mom=False)
             self.fix_mom_cons(7, 4)
+        elif t_s1 == "⟨7|3+4|5+6|7⟩" and t_s2 == "Δ_135":
+            self._set("Δ_12|34|567", t_v2, fix_mom=False)
+            self._set("⟨7|3+4|1+2|7⟩", t_v1, fix_mom=False)
+            self.fix_mom_cons(5, 6)
         else:
             return "Not implemented."
 
