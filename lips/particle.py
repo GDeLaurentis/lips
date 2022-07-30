@@ -18,10 +18,11 @@ import mpmath
 import random
 import lips
 
+from sympy import NotInvertible
+
 from .fields.field import Field
 from .fields.gaussian_rationals import GaussianRational, rand_rat_frac
-# from .fields.finite_field import ModP
-# from .fields.padic import PAdic
+# from .fields import PAdic, ModP
 from pyadic import PAdic, ModP
 from .tools import MinkowskiMetric, LeviCivita, rand_frac, Pauli, Pauli_bar, flatten
 
@@ -122,7 +123,7 @@ class Particle(object):
         try:
             self._r2_sp_b_to_four_momentum()
             self._four_mom_to_four_mom_d()
-        except (TypeError, SystemError):
+        except (ValueError, TypeError, SystemError, NotInvertible):
             self._four_mom = None
             self._four_mom_d = None
 
@@ -142,7 +143,7 @@ class Particle(object):
         try:
             self._r2_sp_b_to_four_momentum()
             self._four_mom_to_four_mom_d()
-        except (TypeError, SystemError):
+        except (ValueError, TypeError, SystemError, NotInvertible):
             self._four_mom = None
             self._four_mom_d = None
 
@@ -162,7 +163,7 @@ class Particle(object):
         try:
             self._r2_sp_b_to_four_momentum()
             self._four_mom_to_four_mom_d()
-        except (TypeError, SystemError):
+        except (ValueError, TypeError, SystemError, NotInvertible):
             self._four_mom = None
             self._four_mom_d = None
 
@@ -182,7 +183,7 @@ class Particle(object):
         try:
             self._r2_sp_b_to_four_momentum()
             self._four_mom_to_four_mom_d()
-        except (TypeError, SystemError):
+        except (ValueError, TypeError, SystemError, NotInvertible):
             self._four_mom = None
             self._four_mom_d = None
 
@@ -199,7 +200,7 @@ class Particle(object):
         try:
             self._r2_sp_to_four_momentum()
             self._four_mom_to_four_mom_d()
-        except (TypeError, SystemError):
+        except (ValueError, TypeError, SystemError, NotInvertible):
             self._four_mom = None
             self._four_mom_d = None
         # should I check for masslessness?
@@ -208,7 +209,7 @@ class Particle(object):
             self._r_sp_d_to_r_sp_u()
             self._r2_sp_to_l_sp_d()
             self._l_sp_d_to_l_sp_u()
-        except (TypeError, ValueError):
+        except (ValueError, TypeError, SystemError, NotInvertible):
             self._r_sp_u = None
             self._r_sp_d = None
             self._l_sp_u = None
@@ -227,7 +228,7 @@ class Particle(object):
         try:
             self._r2_sp_b_to_four_momentum()
             self._four_mom_to_four_mom_d()
-        except (TypeError, SystemError):
+        except (ValueError, TypeError, SystemError, NotInvertible):
             self._four_mom = None
             self._four_mom_d = None
         # should I check for masslessness?
@@ -236,7 +237,7 @@ class Particle(object):
             self._r_sp_d_to_r_sp_u()
             self._r2_sp_to_l_sp_d()
             self._l_sp_d_to_l_sp_u()
-        except (TypeError, ValueError):
+        except (ValueError, TypeError, SystemError, NotInvertible):
             self._r_sp_u = None
             self._r_sp_d = None
             self._l_sp_u = None
@@ -259,7 +260,7 @@ class Particle(object):
             self._r_sp_d_to_r_sp_u()
             self._four_mom_to_l_sp_d()
             self._l_sp_d_to_l_sp_u()
-        except TypeError:
+        except (ValueError, TypeError, SystemError, NotInvertible):
             self._r_sp_u = None
             self._r_sp_d = None
             self._l_sp_u = None
@@ -282,7 +283,7 @@ class Particle(object):
             self._r_sp_d_to_r_sp_u()
             self._four_mom_to_l_sp_d()
             self._l_sp_d_to_l_sp_u()
-        except TypeError:
+        except (ValueError, TypeError, SystemError, NotInvertible):
             self._r_sp_u = None
             self._r_sp_d = None
             self._l_sp_u = None
@@ -349,7 +350,7 @@ class Particle(object):
         try:
             self._r2_sp_b_to_four_momentum()
             self._four_mom_to_four_mom_d()
-        except (TypeError, SystemError):
+        except (ValueError, TypeError, SystemError, NotInvertible):
             self._four_mom = None
             self._four_mom_d = None
 

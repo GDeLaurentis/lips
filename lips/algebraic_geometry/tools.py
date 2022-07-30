@@ -14,7 +14,8 @@ import numpy
 import itertools
 
 from copy import deepcopy
-from lips.fields.finite_field import ModP
+# from lips.fields.finite_field import ModP
+from pyadic import ModP
 from syngular import Ideal, Ring
 
 if sys.version_info.major < 3:
