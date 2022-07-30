@@ -21,8 +21,10 @@ import itertools
 import mpmath
 import sympy
 
+from sympy import NotInvertible
+
 from .fields.field import Field
-# from .fields.padic import PAdic
+# from .fields import PAdic
 from pyadic import PAdic
 from .tools import MinkowskiMetric, flatten, pNB, myException, indexing_decorator, pAu, pAd, pSu, pSd
 from .particle import Particle
@@ -142,10 +144,12 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
             oParticle._l_sp_d_to_l_sp_u()
             oParticle._r1_sp_to_r2_sp()
             oParticle._r1_sp_to_r2_sp_b()
+            # is the following really needed? it slows down the variety calculation,
+            # plus no invariant should be computed from 4-momenta (use rank 2 spinor instead)
             try:
                 oParticle._r2_sp_b_to_four_momentum()
                 oParticle._four_mom_to_four_mom_d()
-            except (TypeError, SystemError):
+            except (ValueError, TypeError, SystemError, NotInvertible):
                 oParticle._four_mom = None
                 oParticle._four_mom_d = None
 
