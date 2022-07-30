@@ -36,6 +36,12 @@ else:
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 
+# this fixes a weird bug where sympy does not respect precision even if mpmath.mp.dps precision is set
+# (sympy seems to use mpmath as backhand)
+equation = sympy.sympify(f"x - 1.{'0' * 290}1")
+sympy.nroots(equation, n=300, maxsteps=500)
+
+
 def univariate_floating_point_solver(equation, root_dict):
     """Returns all possible solutions of 'equation' over arbitrary precision complex numbers."""
     equation = sympy.sympify(equation).subs(root_dict)
