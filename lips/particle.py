@@ -13,14 +13,18 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import numpy
+import sympy
 import mpmath
 import random
 import lips
 
+from sympy import NotInvertible
+
 from .fields.field import Field
 from .fields.gaussian_rationals import GaussianRational, rand_rat_frac
-from .fields.finite_field import ModP
-from .tools import MinkowskiMetric, LeviCivita, rand_frac, Pauli, Pauli_bar
+# from .fields import PAdic, ModP
+from pyadic import PAdic, ModP
+from .tools import MinkowskiMetric, LeviCivita, rand_frac, Pauli, Pauli_bar, flatten
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -34,12 +38,8 @@ class Particle(object):
     def __init__(self, four_mom=None, r2_sp=None, real_momentum=False, field=Field('mpc', 0, 300)):
         """Initialisation. Calls randomise if None, else initialises the four momentum."""
         self.field = field
-        if four_mom is None and r2_sp is None and field.name == "mpc":
+        if four_mom is None and r2_sp is None and field.name in ("mpc", "gaussian rational", "finite field", "padic"):
             self.randomise(real_momentum=real_momentum)
-        elif four_mom is None and r2_sp is None and field.name == "gaussian rational":
-            self.randomise_rational()
-        elif four_mom is None and r2_sp is None and field.name == "finite field":
-            self.randomise_finite_field()
         elif four_mom is not None:
             self.four_mom = four_mom
         elif r2_sp is not None:
@@ -99,6 +99,12 @@ class Particle(object):
     def __getitem__(self, key):
         return self.four_mom[key]
 
+    def __hash__(self):
+        if abs(self.mass) <= self.field.tollerance:
+            return hash(tuple([tuple(self.r_sp_d.flatten()), tuple(self.l_sp_d.flatten())]))
+        else:
+            return hash(tuple(self.r2_sp.flatten()))
+
     # GETTERS and SETTERS
 
     @property
@@ -117,7 +123,7 @@ class Particle(object):
         try:
             self._r2_sp_b_to_four_momentum()
             self._four_mom_to_four_mom_d()
-        except (TypeError, SystemError):
+        except (ValueError, TypeError, SystemError, NotInvertible):
             self._four_mom = None
             self._four_mom_d = None
 
@@ -137,7 +143,7 @@ class Particle(object):
         try:
             self._r2_sp_b_to_four_momentum()
             self._four_mom_to_four_mom_d()
-        except (TypeError, SystemError):
+        except (ValueError, TypeError, SystemError, NotInvertible):
             self._four_mom = None
             self._four_mom_d = None
 
@@ -157,7 +163,7 @@ class Particle(object):
         try:
             self._r2_sp_b_to_four_momentum()
             self._four_mom_to_four_mom_d()
-        except (TypeError, SystemError):
+        except (ValueError, TypeError, SystemError, NotInvertible):
             self._four_mom = None
             self._four_mom_d = None
 
@@ -177,7 +183,7 @@ class Particle(object):
         try:
             self._r2_sp_b_to_four_momentum()
             self._four_mom_to_four_mom_d()
-        except (TypeError, SystemError):
+        except (ValueError, TypeError, SystemError, NotInvertible):
             self._four_mom = None
             self._four_mom_d = None
 
@@ -194,7 +200,7 @@ class Particle(object):
         try:
             self._r2_sp_to_four_momentum()
             self._four_mom_to_four_mom_d()
-        except (TypeError, SystemError):
+        except (ValueError, TypeError, SystemError, NotInvertible):
             self._four_mom = None
             self._four_mom_d = None
         # should I check for masslessness?
@@ -203,7 +209,7 @@ class Particle(object):
             self._r_sp_d_to_r_sp_u()
             self._r2_sp_to_l_sp_d()
             self._l_sp_d_to_l_sp_u()
-        except TypeError:
+        except (ValueError, TypeError, SystemError, NotInvertible):
             self._r_sp_u = None
             self._r_sp_d = None
             self._l_sp_u = None
@@ -222,7 +228,7 @@ class Particle(object):
         try:
             self._r2_sp_b_to_four_momentum()
             self._four_mom_to_four_mom_d()
-        except (TypeError, SystemError):
+        except (ValueError, TypeError, SystemError, NotInvertible):
             self._four_mom = None
             self._four_mom_d = None
         # should I check for masslessness?
@@ -231,7 +237,7 @@ class Particle(object):
             self._r_sp_d_to_r_sp_u()
             self._r2_sp_to_l_sp_d()
             self._l_sp_d_to_l_sp_u()
-        except TypeError:
+        except (ValueError, TypeError, SystemError, NotInvertible):
             self._r_sp_u = None
             self._r_sp_d = None
             self._l_sp_u = None
@@ -254,7 +260,7 @@ class Particle(object):
             self._r_sp_d_to_r_sp_u()
             self._four_mom_to_l_sp_d()
             self._l_sp_d_to_l_sp_u()
-        except TypeError:
+        except (ValueError, TypeError, SystemError, NotInvertible):
             self._r_sp_u = None
             self._r_sp_d = None
             self._l_sp_u = None
@@ -277,7 +283,7 @@ class Particle(object):
             self._r_sp_d_to_r_sp_u()
             self._four_mom_to_l_sp_d()
             self._l_sp_d_to_l_sp_u()
-        except TypeError:
+        except (ValueError, TypeError, SystemError, NotInvertible):
             self._r_sp_u = None
             self._r_sp_d = None
             self._l_sp_u = None
@@ -286,6 +292,16 @@ class Particle(object):
     # PUBLIC METHODS
 
     def randomise(self, real_momentum=False):
+        if self.field.name == "mpc":
+            self.randomise_mpc(real_momentum=real_momentum)
+        elif self.field.name == "gaussian rational":
+            self.randomise_rational()
+        elif self.field.name == "finite field":
+            self.randomise_finite_field()
+        elif self.field.name == "padic":
+            self.randomise_padic()
+
+    def randomise_mpc(self, real_momentum=False):
         """Randomises its momentum."""
         while True:
             if real_momentum is False:
@@ -326,9 +342,14 @@ class Particle(object):
         try:
             self._r2_sp_b_to_four_momentum()
             self._four_mom_to_four_mom_d()
-        except (TypeError, SystemError):
+        except (ValueError, TypeError, SystemError, NotInvertible):
             self._four_mom = None
             self._four_mom_d = None
+
+    @property
+    def spinors_are_in_field_extension(self):
+        from .fields.field_extension import FieldExtension
+        return FieldExtension in set(map(type, flatten(self.r_sp_d) + flatten(self.l_sp_d)))
 
     # PRIVATE METHODS
 
@@ -453,3 +474,19 @@ class Particle(object):
         for i in range(4):
             self._four_mom[i] = numpy.trace(numpy.dot(Pauli[i], r_two_spinor)) / 2
         self.four_mom = self._four_mom
+
+    # OPERATIONS
+
+    def lsq(self):
+        """Lorentz dot product with itself: 2 trace(P^{α̇α}P̅\u0305_{αα̇}) = P^μ * η_μν * P^ν."""
+        # A possible test is that this should match the determinant of the rank 2 spinor
+        # the determinant seems to be less operations, might be better - now used in compute s_ijk function
+        lsq = numpy.trace(numpy.dot(self.r2_sp, self.r2_sp_b)) / 2
+        if isinstance(lsq, sympy.Basic):
+            lsq = sympy.expand(lsq)
+        return lsq
+
+    @property
+    def mass(self):
+        # Technically this is the mass squared - might want to rename
+        return self.lsq()

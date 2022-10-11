@@ -9,6 +9,12 @@ from __future__ import unicode_literals
 
 import mpmath
 
+# from lips.fields.padic import PAdic, padic_sqrt
+# from lips.fields.finite_field import finite_field_sqrt
+from pyadic import PAdic
+from pyadic.padic import padic_sqrt
+from pyadic.finite_field import finite_field_sqrt
+
 mpmath.mp.dps = 300
 
 
@@ -93,6 +99,17 @@ class Field(object):
             return str(self.characteristic)
         else:
             return None
+
+    @property
+    def sqrt(self):
+        if self.name == "finite field":
+            return finite_field_sqrt
+        elif self.name == "padic":
+            return padic_sqrt
+        elif self.name == "mpc":
+            return mpmath.sqrt
+        else:
+            raise Exception(f"Field not understood: {self.field.name}")
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #

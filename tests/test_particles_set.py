@@ -21,7 +21,7 @@ Cores = 6
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 
-@pytest.mark.parametrize("multiplicity", range(4, 7))
+@pytest.mark.parametrize("multiplicity", range(4, 8))
 def test_particles_set(multiplicity):
     invariants = Invariants(multiplicity, no_cached=True).full
     TrueOrFalseList = mapThreads(SingleScalingsTestingInner, multiplicity, invariants, invariants, UseParallelisation=UseParallelisation, Cores=Cores)

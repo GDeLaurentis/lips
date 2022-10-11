@@ -21,8 +21,12 @@ import itertools
 import mpmath
 import sympy
 
+from sympy import NotInvertible
+
 from .fields.field import Field
-from .tools import MinkowskiMetric, flatten, pNB, myException, indexing_decorator
+# from .fields import PAdic
+from pyadic import PAdic
+from .tools import MinkowskiMetric, flatten, pNB, myException, indexing_decorator, pAu, pAd, pSu, pSd
 from .particle import Particle
 from .particles_compute import Particles_Compute
 from .particles_eval import Particles_Eval
@@ -67,7 +71,9 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
 
     def __hash__(self):
         """Hash function: hash string of concatenated momenta."""
-        return hash(" ".join(flatten([list(map(str, flatten(oParticle.r2_sp))) for oParticle in self])))
+        return hash(tuple([hash(oP) for oP in self]))
+        # this breaks when only little group changes
+        # return hash(" ".join(flatten([list(map(str, flatten(oParticle.r2_sp))) for oParticle in self])))
 
     # PUBLIC METHODS
 
@@ -79,7 +85,7 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
     @property
     def masses(self):
         """Masses of all particles in phase space."""
-        return [self.ldot(i, i) for i in range(1, len(self) + 1)]
+        return [oParticle.mass for oParticle in self]
 
     def randomise_all(self, real_momenta=False):
         """Randomises all particles. Breaks momentum conservation."""
@@ -113,20 +119,16 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
 
     def cluster(self, llIntegers):
         """Returns clustered particle objects according to lists of lists of integers (e.g. corners of one loop diagram)."""
-        oKs = Particles(len(llIntegers), fix_mom_cons=False)
-        r2_spinors = [sum([self[i].r2_sp for i in corner_as_integers]) for corner_as_integers in llIntegers]
-        for i, iK in enumerate(oKs):
-            iK.r2_sp = r2_spinors[i]
-        return oKs
+        return Particles([sum([self[i] for i in corner_as_integers]) for corner_as_integers in llIntegers], fix_mom_cons=False)
 
-    def make_analytical_d(self, indepVars=None):
+    def make_analytical_d(self, indepVars=None, symbols=('a', 'b', 'c', 'd')):
         """ """
         if indepVars is None:
             indepVars = tuple(numpy.zeros(4 * len(self), dtype=int))
-        la = sympy.symbols('a1:{}'.format(len(self) + 1))
-        lb = sympy.symbols('b1:{}'.format(len(self) + 1))
-        lc = sympy.symbols('c1:{}'.format(len(self) + 1))
-        ld = sympy.symbols('d1:{}'.format(len(self) + 1))
+        la = sympy.symbols(f'{symbols[0]}1:{len(self) + 1}')
+        lb = sympy.symbols(f'{symbols[1]}1:{len(self) + 1}')
+        lc = sympy.symbols(f'{symbols[2]}1:{len(self) + 1}')
+        ld = sympy.symbols(f'{symbols[3]}1:{len(self) + 1}')
         for i, oParticle in enumerate(self):
             if indepVars[i * 4 + 0] == 0:
                 oParticle._r_sp_d[0, 0] = la[i]
@@ -140,10 +142,12 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
             oParticle._l_sp_d_to_l_sp_u()
             oParticle._r1_sp_to_r2_sp()
             oParticle._r1_sp_to_r2_sp_b()
+            # is the following really needed? it slows down the variety calculation,
+            # plus no invariant should be computed from 4-momenta (use rank 2 spinor instead)
             try:
                 oParticle._r2_sp_b_to_four_momentum()
                 oParticle._four_mom_to_four_mom_d()
-            except (TypeError, SystemError):
+            except (ValueError, TypeError, SystemError, NotInvertible):
                 oParticle._four_mom = None
                 oParticle._four_mom_d = None
 
@@ -259,15 +263,45 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
                     print("{} = {}".format(_invars[i], float(values[i]) if type(values[i]) is mpmath.mpf else values[i]))
         return mom_cons, on_shell, big_outliers, small_outliers
 
+    @property
+    def spinors_are_in_field_extension(self):
+        return any([oP.spinors_are_in_field_extension for oP in self])
+
     # BASE ONE LIST METHODS
 
     @indexing_decorator
     def __getitem__(self, index):
-        return list.__getitem__(self, index)
+        if isinstance(index, str):
+            if pAu.findall(index) != [] or pAd.findall(index) != [] or pSu.findall(index) != [] or pSd.findall(index) != []:
+                return self.compute(index)
+            elif re.findall(r"(\d)", index) != []:
+                return self[int(re.findall(r"(\d)", index)[0])]
+            else:
+                raise IndexError(index)
+        elif isinstance(index, slice):
+            oNewParticles = Particles(list.__getitem__(self, index), fix_mom_cons=False)
+            oNewParticles.oRefVec = self.oRefVec
+            return oNewParticles
+        else:
+            return list.__getitem__(self, index)
 
     @indexing_decorator
     def __setitem__(self, index, value):
-        list.__setitem__(self, index, value)
+        if isinstance(index, str):
+            if pAu.findall(index) != []:                        # ⟨A|
+                A = int(pAu.findall(index)[0])
+                self[A].r_sp_u = value
+            elif pAd.findall(index) != []:                      # |B⟩
+                B = int(pAd.findall(index)[0])
+                self[B].r_sp_d = value
+            elif pSu.findall(index) != []:                      # |A]
+                A = int(pSu.findall(index)[0])
+                self[A].l_sp_u = value
+            elif pSd.findall(index) != []:                      # [B|
+                B = int(pSd.findall(index)[0])
+                self[B].l_sp_d = value
+        else:
+            list.__setitem__(self, index, value)
 
     @indexing_decorator
     def __delitem__(self, index):

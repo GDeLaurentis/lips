@@ -12,26 +12,43 @@ on:
 
 jobs:
 
-  test:
+  CI:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Install singular
+      run: |
+        sudo apt-get update
+        sudo apt-get install singular
     - uses: actions/checkout@v2
     - name: Set up Python 3.9
       uses: actions/setup-python@v2
       with:
         python-version: 3.9
+    - name: Checkout this Repo
+      uses: actions/checkout@v2
+      with:
+        path: lips-dev
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install flake8 pytest pytest-cov
-        python setup.py install
+        pip install -e lips-dev
     - name: Lint with flake8
       run: |
-        # stop the build if there are Python syntax errors or undefined names
+        cd lips-dev
         flake8 lips/ --count --max-line-length=190 --statistics --verbose
-#        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-#        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=190 --statistics --verbose
     - name: Test with pytest
       run: |
-        pytest
+        cd lips-dev
+        pytest |& tee coverage.txt
+    - name: Run update-badges script
+      run: |
+        cd lips-dev
+        python update-badges.py
+    - name: Update badges and commit README.md
+      uses: stefanzweifel/git-auto-commit-action@v4
+      with:
+        file_pattern: README.md
+        repository: lips-dev
+        commit_message: "Automatic badge update"

@@ -19,7 +19,7 @@ import re
 import mpmath
 import sys
 
-from .tools import pSijk, pd5, pDijk, pOijk, pPijk, pA2, pS2, pNB, ptr5
+from .tools import pSijk, pMi, pd5, pDijk, pOijk, pPijk, pA2, pAu, pAd, pS2, pSu, pSd, pNB, ptr5, det2x2
 
 if sys.version_info[0] > 2:
     unicode = str
@@ -93,9 +93,9 @@ class Particles_Compute:
                 NonOverlappingLists = [list(map(int, corner)) for corner in match_list[1:]]
             else:
                 NonOverlappingLists = self.ijk_to_3NonOverlappingLists(list(map(int, match_list[0])))
-            temp_oParticles = self.cluster(NonOverlappingLists)
-            Delta = temp_oParticles.ldot(1, 2)**2 - temp_oParticles.ldot(1, 1) * temp_oParticles.ldot(2, 2)
-            return Delta
+            r2_sp_1 = sum([self[_i].r2_sp for _i in NonOverlappingLists[0]])
+            r2_sp_b_2 = sum([self[_i].r2_sp_b for _i in NonOverlappingLists[1]])
+            return (numpy.trace(numpy.dot(r2_sp_1, r2_sp_b_2)) / 2) ** 2 - det2x2(r2_sp_1) * det2x2(r2_sp_b_2)
 
         if pd5.findall(temp_string) != []:
             return (2 * self.compute("s_12") * self.compute("s_23") * self.compute("s_34") * self.compute("s_45") +
@@ -114,21 +114,39 @@ class Particles_Compute:
                     1 * self.compute("s_34") * self.compute("s_34") * self.compute("s_45") * self.compute("s_45") +
                     1 * self.compute("s_45") * self.compute("s_45") * self.compute("s_51") * self.compute("s_51"))
 
+        elif pMi.findall(temp_string) != []:
+            """Mass of the i^{th} particle (m_i = s_i)."""
+            return self.compute(temp_string.replace("m", "s").replace("M", "S"))
+
         elif pSijk.findall(temp_string) != []:                      # S_ijk...
+            r"""Mandelstam variables: s_{i \dots k} = (P_i + \dots + P_k)^2. Computed via determinant of rank 2 spinor."""
             ijk = list(map(int, pSijk.findall(temp_string)[0]))
-            s = 0
-            for i in range(len(ijk)):
-                for j in range(i + 1, len(ijk)):
-                    s = s + 2 * self.ldot(ijk[i], ijk[j])
-            return s
+            tot_r2_sp = sum([self[_i].r2_sp for _i in ijk])
+            return det2x2(tot_r2_sp)
 
         elif pA2.findall(temp_string) != []:                        # ⟨A|B⟩ -- contraction is up -> down : lambda[A]^alpha.lambda[B]_alpha
             A, B = map(int, pA2.findall(temp_string)[0])
             return numpy.dot(self[A].r_sp_u, self[B].r_sp_d)[0, 0]
 
+        elif pAu.findall(temp_string) != []:                        # ⟨A|
+            A = int(pAu.findall(temp_string)[0])
+            return self[A].r_sp_u
+
+        elif pAd.findall(temp_string) != []:                        # |B⟩
+            B = int(pAd.findall(temp_string)[0])
+            return self[B].r_sp_d
+
         elif pS2.findall(temp_string) != []:                        # [A|B] -- contraction is down -> up : lambda_bar[A]_alpha_dot.lambda_bar[B]^alpha_dot
             A, B = map(int, pS2.findall(temp_string)[0])
             return numpy.dot(self[A].l_sp_d, self[B].l_sp_u)[0, 0]
+
+        elif pSu.findall(temp_string) != []:                        # |A]
+            A = int(pSu.findall(temp_string)[0])
+            return self[A].l_sp_u
+
+        elif pSd.findall(temp_string) != []:                        # [B|
+            B = int(pSd.findall(temp_string)[0])
+            return self[B].l_sp_d
 
         elif pNB.findall(temp_string) != []:                        # ⟨A|(B+C+..)..|D]
             abcd = pNB.search(temp_string)
