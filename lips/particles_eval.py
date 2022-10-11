@@ -15,7 +15,8 @@ import mpmath
 import operator as op
 
 from fractions import Fraction
-from lips.fields import GaussianRational, ModP
+from lips.fields import GaussianRational   # , ModP, PAdic
+from pyadic import PAdic, ModP
 
 operators = {ast.Add: op.add, ast.Sub: op.sub, ast.Mult: op.mul,
              ast.Div: op.truediv, ast.Pow: op.pow, ast.BitXor: op.xor,
@@ -27,9 +28,14 @@ operators = {ast.Add: op.add, ast.Sub: op.sub, ast.Mult: op.mul,
 
 pA2 = re.compile(r'(?:\u27e8)(\d+)(?:\|)(\d+)(?:\u27e9)')
 pA2bis = re.compile(r'(?:(?:\u27e8)(\d)(\d)(?:\u27e9))')
+pAu = re.compile(r'(?:⟨|<)(\d+)(?:\|)(?!\d[⟩|>])(?!\d[\+|-])(?!\(\d[\+|-])')
+pAd = re.compile(r'(?<![⟨|<]\d)(?<![\+|-]\d\))(?<![\+|-]\d)(?:\|)(\d+)(?:⟩|>)')
 pS2 = re.compile(r'(?:\[)(\d+)(?:\|)(\d+)(?:\])')
+pSd = re.compile(r'(?:\[)(\d+)(?:\|)(?!\d\])(?!\d[\+|-])(?!\(\d[\+|-])')
+pSu = re.compile(r'(?<!\[\d)(?<![\+|-]\d\))(?<![\+|-]\d)(?:\|)(\d+)(?:\])')
 pS2bis = re.compile(r'(?:\[)(\d)(\d)(?:\])')
 pSijk = re.compile(r'(?:s|S)(?:_){0,1}(\d+)')
+pMi = re.compile(r'(?:m|M)(?:_){0,1}(\d)')
 pOijk = re.compile(r'(?:Ω_)(\d+)')
 pPijk = re.compile(r'(?:Π_)(\d+)')
 pDijk_adjacent = re.compile(r'(?:Δ_(\d+)(?![\d\|]))')
@@ -45,6 +51,7 @@ class Particles_Eval:
 
     @staticmethod
     def _parse(string):
+        string = string.replace("−", "-")
         string = string.replace(r"\scriptscriptstyle", "").replace("<", "⟨").replace(">", "⟩")
         string = string.replace(r"\frac{", "(")
         string = string.replace(r"}{", ")/(")
@@ -56,9 +63,14 @@ class Particles_Eval:
         string = re.sub(r"{([\d\|]+)}", r"\1", string)
         string = pA2bis.sub(r"⟨\1|\2⟩", string)
         string = pA2.sub(r"oPs.compute('⟨\1|\2⟩')", string)
+        string = pAu.sub(r"oPs.compute('⟨\1|')", string)
+        string = pAd.sub(r"oPs.compute('|\1⟩')", string)
         string = pS2bis.sub(r"[\1|\2]", string)
         string = pS2.sub(r"oPs.compute('[\1|\2]')", string)
+        string = pSd.sub(r"oPs.compute('[\1|')", string)
+        string = pSu.sub(r"oPs.compute('|\1]')", string)
         string = pSijk.sub(r"oPs.compute('s_\1')", string)
+        string = pMi.sub(r"oPs.compute('m_\1')", string)
         string = pOijk.sub(r"oPs.compute('Ω_\1')", string)
         string = pPijk.sub(r"oPs.compute('Π_\1')", string)
         string = ptr5.sub(r"oPs.compute('tr5_\1')", string)
