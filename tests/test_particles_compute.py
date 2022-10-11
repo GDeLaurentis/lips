@@ -20,13 +20,13 @@ from lips.tools import pSijk, pDijk
 
 def test_particles_compute_ldot():
     oParticles = Particles(5)
-    assert(abs(oParticles.ldot(1, 2) - numpy.trace(numpy.dot(oParticles[1].r2_sp, oParticles[2].r2_sp_b)) / 2) < 10 ** -290)
+    assert abs(oParticles.ldot(1, 2) - numpy.trace(numpy.dot(oParticles[1].r2_sp, oParticles[2].r2_sp_b)) / 2) < 10 ** -290
 
 
 def test_particles_compute_lNB():
     oParticles = Particles(6)
-    assert(abs(oParticles("⟨1|2-3|4]") - oParticles("⟨1|2⟩[2|4]-⟨1|3⟩[3|4]")) < 10 ** -290)
-    assert(abs(oParticles("⟨1|2+3|4]") - oParticles("⟨1|2⟩[2|4]+⟨1|3⟩[3|4]")) < 10 ** -290)
+    assert abs(oParticles("⟨1|2-3|4]") - oParticles("⟨1|2⟩[2|4]-⟨1|3⟩[3|4]")) < 10 ** -290
+    assert abs(oParticles("⟨1|2+3|4]") - oParticles("⟨1|2⟩[2|4]+⟨1|3⟩[3|4]")) < 10 ** -290
 
 
 def test_particles_compute_Mandelstam():
@@ -63,4 +63,4 @@ def test_particles_compute_tr5_1234():
                                                      oParticles[2].four_mom[j] *
                                                      oParticles[3].four_mom[k] *
                                                      oParticles[4].four_mom[l]))
-    assert(abs(tr5 - oParticles("tr5_1234")) < 10 ** -290)
+    assert abs(tr5 - oParticles("tr5_1234")) < 10 ** -290

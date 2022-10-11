@@ -46,8 +46,8 @@ def test_particles_set_pair(multiplicity, type1, type2, expected_failures, expec
     TrueOrFalseList = mapThreads(DoubleScalingsTestingInner, multiplicity, oInvariants.full, tuples, UseParallelisation=UseParallelisation, Cores=Cores)
     failed_counter = sum(1 for entry in TrueOrFalseList if entry is False or entry is None)
 
-    assert(len(tuples) == expected_length)
-    assert(failed_counter == expected_failures)
+    assert len(tuples) == expected_length
+    assert failed_counter == expected_failures
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
