@@ -26,7 +26,7 @@ def test_particles_set(multiplicity):
     invariants = Invariants(multiplicity, no_cached=True).full
     TrueOrFalseList = mapThreads(SingleScalingsTestingInner, multiplicity, invariants, invariants, UseParallelisation=UseParallelisation, Cores=Cores)
     failed_counter = sum(1 for entry in TrueOrFalseList if entry is False)
-    assert(failed_counter == 0)
+    assert failed_counter == 0
     # print("\r{}/{} single collinear limits failed to be constructed.                                  \n".format(failed_counter, len(invariants)))
 
 

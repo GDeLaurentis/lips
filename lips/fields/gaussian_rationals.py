@@ -29,10 +29,10 @@ def to_gaussian_rational(other):
     elif type(other) is Fraction:
         return GaussianRational(other, Fraction(0, 1))
     elif type(other) is complex:
-        assert(other.real.is_integer() and other.imag.is_integer())
+        assert other.real.is_integer() and other.imag.is_integer()
         return GaussianRational(Fraction(int(other.real), 1), Fraction(int(other.imag), 1))
     elif type(other) is mpmath.mpc:
-        assert(mpmath.isint(other, gaussian=True))
+        assert mpmath.isint(other, gaussian=True)
         return GaussianRational(Fraction(int(other.real), 1), Fraction(int(other.imag), 1))
     else:
         raise Exception("Can't convert {} of type {} to GaussianRational.".format(other, type(other)))
@@ -112,7 +112,7 @@ class GaussianRational(object):
         return -1 * self
 
     def __pow__(self, n):
-        assert(isinstance(n, int) or n.is_integer())
+        assert isinstance(n, int) or n.is_integer()
         if n == 0:
             return 1
         elif n % 2 == 0:
