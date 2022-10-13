@@ -30,12 +30,12 @@ Cores = 6
         (6, "invs_2", "invs_2", 0, 870),
         (6, "invs_2", "invs_N", 48, 4950),
         (6, "invs_2", "invs_s", 0, 300),
-        (6, "invs_2", "invs_D", 0, 90),
+        (6, "invs_2", "invs_D", 0, 120),
         (6, "invs_3", "invs_3", 204, 8556),
         (6, "invs_3", "invs_s", 0, 930),
-        (6, "invs_3", "invs_D", 67, 279),
+        (6, "invs_3", "invs_D", 89, 372),
         (6, "invs_s", "invs_s", 0, 90),
-        (6, "invs_s", "invs_D", 12, 30),
+        (6, "invs_s", "invs_D", 16, 40),
     ]
 )
 def test_particles_set_pair(multiplicity, type1, type2, expected_failures, expected_length):
