@@ -114,8 +114,8 @@ class MyPool(object):      # context manager pool
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.obj.close()
-        self.obj.terminate()
         self.obj.join()
+        self.obj.terminate()
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
