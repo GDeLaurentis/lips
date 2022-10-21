@@ -23,7 +23,7 @@ class Particles_Variety:
 
     def variety(self, invariants, valuations, try_singular_variety_solver=False, verbose=False):
         """Constructs the required phase space point by first trying hardcoded limits and then the singular variety."""
-        assert(len(invariants) == len(valuations))
+        assert len(invariants) == len(valuations)
         try:
             if verbose:
                 print("Trying hardcoded solutions...")

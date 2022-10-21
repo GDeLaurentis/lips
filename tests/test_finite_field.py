@@ -83,7 +83,7 @@ def test_extended_euclideal_algorithm():
     for i in range(10):
         a, b = random.randint(1, 1000), random.randint(1, 1000)
         s, t, gcd = extended_euclideal_algorithm(a, b)
-        assert(a * s + b * t == gcd)
+        assert a * s + b * t == gcd
 
 
 def test_reconstruction_MQRR_2147483647():

@@ -30,8 +30,8 @@ modp = Field('finite field', 2 ** 31 - 1, 1)
 )
 def test_particles_instantiation(multiplicity, field):
     oPs = Particles(multiplicity, field=field)
-    assert(oPs.momentum_conservation_check())
-    assert(oPs.onshell_relation_check())
+    assert oPs.momentum_conservation_check()
+    assert oPs.onshell_relation_check()
 
 
 @pytest.mark.parametrize(
@@ -54,8 +54,8 @@ def test_particles_fix_mom_cons(multiplicity, real_momenta, axis):
     oParticles = Particles(multiplicity, real_momenta=real_momenta, fix_mom_cons=False)
     oParticles.fix_mom_cons(real_momenta=real_momenta, axis=axis)
 
-    assert(oParticles.momentum_conservation_check())
-    assert(oParticles.onshell_relation_check())
+    assert oParticles.momentum_conservation_check()
+    assert oParticles.onshell_relation_check()
 
 
 def test_spinor_item_setter():

@@ -46,6 +46,7 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
         """Initialisation. Requires either multiplicity of phace space or list of Particle objects."""
         list.__init__(self)
         self.field = field
+        self.seed = seed
         if isinstance(number_of_particles_or_particles, int):
             random.seed(seed) if seed is not None else random.seed()
             for i in range(number_of_particles_or_particles):
