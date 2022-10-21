@@ -25,7 +25,7 @@ class Particles_Set:
 
     # PRIVATE METHODS
 
-    def set(self, temp_string, temp_value, fix_mom=True, mode=1):
+    def _set(self, temp_string, temp_value, fix_mom=True, mode=1):
         """Constructs a singular phase space point."""
         self._set_inner(temp_string, temp_value, fix_mom, mode)
         abs_diff = abs(self.compute(temp_string) - temp_value)
