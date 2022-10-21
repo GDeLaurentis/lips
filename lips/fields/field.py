@@ -52,8 +52,8 @@ class Field(object):
 
     @name.setter
     def name(self, value):
-        if value not in ['mpc', 'gaussian rational', 'finite field', ]:
-            raise Exception("Field must be one of 'mpc', 'gaussian rational', 'finite field'.")
+        if value not in ['mpc', 'gaussian rational', 'finite field', 'padic']:
+            raise Exception("Field must be one of 'mpc', 'gaussian rational', 'finite field', 'padic'.")
         else:
             self._name = value
 
@@ -90,12 +90,14 @@ class Field(object):
             return 0
         elif self.name == 'mpc':
             return mpmath.mpf('10e-{}'.format(int(min([0.95 * mpmath.mp.dps, mpmath.mp.dps - 4]))))
+        elif self.name == 'padic':
+            return PAdic(0, self.characteristic, 0, self.digits)
 
     @property
     def singular_notation(self):
         if self.name == 'mpc':
             return '(complex,{},I)'.format(self.digits - 5)
-        elif self.name in ['finite field', ]:
+        elif self.name in ['finite field', 'padic']:
             return str(self.characteristic)
         else:
             return None

@@ -60,6 +60,9 @@ class ModP(object):
         elif p is None and isinstance(n, ModP):
             self.n = n.n
             self.p = n.p
+        elif p is None and isinstance(n, PAdic):
+            self.n = int(n)
+            self.p = n.p ** n.k
         elif p is None:
             self.n, self.p = self.__rstr__(n)
         else:

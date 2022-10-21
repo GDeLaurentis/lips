@@ -92,7 +92,7 @@ class Invariants(object):
             invs_to_be_added = ["⟨2|(1+3)|5]", "⟨3|(1+5)|4]", "⟨6|(1+3)|4]", "⟨6|(2+4)|3]", "⟨4|(3+5)|1]", "⟨2|(1+4)|5]", "⟨4|(2+5)|1]", "⟨6|(2+5)|3]", "⟨3|(4+6)|1]", ]
             for inv in invs_to_be_added:
                 oParticles.randomise_all()
-                oParticles.set(inv, 10 ** -30)
+                oParticles._set(inv, 10 ** -30)
                 mom_cons, on_shell, big_outliers, small_outliers = oParticles.phasespace_consistency_check(oInvariants.full)
                 # print mom_cons, on_shell, big_outliers, small_outliers
                 if mom_cons is True and on_shell is True and len(small_outliers) == 0:
