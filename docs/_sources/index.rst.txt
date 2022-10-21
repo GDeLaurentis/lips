@@ -3,18 +3,18 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-lips
-==================================
+Lorentz Invariant Phase Space
+===================================
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-lips (Lorentz Invariant Phase Space) is an object-oriented phase space generator written entirely in python.
+lips is an object-oriented phase space generator for theory computations.
 
 
 Installation
-=================
+------------
 
 Installation is easy with pip::
 
@@ -24,7 +24,7 @@ alternatively the package can be cloned from github at https://github.com/GDeLau
 
 
 Quick start
-=================
+-----------
 
 To generate a phase space point follow this very simple example:
 
@@ -47,8 +47,17 @@ Particle objects have several attributes, corresponding to the different represe
 Changing an attribute, for instance oParticles[1].four_mom, automatically updates all other representations, such as the rank two spinor oParticles[1].r2_sp.
 
 Indices and tables
-==================
+------------------
 
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+
+.. Hidden TOCs
+
+.. toctree::
+   :caption: Modules Documentation
+   :maxdepth: 2
+
+   modules
