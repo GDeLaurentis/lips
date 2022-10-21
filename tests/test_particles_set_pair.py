@@ -57,7 +57,7 @@ def test_particles_set_pair(multiplicity, type1, type2, expected_failures, expec
 def DoubleScalingsTestingInner(n, invariants, _tuple):
     oParticles = Particles(n)
     try:
-        oParticles.set_pair(_tuple[0], 10 ** -28, _tuple[1], 10 ** -28)
+        oParticles._set_pair(_tuple[0], 10 ** -28, _tuple[1], 10 ** -28)
         return True
     except Exception as e:
         print(e)

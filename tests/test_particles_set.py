@@ -38,7 +38,7 @@ def SingleScalingsTestingInner(n, invariants, invariant):
     error_counter = 0
     while True:
         oParticles = Particles(n)
-        result = oParticles.set(invariant, 10 ** -28)
+        result = oParticles._set(invariant, 10 ** -28)
         _, _, _, small_invs = oParticles.phasespace_consistency_check(invariants)
         if len(small_invs) > 1:         # check that only one is set to be small
             error_counter += 1
