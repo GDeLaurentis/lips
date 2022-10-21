@@ -104,6 +104,7 @@ class Particles_SingularVariety:
                 if verbose:
                     print("Chosen indepSet:", currentIndepSet)
                 if currentIndepSet != indepSet:  # this happens only with padics
+                    random.seed(self.seed)  # reproducible p-adic extension
                     newIndepSymbols = tuple(symbol for i, symbol in enumerate(lips_covariant_symbols(len(self))) if currentIndepSet[i] == 1 and indepSet[i] == 0)
                     rand_dict = {newIndepSymbol: random.randrange(1, self.field.characteristic ** (self.field.digits - iteration)) for newIndepSymbol in newIndepSymbols}
                     update_particles(self, rand_dict)
