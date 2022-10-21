@@ -1,7 +1,7 @@
 # Lorentz Invariant Phase Space
 
 [![Continuous Integration Status](https://github.com/GDeLaurentis/lips-dev/actions/workflows/continuous_integration.yml/badge.svg)](https://github.com/GDeLaurentis/lips-dev/actions)
-[![Coverage](https://img.shields.io/badge/Coverage-56%25-orange?labelColor=2a2f35)](https://github.com/GDeLaurentis/lips-dev/actions)
+[![Coverage](https://img.shields.io/badge/Coverage-80%25-greenyellow?labelColor=2a2f35)](https://github.com/GDeLaurentis/lips-dev/actions)
 [![PyPI Downloads](https://img.shields.io/pypi/dm/lips.svg?label=PyPI%20downloads)](https://pypi.org/project/lips/)
 
 ## Requirements
