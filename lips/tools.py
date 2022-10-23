@@ -30,6 +30,7 @@ Pauli_bar = numpy.array([Pauli_zero, -Pauli_x, -Pauli_y, -Pauli_z])
 
 
 pSijk = re.compile(r'^(?:s|S)(?:_){0,1}(\d+)$')
+pMi = re.compile(r'^(?:m|M)(?:_){0,1}(\d)$')
 pd5 = re.compile(r'^δ5$')
 ptr5 = re.compile(r'^(?:tr5_)(\d+)$')
 pDijk = re.compile(r'(?:^Δ_(\d+)$)|(?:^Δ_(\d+)\|(\d+)\|(\d+)$)')
@@ -78,6 +79,13 @@ def flatten(temp_list, recursion_level=0, treat_list_subclasses_as_list=True, tr
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 
+def det2x2(array):
+    return array[0, 0] * array[1, 1] - array[0, 1] * array[1, 0]
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+
 def ldot(oP1, oP2):
     return numpy.trace(numpy.dot(oP1.r2_sp, oP2.r2_sp_b)) / 2
 
@@ -89,6 +97,11 @@ def indexing_decorator(func):
     """Rebases a list to start from index 1."""
 
     def decorated(self, index, *args):
+
+        # for now do not decorate slices (might want to shift this as well)
+        if isinstance(index, slice) or isinstance(index, str):
+            return func(self, index, *args)
+
         if index < 1:
             raise IndexError('Indices start from 1')
         elif index > 0 and index < len(self) + 1:

@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 #   ___          _   _    _
@@ -19,36 +18,48 @@ import re
 import os
 import copy
 import itertools
+import mpmath
 import sympy
 
-from .tools import MinkowskiMetric, flatten, pA2, pS2, pNB, myException, indexing_decorator
+from sympy import NotInvertible
+
+from .fields.field import Field
+# from .fields import PAdic
+from pyadic import PAdic
+from .tools import MinkowskiMetric, flatten, pNB, myException, indexing_decorator, pAu, pAd, pSu, pSd
 from .particle import Particle
 from .particles_compute import Particles_Compute
 from .particles_eval import Particles_Eval
-from .particles_set import Particles_Set
-from .particles_set_pair import Particles_SetPair
+from .hardcoded_limits.particles_set import Particles_Set
+from .hardcoded_limits.particles_set_pair import Particles_SetPair
+from .algebraic_geometry.particles_singular_variety import Particles_SingularVariety
+from .particles_variety import Particles_Variety
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 
-class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetPair, list):
+class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetPair, Particles_SingularVariety, Particles_Variety, list):
     """Describes the kinematics of n particles. Base one list of Particle objects."""
 
-    def __init__(self, number_of_particles_or_particles=None, seed=None, real_momenta=False, fix_mom_cons=True):
+    # MAGIC METHODS
+
+    def __init__(self, number_of_particles_or_particles=None, seed=None, real_momenta=False, field=Field('mpc', 0, 300), fix_mom_cons=True):
         """Initialisation. Requires either multiplicity of phace space or list of Particle objects."""
         list.__init__(self)
+        self.field = field
+        self.seed = seed
         if isinstance(number_of_particles_or_particles, int):
             random.seed(seed) if seed is not None else random.seed()
             for i in range(number_of_particles_or_particles):
-                self.append(Particle(real_momentum=real_momenta))
+                self.append(Particle(real_momentum=real_momenta, field=field))
         elif isinstance(number_of_particles_or_particles, list):
             for oParticle in number_of_particles_or_particles:
                 self.append(oParticle)
         elif number_of_particles_or_particles is not None:
             raise Exception("Invalid initialisation of Particles instance.")
-        self.oRefVec = Particle(real_momentum=real_momenta)
-        if fix_mom_cons is True and max(map(abs, flatten(self.total_mom))) > 10 ** -(0.9 * 300):
+        self.oRefVec = Particle(real_momentum=real_momenta, field=field)
+        if fix_mom_cons is True and max(map(abs, flatten(self.total_mom))) > field.tollerance:
             self.fix_mom_cons(real_momenta=real_momenta)
 
     def __call__(self, string_expression):
@@ -63,7 +74,9 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
 
     def __hash__(self):
         """Hash function: hash string of concatenated momenta."""
-        return hash(" ".join(flatten([list(map(str, flatten(oParticle.r2_sp))) for oParticle in self])))
+        return hash(tuple([hash(oP) for oP in self]))
+        # this breaks when only little group changes
+        # return hash(" ".join(flatten([list(map(str, flatten(oParticle.r2_sp))) for oParticle in self])))
 
     # PUBLIC METHODS
 
@@ -99,7 +112,7 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
     def image(self, permutation_or_rule):
         """Returns the image of self under a given permutation or rule. Remember, this is a passive transformation."""
         if type(permutation_or_rule) is str:
-            return copy.deepcopy(Particles(sorted(self, key=lambda x: permutation_or_rule[self.index(x)]), fix_mom_cons=False))
+            return copy.deepcopy(Particles(sorted(self, key=lambda x: permutation_or_rule[self.index(x)]), field=self.field, fix_mom_cons=False))
         else:
             assert type(permutation_or_rule[0]) is str and type(permutation_or_rule[1]) is bool
             oResParticles = self.image(permutation_or_rule[0])
@@ -109,20 +122,16 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
 
     def cluster(self, llIntegers):
         """Returns clustered particle objects according to lists of lists of integers (e.g. corners of one loop diagram)."""
-        oKs = Particles(len(llIntegers), fix_mom_cons=False)
-        r2_spinors = [sum([self[i].r2_sp for i in corner_as_integers]) for corner_as_integers in llIntegers]
-        for i, iK in enumerate(oKs):
-            iK.r2_sp = r2_spinors[i]
-        return oKs
+        return Particles([sum([self[i] for i in corner_as_integers]) for corner_as_integers in llIntegers], fix_mom_cons=False)
 
-    def make_analytical_d(self, indepVars=None):
+    def make_analytical_d(self, indepVars=None, symbols=('a', 'b', 'c', 'd')):
         """ """
         if indepVars is None:
             indepVars = tuple(numpy.zeros(4 * len(self), dtype=int))
-        la = sympy.symbols('a1:{}'.format(len(self) + 1))
-        lb = sympy.symbols('b1:{}'.format(len(self) + 1))
-        lc = sympy.symbols('c1:{}'.format(len(self) + 1))
-        ld = sympy.symbols('d1:{}'.format(len(self) + 1))
+        la = sympy.symbols(f'{symbols[0]}1:{len(self) + 1}')
+        lb = sympy.symbols(f'{symbols[1]}1:{len(self) + 1}')
+        lc = sympy.symbols(f'{symbols[2]}1:{len(self) + 1}')
+        ld = sympy.symbols(f'{symbols[3]}1:{len(self) + 1}')
         for i, oParticle in enumerate(self):
             if indepVars[i * 4 + 0] == 0:
                 oParticle._r_sp_d[0, 0] = la[i]
@@ -136,12 +145,26 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
             oParticle._l_sp_d_to_l_sp_u()
             oParticle._r1_sp_to_r2_sp()
             oParticle._r1_sp_to_r2_sp_b()
+            # is the following really needed? it slows down the variety calculation,
+            # plus no invariant should be computed from 4-momenta (use rank 2 spinor instead)
             try:
                 oParticle._r2_sp_b_to_four_momentum()
                 oParticle._four_mom_to_four_mom_d()
-            except (TypeError, SystemError):
+            except (ValueError, TypeError, SystemError, NotInvertible):
                 oParticle._four_mom = None
                 oParticle._four_mom_d = None
+
+    def analytical_subs_d(self):
+        multiplicity = len(self)
+        la = sympy.symbols('a1:{}'.format(multiplicity + 1))
+        lb = sympy.symbols('b1:{}'.format(multiplicity + 1))
+        lc = sympy.symbols('c1:{}'.format(multiplicity + 1))
+        ld = sympy.symbols('d1:{}'.format(multiplicity + 1))
+        subs_dict = {}
+        for i, iParticle in enumerate(self):
+            subs_dict.update({la[i]: iParticle.r_sp_d[0, 0], lb[i]: iParticle.r_sp_d[1, 0]})
+            subs_dict.update({lc[i]: iParticle.l_sp_d[0, 0], ld[i]: iParticle.l_sp_d[0, 1]})
+        return subs_dict
 
     def fix_mom_cons(self, A=0, B=0, real_momenta=False, axis=1):   # using real momenta changes both |⟩ and |] of A & B
         """Fixes momentum conservation using particles A and B."""
@@ -165,26 +188,20 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
 
     def momentum_conservation_check(self, silent=True):
         """Returns true if momentum is conserved."""
-        mom_violation = 0
-        for i in range(4):
-            if abs(flatten(self.total_mom)[i]) > mom_violation:
-                mom_violation = abs(flatten(self.total_mom)[i])
+        mom_violation = max(map(abs, flatten(self.total_mom)))
         if silent is False:
-            print("The largest momentum violation is {}".format(float(mom_violation)))
-        if mom_violation > 10 ** -(0.9 * 300):
+            print("The largest momentum violation is {}".format(float(mom_violation) if type(mom_violation) is mpmath.mpf else mom_violation))
+        if mom_violation > self.field.tollerance:
             myException("Momentum conservation violation.")
             return False
         return True
 
     def onshell_relation_check(self, silent=True):
         """Returns true if all on-shell relations are satisfied."""
-        onshell_violation = 0
-        for i in range(1, len(self) + 1):
-            if abs(self.ldot(i, i)) > onshell_violation:
-                onshell_violation = abs(self.ldot(i, i))
+        onshell_violation = max(map(abs, flatten(self.masses)))
         if silent is False:
-            print("The largest on shell violation is {}".format(float(onshell_violation)))
-        if onshell_violation > 10 ** -(0.9 * 300):
+            print("The largest on shell violation is {}".format(float(onshell_violation) if type(onshell_violation) is mpmath.mpf else onshell_violation))
+        if onshell_violation > self.field.tollerance:
             myException("Onshell relation violation.")
             return False
         return True
@@ -200,10 +217,16 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
 
         if silent is False:
             print("Consistency check:")
-            # print("{} Consistency check {}".format(Hyphens, Hyphens))
 
         mom_cons = self.momentum_conservation_check(silent)         # momentum conservation violation
         on_shell = self.onshell_relation_check(silent)              # onshell violation
+
+        if self.field.name == 'padic':
+            threshold = PAdic(0, self.field.characteristic, 0, 1)
+        elif self.field.name == 'finite field':
+            threshold = 10 ** -300
+        else:
+            threshold = 10 ** -8
 
         values = []                                                 # smallest and biggest invariants
         for _invar in _invars:
@@ -227,36 +250,63 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
         small_outliers, small_outliers_values = [], []
         big_outliers, big_outliers_values = [], []
         for i in range(len(_invars)):
-            if values[i] < 0.00001:
+            if values[i] <= threshold:
                 small_outliers += [_invars[i]]
                 small_outliers_values += [values[i]]
                 if silent is False:
-                    print("{} = {}".format(_invars[i], float(values[i])))
-            if values[i] > 0.0001:
+                    print("{} = {}".format(_invars[i], float(values[i]) if type(values[i]) is mpmath.mpf else values[i]))
+            if values[i] > threshold:
                 break
         if silent is False:
             print("...")
         for i in range(len(_invars)):
-            if values[i] > 100000:
+            if values[i] >= 1 / threshold:
                 myException("Outliers are big!")
                 big_outliers += [_invars[i]]
                 big_outliers_values += [values[i]]
                 if silent is False:
-                    print("{} = {}".format(_invars[i], float(values[i])))
-        if silent is False:
-            pass
-            # print("{}-------------------{}".format(Hyphens, Hyphens))
+                    print("{} = {}".format(_invars[i], float(values[i]) if type(values[i]) is mpmath.mpf else values[i]))
         return mom_cons, on_shell, big_outliers, small_outliers
 
-    # BASE ONE LIST
+    @property
+    def spinors_are_in_field_extension(self):
+        return any([oP.spinors_are_in_field_extension for oP in self])
+
+    # BASE ONE LIST METHODS
 
     @indexing_decorator
     def __getitem__(self, index):
-        return list.__getitem__(self, index)
+        if isinstance(index, str):
+            if pAu.findall(index) != [] or pAd.findall(index) != [] or pSu.findall(index) != [] or pSd.findall(index) != []:
+                return self.compute(index)
+            elif re.findall(r"(\d)", index) != []:
+                return self[int(re.findall(r"(\d)", index)[0])]
+            else:
+                raise IndexError(index)
+        elif isinstance(index, slice):
+            oNewParticles = Particles(list.__getitem__(self, index), fix_mom_cons=False)
+            oNewParticles.oRefVec = self.oRefVec
+            return oNewParticles
+        else:
+            return list.__getitem__(self, index)
 
     @indexing_decorator
     def __setitem__(self, index, value):
-        list.__setitem__(self, index, value)
+        if isinstance(index, str):
+            if pAu.findall(index) != []:                        # ⟨A|
+                A = int(pAu.findall(index)[0])
+                self[A].r_sp_u = value
+            elif pAd.findall(index) != []:                      # |B⟩
+                B = int(pAd.findall(index)[0])
+                self[B].r_sp_d = value
+            elif pSu.findall(index) != []:                      # |A]
+                A = int(pSu.findall(index)[0])
+                self[A].l_sp_u = value
+            elif pSd.findall(index) != []:                      # [B|
+                B = int(pSd.findall(index)[0])
+                self[B].l_sp_d = value
+        else:
+            list.__setitem__(self, index, value)
 
     @indexing_decorator
     def __delitem__(self, index):
@@ -266,83 +316,7 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
     def insert(self, index, value):
         list.insert(self, index, value)
 
-    # MISCELLANEOUS
-
-    def _can_fix_mom_cons(self, t_s1, t_s2):
-        """Checks if momentum conservation can be restored, without spoiling the collinear limit."""
-        # If possible returns how to fix mom cons (tuple & axis), otherwise returns false.
-        if ((pA2.findall(t_s1) != [] or pS2.findall(t_s1) != []) and pNB.findall(t_s2) != []):
-            if pA2.findall(t_s1) != []:
-                ab = list(map(int, list(pA2.findall(t_s1)[0])))
-            elif pS2.findall(t_s1) != []:
-                ab = list(map(int, list(pS2.findall(t_s1)[0])))
-            lNB, lNBs, lNBms, lNBe = self._get_lNB(t_s2)
-            plist = self._complementary(ab + lNB)
-            if len(plist) >= 2:                                     # easy momentum fix: two free particles
-                return (plist[0], plist[1]), 1
-            elif len(plist) == 1:                                   # complicated momentum fix: one free particle
-                if ab[0] not in lNB:
-                    if t_s1[0] == "⟨":
-                        return (plist[0], ab[0]), 2                 # plist[0] and ab[0]
-                    else:
-                        return (plist[0], ab[0]), 1
-                elif ab[1] not in lNB:
-                    if t_s1[-1] == "⟩":
-                        return (plist[0], ab[1]), 2                 # plist[0] and ab[1]
-                    else:
-                        return (plist[0], ab[1]), 1
-                elif (lNBs not in ab or t_s1[0] == t_s2[0]) and (lNBs != lNBe or len(lNBms) % 2 == 0) and all(lNBs not in lNBm for lNBm in lNBms):
-                    if t_s2[0] == "⟨":
-                        return (plist[0], lNBs), 2                  # plist[0] and lNBs
-                    else:
-                        return (plist[0], lNBs), 1
-                elif (lNBe not in ab or t_s1[-1] == t_s2[-1]) and (lNBs != lNBe or len(lNBms) % 2 == 0) and all(lNBe not in lNBm for lNBm in lNBms):
-                    if t_s2[-1] == "⟩":
-                        return (plist[0], lNBe), 2                  # plist[0] and lNBe
-                    else:
-                        return (plist[0], lNBe), 1
-                else:
-                    myException("Not enough particles to fix mom cons! (One free particle)")
-                    return False, 0
-            else:                                                   # almost impossible momentum fix: no free particles
-                if ab[0] not in lNB and ab[1] not in lNB:
-                    if t_s1[0] == "⟨":
-                        return False, 0                             # ab[0] and ab[1] would result in big outliers
-                    else:
-                        return False, 0
-                elif (ab[0] not in lNB and lNBs not in ab and t_s1[0] == t_s2[0] and
-                      (lNBs != lNBe or len(lNBms) % 2 == 0) and all(lNBs not in lNBm for lNBm in lNBms)):
-                    if t_s1[0] == "⟨":
-                        return (ab[0], lNBs), 2                     # ab[0] and lNBs
-                    else:
-                        return (ab[0], lNBs), 1
-                elif (ab[1] not in lNB and lNBs not in ab and t_s1[0] == t_s2[0] and
-                      (lNBs != lNBe or len(lNBms) % 2 == 0) and all(lNBs not in lNBm for lNBm in lNBms)):
-                    if t_s1[0] == "⟨":
-                        return (ab[1], lNBs), 2                     # ab[1] and lNBs
-                    else:
-                        return (ab[1], lNBs), 1
-                elif (ab[0] not in lNB and lNBe not in ab and t_s1[-1] == t_s2[-1] and
-                      (lNBe != lNBs or len(lNBms) % 2 == 0) and all(lNBe not in lNBm for lNBm in lNBms)):
-                    if t_s1[-1] == "⟩":
-                        return (ab[0], lNBe), 2                     # ab[0] and lNBe
-                    else:
-                        return (ab[0], lNBe), 1
-                elif (ab[1] not in lNB and lNBe not in ab and t_s1[-1] == t_s2[-1] and
-                      (lNBe != lNBs or len(lNBms) % 2 == 0) and all(lNBe not in lNBm for lNBm in lNBms)):
-                    if t_s1[-1] == "⟩":
-                        return (ab[1], lNBe), 2                     # ab[1] and lNBe
-                    else:
-                        return (ab[1], lNBe), 1
-                elif (((lNBs not in ab or t_s1[0] == t_s2[0]) and all(lNBs not in lNBm for lNBm in lNBms)) and (lNBs != lNBe) and
-                      ((lNBe not in ab or t_s1[-1] == t_s2[-1]) and all(lNBe not in lNBm for lNBm in lNBms)) and len(lNBms) % 2 == 0):
-                    if t_s2[0] == "⟨":
-                        return (lNBs, lNBe), 2
-                    else:
-                        return (lNBs, lNBe), 1
-                else:
-                    myException("Not enough particles to fix mom cons! (Zero free particles)")
-                    return False, 0
+    # PRIVATE METHODS
 
     @staticmethod
     def _lNB_to_string(start, lNBs, lNBms, lNBe, end):
@@ -447,8 +421,8 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
             b_real = repr(b.real)[5:-1]
             b_imag = repr(b.imag)[5:-1]
             b = (b_real + "+" + b_imag + "I").replace("e", "*^")
-            msg += 'Subscript[\[Lambda], ' + str(i) + ',1] = ' + a + ";\n"
-            msg += 'Subscript[\[Lambda], ' + str(i) + ',2] = ' + b + ";\n"
+            msg += r'Subscript[\[Lambda], ' + str(i) + ',1] = ' + a + ";\n"
+            msg += r'Subscript[\[Lambda], ' + str(i) + ',2] = ' + b + ";\n"
             i = i + 1
         return msg
 
@@ -464,8 +438,8 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
             b_real = repr(b.real)[5:-1]
             b_imag = repr(b.imag)[5:-1]
             b = (b_real + "+" + b_imag + "I").replace("e", "*^")
-            msg += "Subscript[\!\(\*OverscriptBox[\(\[Lambda]\), \(_\)]\), " + str(i) + ",1] = " + a + ";\n"
-            msg += "Subscript[\!\(\*OverscriptBox[\(\[Lambda]\), \(_\)]\), " + str(i) + ",2] = " + b + ";\n"
+            msg += r"Subscript[\!\(\*OverscriptBox[\(\[Lambda]\), \(_\)]\), " + str(i) + ",1] = " + a + ";\n"
+            msg += r"Subscript[\!\(\*OverscriptBox[\(\[Lambda]\), \(_\)]\), " + str(i) + ",2] = " + b + ";\n"
             i = i + 1
         return msg
 
@@ -473,20 +447,20 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
         msg = ""
         if as_spinors is False:
             for i, iParticle in enumerate(self):
-                P0 = (repr(iParticle.four_mom[0].real) + "+" + repr(iParticle.four_mom[0].imag) + "I").replace("e", "*^").replace("RGMP(", "").replace(")", "")
-                P1 = (repr(iParticle.four_mom[1].real) + "+" + repr(iParticle.four_mom[1].imag) + "I").replace("e", "*^").replace("RGMP(", "").replace(")", "")
-                P2 = (repr(iParticle.four_mom[2].real) + "+" + repr(iParticle.four_mom[2].imag) + "I").replace("e", "*^").replace("RGMP(", "").replace(")", "")
-                P3 = (repr(iParticle.four_mom[3].real) + "+" + repr(iParticle.four_mom[3].imag) + "I").replace("e", "*^").replace("RGMP(", "").replace(")", "")
-                msg += "DeclareSpinorMomentum[{ind}, [[{P0}, {P1}, {P2}, {P3}]]]".format(
-                    ind=i + 1, P0=P0, P1=P1, P2=P2, P3=P3).replace("[[", "{").replace("]]", "}").replace("+-", "-") + "\n"
+                P0 = (repr(iParticle.four_mom[0].real) + "+" + repr(iParticle.four_mom[0].imag) + "I").replace("e", "*^").replace("mpf(", "").replace(")", "")
+                P1 = (repr(iParticle.four_mom[1].real) + "+" + repr(iParticle.four_mom[1].imag) + "I").replace("e", "*^").replace("mpf(", "").replace(")", "")
+                P2 = (repr(iParticle.four_mom[2].real) + "+" + repr(iParticle.four_mom[2].imag) + "I").replace("e", "*^").replace("mpf(", "").replace(")", "")
+                P3 = (repr(iParticle.four_mom[3].real) + "+" + repr(iParticle.four_mom[3].imag) + "I").replace("e", "*^").replace("mpf(", "").replace(")", "")
+                msg += "DeclareSpinorMomentum[{ind}, [[SetPrecision[{P0}, {PR}], SetPrecision[{P1}, {PR}], SetPrecision[{P2}, {PR}], SetPrecision[{P3}, {PR}] ]]]".format(
+                    ind=i + 1, P0=P0, P1=P1, P2=P2, P3=P3, PR=mpmath.mp.dps).replace("[[", "{").replace("]]", "}").replace("+-", "-").replace("'", "") + "\n"
             msg = msg[:-1]
             return msg
         elif as_spinors is True:
             for i, iParticle in enumerate(self):
-                La0 = (repr(iParticle.r_sp_d[0, 0].real) + "+" + repr(iParticle.r_sp_d[0, 0].imag) + "I").replace("e", "*^").replace("RGMP(", "").replace(")", "")
-                La1 = (repr(iParticle.r_sp_d[1, 0].real) + "+" + repr(iParticle.r_sp_d[1, 0].imag) + "I").replace("e", "*^").replace("RGMP(", "").replace(")", "")
-                Lat0 = (repr(iParticle.l_sp_d[0, 0].real) + "+" + repr(iParticle.l_sp_d[0, 0].imag) + "I").replace("e", "*^").replace("RGMP(", "").replace(")", "")
-                Lat1 = (repr(iParticle.l_sp_d[0, 1].real) + "+" + repr(iParticle.l_sp_d[0, 1].imag) + "I").replace("e", "*^").replace("RGMP(", "").replace(")", "")
+                La0 = str(complex(iParticle.r_sp_d[0, 0])).replace("j", "I").replace("e", "*^")
+                La1 = str(complex(iParticle.r_sp_d[1, 0])).replace("j", "I").replace("e", "*^")
+                Lat0 = str(complex(iParticle.l_sp_d[0, 0])).replace("j", "I").replace("e", "*^")
+                Lat1 = str(complex(iParticle.l_sp_d[0, 1])).replace("j", "I").replace("e", "*^")
                 msg += "DeclareSpinorMomentum[Sp[{ind}], [[[[{La0}]], [[{La1}]]]], [[[[{Lat0}, {Lat1}]]]]]".format(
                     ind=i + 1, La0=La0, La1=La1, Lat0=Lat0, Lat1=Lat1).replace("[[", "{").replace("]]", "}").replace("+-", "-") + "\n"
             msg = msg[:-1]

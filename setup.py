@@ -22,9 +22,12 @@ setup(
     },
     keywords=['lips', 'Lorentz Invariant Phase Space', 'Spinor Helicity'],
     packages=find_packages(),
+    include_package_data=True,
     install_requires=['numpy',
                       'mpmath',
-                      'sympy', ],
+                      'sympy',
+                      'pyadic',
+                      'syngular'],
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Science/Research',

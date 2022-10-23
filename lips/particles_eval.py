@@ -15,6 +15,8 @@ import mpmath
 import operator as op
 
 from fractions import Fraction
+from lips.fields import GaussianRational   # , ModP, PAdic
+from pyadic import PAdic, ModP
 
 operators = {ast.Add: op.add, ast.Sub: op.sub, ast.Mult: op.mul,
              ast.Div: op.truediv, ast.Pow: op.pow, ast.BitXor: op.xor,
@@ -33,6 +35,7 @@ pSd = re.compile(r'(?:\[)(\d+)(?:\|)(?!\d\])(?!\d[\+|-])(?!\(\d[\+|-])')
 pSu = re.compile(r'(?<!\[\d)(?<![\+|-]\d\))(?<![\+|-]\d)(?:\|)(\d+)(?:\])')
 pS2bis = re.compile(r'(?:\[)(\d)(\d)(?:\])')
 pSijk = re.compile(r'(?:s|S)(?:_){0,1}(\d+)')
+pMi = re.compile(r'(?:m|M)(?:_){0,1}(\d)')
 pOijk = re.compile(r'(?:Ω_)(\d+)')
 pPijk = re.compile(r'(?:Π_)(\d+)')
 pDijk_adjacent = re.compile(r'(?:Δ_(\d+)(?![\d\|]))')
@@ -67,6 +70,7 @@ class Particles_Eval:
         string = pSd.sub(r"oPs.compute('[\1|')", string)
         string = pSu.sub(r"oPs.compute('|\1]')", string)
         string = pSijk.sub(r"oPs.compute('s_\1')", string)
+        string = pMi.sub(r"oPs.compute('m_\1')", string)
         string = pOijk.sub(r"oPs.compute('Ω_\1')", string)
         string = pPijk.sub(r"oPs.compute('Π_\1')", string)
         string = ptr5.sub(r"oPs.compute('tr5_\1')", string)
@@ -123,7 +127,7 @@ def _eval_node(node, locals_={}):
             raise TypeError(node)
         return eval(allowed_func_call)
     elif isinstance(node, ast.Name):
-        if node.id in locals() and type(locals()[node.id]) in [int, float, mpmath.mpc, mpmath.mpc, Fraction]:
+        if node.id in locals() and type(locals()[node.id]) in [int, float, GaussianRational, PAdic, ModP, mpmath.mpc, mpmath.mpc, Fraction]:
             return eval(node.id)
         else:
             raise TypeError(node)
