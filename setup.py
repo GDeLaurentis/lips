@@ -11,7 +11,7 @@ setup(
     license='GNU General Public License v3.0',
     description='Lorentz Invariant Phase Space',
     long_description=long_description,
-    long_description_content_type='text/markdown'
+    long_description_content_type='text/markdown',
     author='Giuseppe De Laurentis',
     author_email='g.dl@hotmail.it',
     url='https://github.com/GDeLaurentis/lips',
