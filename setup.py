@@ -19,7 +19,7 @@ setup(
     project_urls={
         'Documentation': 'https://gdelaurentis.github.io/lips/',
         'Issues': 'https://github.com/GDeLaurentis/lips/issues',
-    }
+    },
     keywords=['lips', 'Lorentz Invariant Phase Space', 'Spinor Helicity'],
     packages=find_packages(),
     install_requires=['numpy',
