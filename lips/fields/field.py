@@ -11,7 +11,7 @@ import mpmath
 
 # from lips.fields.padic import PAdic, padic_sqrt
 # from lips.fields.finite_field import finite_field_sqrt
-from pyadic import PAdic
+from pyadic import PAdic, ModP
 from pyadic.padic import padic_sqrt
 from pyadic.finite_field import finite_field_sqrt
 
@@ -45,6 +45,17 @@ class Field(object):
 
     def __repr__(self):
         return str(self)
+
+    def __call__(self, other):
+        """Cast to field."""
+        if self.name == "mpc":
+            return mpmath.mpc(other)
+        elif self.name == "padic":
+            return PAdic(other, self.characteristic, self.digits)
+        elif self.name == "finite field":
+            return ModP(other, self.characteristic)
+        else:
+            raise NotImplementedError
 
     @property
     def name(self):
