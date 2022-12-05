@@ -112,7 +112,9 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
     def image(self, permutation_or_rule):
         """Returns the image of self under a given permutation or rule. Remember, this is a passive transformation."""
         if type(permutation_or_rule) is str:
-            return copy.deepcopy(Particles(sorted(self, key=lambda x: permutation_or_rule[self.index(x)]), field=self.field, fix_mom_cons=False))
+            oResParticles = copy.deepcopy(Particles(sorted(self, key=lambda x: permutation_or_rule[self.index(x)]), field=self.field, fix_mom_cons=False))
+            oResParticles.oRefVec = copy.deepcopy(self.oRefVec)
+            return oResParticles
         else:
             assert type(permutation_or_rule[0]) is str and type(permutation_or_rule[1]) is bool
             oResParticles = self.image(permutation_or_rule[0])

@@ -7,6 +7,7 @@ from __future__ import unicode_literals
 
 import numpy
 import pytest
+import pickle
 
 from lips.fields import Field
 from lips import Particles
@@ -66,3 +67,12 @@ def test_spinor_item_setter():
     assert numpy.all(oPs["|5]"] == b)
     oPs["|5⟩"] = d
     assert numpy.all(oPs["⟨5|"] == c)
+
+
+def test_equality_after_pickle():
+    # Note that pickle uses __reduce__ to dump bytecode info of the object.
+    oPs = Particles(6, field=Field("finite field", 2 ** 31 - 1, 1), seed=0)
+    oPs2 = oPs.image(('132456', False))
+    oPs3 = oPs.image(('132456', False))
+    assert oPs2 == oPs3
+    assert pickle.dumps(oPs2) == pickle.dumps(oPs3)
