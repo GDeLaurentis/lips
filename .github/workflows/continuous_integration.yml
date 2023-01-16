@@ -28,27 +28,27 @@ jobs:
     - name: Checkout this Repo
       uses: actions/checkout@v2
       with:
-        path: lips-dev
+        path: lips
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install flake8 pytest pytest-cov
-        pip install -e lips-dev
+        pip install -e lips
     - name: Lint with flake8
       run: |
-        cd lips-dev
+        cd lips
         flake8 lips/ --count --max-line-length=190 --statistics --verbose
     - name: Test with pytest
       run: |
-        cd lips-dev
+        cd lips
         pytest |& tee coverage.txt
     - name: Run update-badges script
       run: |
-        cd lips-dev
+        cd lips
         python update-badges.py
     - name: Update badges and commit README.md
       uses: stefanzweifel/git-auto-commit-action@v4
       with:
         file_pattern: README.md
-        repository: lips-dev
+        repository: lips
         commit_message: "Automatic badge update"

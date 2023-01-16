@@ -2,7 +2,7 @@
 import re
 
 repo_owner = "GDeLaurentis"
-repo_name = "lips-dev"
+repo_name = "lips"
 
 
 def update_coverage_badge():
