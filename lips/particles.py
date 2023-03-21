@@ -48,7 +48,7 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
         """Initialisation. Requires either multiplicity of phace space or list of Particle objects."""
         list.__init__(self)
         self.field = field
-        self.seed = seed
+        self.seed = seed  # This should be removed
         if isinstance(number_of_particles_or_particles, int):
             random.seed(seed) if seed is not None else random.seed()
             for i in range(number_of_particles_or_particles):
@@ -58,7 +58,7 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
                 self.append(oParticle)
         elif number_of_particles_or_particles is not None:
             raise Exception("Invalid initialisation of Particles instance.")
-        self.oRefVec = Particle(real_momentum=real_momenta, field=field)
+        self.oRefVec = Particle(real_momentum=real_momenta, field=field)  # This should not be added by default
         if fix_mom_cons is True and max(map(abs, flatten(self.total_mom))) > field.tollerance:
             self.fix_mom_cons(real_momenta=real_momenta)
 
