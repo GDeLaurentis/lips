@@ -44,6 +44,18 @@ pDijk_non_adjacent = re.compile(r'(?:Δ_(\d+)\|(\d+)\|(\d+))')
 pNB = re.compile(r'((?:⟨|\[)\d+\|(?:(?:\([\d+\+|-]{1,}\))|(?:[\d+\+|-]{1,}))*\|\d+(?:⟩|\]))')
 ptr5 = re.compile(r'(?:tr5_)(\d+)')
 
+unicode_powers_dict = {"^0": "⁰", "^1": "¹", "^2": "²", "^3": "³", "^4": "⁴", "^5": "⁵", "^6": "⁶", "^7": "⁷", "^8": "⁸", "^9": "⁹"}
+
+def non_unicode_powers(string):
+    for hat_pow, uni_pow in unicode_powers_dict.items():
+        string = string.replace(uni_pow, hat_pow)
+    return string
+
+def unicode_powers(string):
+    for hat_pow, uni_pow in unicode_powers_dict.items():
+        string = string.replace(hat_pow, uni_pow)
+    return string
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 
@@ -58,7 +70,7 @@ class Particles_Eval:
         string = string.replace("}+\\", ")+")
         string = string.replace("\n", "").replace(" ", "")
         string = re.sub(r"}$", ")", string)
-        string = string.replace("²", "^2", ).replace("³", "^3", ).replace("⁴", "^4")
+        string = non_unicode_powers(string)
         string = string.replace("^", "**")
         string = re.sub(r"{([\d\|]+)}", r"\1", string)
         string = pA2bis.sub(r"⟨\1|\2⟩", string)
