@@ -9,7 +9,7 @@ import sympy
 import pytest
 import mpmath
 
-from lips import Particles
+from lips import Particles, Field
 from lips.invariants import Invariants
 
 from tools import mapThreads
@@ -54,3 +54,19 @@ def SingleScalingsTestingInner(n, invariants, invariant):
                 return False
         else:
             return True
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+
+def test_particles_set_p5Bdiff():
+    invariants = ['(⟨2|3|5+6|1|2]-⟨3|4|5+6|1|3])', '(⟨3|2|5+6|4|3]-⟨2|1|5+6|4|2])']
+    oPs = Particles(6, field=Field("finite field", 2 ** 31 - 1, 1))
+    for invariant in invariants:
+        oPs._set(invariant, 0)
+        mom_cons, on_shell, large_invs, small_invs = oPs.phasespace_consistency_check(invariants=invariants, silent=True)
+        assert mom_cons
+        assert on_shell
+        assert large_invs == []
+        assert small_invs == [invariant]
+
+(True, True, [], ['(⟨1|2|5+6|4|1]-⟨2|3|5+6|4|2])'])

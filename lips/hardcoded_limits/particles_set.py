@@ -15,7 +15,7 @@ from __future__ import unicode_literals
 import numpy
 import re
 
-from ..tools import flatten, pSijk, pDijk, pOijk, pPijk, pA2, pS2, pNB, ptr5, myException
+from ..tools import flatten, pSijk, pDijk, pOijk, pPijk, pA2, pS2, pNB, ptr5, p5Bdiff, myException
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -73,6 +73,10 @@ class Particles_Set:
         elif ptr5.findall(temp_string) != []:
 
             self._set_tr5(temp_string, temp_value, fix_mom)
+
+        elif p5Bdiff.findall(temp_string) != []:
+
+            self._set_p5Bdiff(temp_string, temp_value, fix_mom)
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
@@ -487,3 +491,20 @@ class Particles_Set:
         self[a].r_sp_d = numpy.array([[a1], [b1]])
         if fix_mom is True:
             self.fix_mom_cons(plist[0], plist[1], axis=1)
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+    def _set_p5Bdiff(self, temp_string, temp_value, fix_mom=True):
+        # not tested beyond 6-point massless kinematics
+        a, b, cd, e, f = p5Bdiff.findall(temp_string)[0]
+        a, b, c, d, e, f = map(int, [a, b, ] + cd.split("+") + [e, f])
+
+        # (⟨a|b|c+d|e|a]-⟨b|f|c+d|e|b]) = (⟨a|b|c+d|e⟩[e|a]-⟨b|f|c+d|e⟩[e|b]) = (-⟨a|b|c+d|e⟩[a|-⟨b|f|c+d|e⟩[b|)|e]
+        X = temp_value
+        A, B = self(f"(⟨{a}|{b}|{c}+{d}|{e}⟩[{a}|-⟨{b}|{f}|{c}+{d}|{e}⟩[{b}|)").flatten().tolist()
+        C, D = self[e].l_sp_u[0, 0], self[e].l_sp_u[1, 0]
+        C = (- X - B * D) / A
+        self[e].l_sp_u = numpy.array([C, D], dtype=type(C))  # set |e]
+
+        if fix_mom:
+            self.fix_mom_cons(c, d)
