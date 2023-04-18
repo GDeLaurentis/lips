@@ -68,5 +68,3 @@ def test_particles_set_p5Bdiff():
         assert on_shell
         assert large_invs == []
         assert small_invs == [invariant]
-
-(True, True, [], ['(⟨1|2|5+6|4|1]-⟨2|3|5+6|4|2])'])
