@@ -470,25 +470,12 @@ class Particles_Set:
         if len(plist) < 2:
             myException("Set_tr5 called with less than 6 particles. Cound't fix momentum conservation.")
 
-        x = temp_value
-        a1, b1 = self[a].r_sp_d[0, 0], self[a].r_sp_d[1, 0]
-        c1, d1 = self[a].l_sp_d[0, 0], self[a].l_sp_d[0, 1]
-        a2, b2 = self[b].r_sp_d[0, 0], self[b].r_sp_d[1, 0]
-        c2, d2 = self[b].l_sp_d[0, 0], self[b].l_sp_d[0, 1]
-        a3, b3 = self[c].r_sp_d[0, 0], self[c].r_sp_d[1, 0]
-        c3, d3 = self[c].l_sp_d[0, 0], self[c].l_sp_d[0, 1]
-        a4, b4 = self[d].r_sp_d[0, 0], self[d].r_sp_d[1, 0]
-        c4, d4 = self[d].l_sp_d[0, 0], self[d].l_sp_d[0, 1]
+        X = temp_value
+        A, B = (self(f"[{a}|{b}|{c}|{d}]") * self(f"⟨{d}|") - self(f"[{a}|{d}|{c}|{b}]") * self(f"⟨{b}|")).flatten().tolist()
+        C, D = self[a].r_sp_d[0, 0], self[a].r_sp_d[1, 0]
+        C = (X - B * D) / A
+        self[a].r_sp_d = numpy.array([C, D], dtype=type(C))
 
-        a1 = (-a2 * a3 * b1 * b4 * c1 * c2 * d3 * d4 + a2 * a3 * b1 * b4 * c1 * c3 * d2 * d4 + a2 * a3 * b1 * b4 * c2 * c4 * d1 * d3 -
-              a2 * a3 * b1 * b4 * c3 * c4 * d1 * d2 + a2 * a4 * b1 * b3 * c1 * c2 * d3 * d4 - a2 * a4 * b1 * b3 * c1 * c4 * d2 * d3 -
-              a2 * a4 * b1 * b3 * c2 * c3 * d1 * d4 + a2 * a4 * b1 * b3 * c3 * c4 * d1 * d2 - a3 * a4 * b1 * b2 * c1 * c3 * d2 * d4 +
-              a3 * a4 * b1 * b2 * c1 * c4 * d2 * d3 + a3 * a4 * b1 * b2 * c2 * c3 * d1 * d4 - a3 * a4 * b1 * b2 * c2 * c4 * d1 * d3 - x) / (
-                  a2 * b3 * b4 * c1 * c3 * d2 * d4 - a2 * b3 * b4 * c1 * c4 * d2 * d3 - a2 * b3 * b4 * c2 * c3 * d1 * d4 + a2 * b3 * b4 * c2 * c4 * d1 * d3 -
-                  a3 * b2 * b4 * c1 * c2 * d3 * d4 + a3 * b2 * b4 * c1 * c4 * d2 * d3 + a3 * b2 * b4 * c2 * c3 * d1 * d4 - a3 * b2 * b4 * c3 * c4 * d1 * d2 +
-                  a4 * b2 * b3 * c1 * c2 * d3 * d4 - a4 * b2 * b3 * c1 * c3 * d2 * d4 - a4 * b2 * b3 * c2 * c4 * d1 * d3 + a4 * b2 * b3 * c3 * c4 * d1 * d2)
-
-        self[a].r_sp_d = numpy.array([[a1], [b1]])
         if fix_mom is True:
             self.fix_mom_cons(plist[0], plist[1], axis=1)
 
