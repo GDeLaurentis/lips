@@ -24,8 +24,6 @@ Cores = 6
 @pytest.mark.parametrize("multiplicity", range(4, 8))
 def test_particles_set(multiplicity):
     invariants = Invariants(multiplicity, no_cached=True).full
-    if multiplicity == 5:
-        invariants += ["tr5_1234"]  # Ideally this should just be in invariants to begin with
     TrueOrFalseList = mapThreads(SingleScalingsTestingInner, multiplicity, invariants, invariants, UseParallelisation=UseParallelisation, Cores=Cores)
     failed_counter = sum(1 for entry in TrueOrFalseList if entry is False)
     assert failed_counter == 0
