@@ -25,7 +25,7 @@ author = u'Giuseppe De Laurentis'
 # The short X.Y version
 version = u''
 # The full version, including alpha/beta/rc tags
-release = u'v0.3.0'
+release = u'v0.3.1'
 
 
 # -- General configuration ---------------------------------------------------
