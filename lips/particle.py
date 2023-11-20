@@ -60,7 +60,7 @@ class Particle(object):
 
     def __eq__(self, other):
         """Equality: checks equality of four momenta."""
-        if type(self) == type(other):
+        if isinstance(other, Particle):
             return numpy.all(self.r2_sp == other.r2_sp)
         else:
             return False

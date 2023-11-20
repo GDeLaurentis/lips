@@ -898,7 +898,7 @@ class Particles_SetPair:
         k, l = self[C].l_sp_d[0, 0], self[C].l_sp_d[0, 1]  # noqa --- used in eval
         m, n = self[D].r_sp_d[0, 0], self[D].r_sp_d[1, 0]  # noqa --- used in eval
         o, p = self[D].l_sp_d[0, 0], self[D].l_sp_d[0, 1]  # noqa --- used in eval
-        if type(t_v1) == type(t_v2) == float:
+        if isinstance(t_v1, float) and isinstance(t_v2, float):
             Y, X = mpmath.mpf(t_v1), mpmath.mpf(t_v2)      # noqa --- used in eval
         else:
             Y, X = t_v1, t_v2

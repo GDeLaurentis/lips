@@ -67,7 +67,7 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
 
     def __eq__(self, other):
         """Checks equality of each particle in particles."""
-        if type(self) == type(other):
+        if isinstance(other, Particles):
             return all(self[i] == other[i] for i in range(1, len(self) + 1))
         else:
             return False
@@ -124,7 +124,7 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
 
     def cluster(self, llIntegers):
         """Returns clustered particle objects according to lists of lists of integers (e.g. corners of one loop diagram)."""
-        return Particles([sum([self[i] for i in corner_as_integers]) for corner_as_integers in llIntegers], 
+        return Particles([sum([self[i] for i in corner_as_integers]) for corner_as_integers in llIntegers],
                          field=self.field, fix_mom_cons=False)
 
     def make_analytical_d(self, indepVars=None, symbols=('a', 'b', 'c', 'd')):
@@ -340,7 +340,7 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
 
     def _complementary(self, temp_list):                            # returns the list obtained by using momentum conservation
         temp_list = flatten(temp_list)
-        if type(temp_list) == list:                                 # make sure it is a set (no double entries)
+        if isinstance(temp_list, list):                                 # make sure it is a set (no double entries)
             temp_list = set(temp_list)
         original_type = type(list(temp_list)[0])
         if type(list(temp_list)[0]) is not int:                         # make sure entries are integers (representing particle #)

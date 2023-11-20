@@ -64,14 +64,14 @@ def flatten(temp_list, recursion_level=0, treat_list_subclasses_as_list=True, tr
     from numpy import ndarray
     flat_list = []
     for entry in temp_list:
-        if type(entry) == list and (max_recursion is None or recursion_level < max_recursion):
+        if type(entry) is list and (max_recursion is None or recursion_level < max_recursion):
             flat_list += flatten(entry, recursion_level=recursion_level + 1, treat_list_subclasses_as_list=treat_list_subclasses_as_list,
                                  treat_tuples_as_lists=treat_tuples_as_lists, max_recursion=max_recursion)
         elif ((issubclass(type(entry), list) or type(entry) in [MutableDenseMatrix, ndarray]) and
               treat_list_subclasses_as_list is True and (max_recursion is None or recursion_level < max_recursion)):
             flat_list += flatten(entry, recursion_level=recursion_level + 1, treat_list_subclasses_as_list=treat_list_subclasses_as_list,
                                  treat_tuples_as_lists=treat_tuples_as_lists, max_recursion=max_recursion)
-        elif (type(entry) == tuple and treat_tuples_as_lists is True and (max_recursion is None or recursion_level < max_recursion)):
+        elif (type(entry) is tuple and treat_tuples_as_lists is True and (max_recursion is None or recursion_level < max_recursion)):
             flat_list += flatten(entry, recursion_level=recursion_level + 1, treat_list_subclasses_as_list=treat_list_subclasses_as_list,
                                  treat_tuples_as_lists=treat_tuples_as_lists, max_recursion=max_recursion)
         else:
