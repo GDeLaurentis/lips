@@ -8,25 +8,32 @@ from __future__ import unicode_literals
 import mpmath
 import sympy
 import numpy
+import pytest
 
 from sympy.functions.special.tensor_functions import LeviCivita
 
 from lips import Particles
 from lips.tools import pSijk, pDijk
+from lips.fields.field import Field
 
+mpc = Field('mpc', 0, 300)
+modp = Field('finite field', 2 ** 31 - 1, 1)
+padic = Field('padic', 2 ** 31 - 1, 6)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 
-def test_particles_compute_ldot():
-    oParticles = Particles(5)
-    assert abs(oParticles.ldot(1, 2) - numpy.trace(numpy.dot(oParticles[1].r2_sp, oParticles[2].r2_sp_b)) / 2) < 10 ** -290
+@pytest.mark.parametrize("field", [mpc, modp, padic, ])
+def test_particles_compute_ldot(field):
+    oParticles = Particles(5, field=field)
+    assert abs(oParticles.ldot(1, 2) - numpy.trace(numpy.dot(oParticles[1].r2_sp, oParticles[2].r2_sp_b)) / 2) <= field.tollerance
 
 
-def test_particles_compute_lNB():
-    oParticles = Particles(6)
-    assert abs(oParticles("⟨1|2-3|4]") - oParticles("⟨1|2⟩[2|4]-⟨1|3⟩[3|4]")) < 10 ** -290
-    assert abs(oParticles("⟨1|2+3|4]") - oParticles("⟨1|2⟩[2|4]+⟨1|3⟩[3|4]")) < 10 ** -290
+@pytest.mark.parametrize("field", [mpc, modp, padic, ])
+def test_particles_compute_lNB(field):
+    oParticles = Particles(6, field=field)
+    assert abs(oParticles("⟨1|2-3|4]") - oParticles("⟨1|2⟩[2|4]-⟨1|3⟩[3|4]")) <= field.tollerance
+    assert abs(oParticles("⟨1|2+3|4]") - oParticles("⟨1|2⟩[2|4]+⟨1|3⟩[3|4]")) <= field.tollerance
 
 
 def test_particles_compute_Mandelstam():

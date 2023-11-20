@@ -124,7 +124,8 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
 
     def cluster(self, llIntegers):
         """Returns clustered particle objects according to lists of lists of integers (e.g. corners of one loop diagram)."""
-        return Particles([sum([self[i] for i in corner_as_integers]) for corner_as_integers in llIntegers], fix_mom_cons=False)
+        return Particles([sum([self[i] for i in corner_as_integers]) for corner_as_integers in llIntegers], 
+                         field=self.field, fix_mom_cons=False)
 
     def make_analytical_d(self, indepVars=None, symbols=('a', 'b', 'c', 'd')):
         """ """
@@ -286,7 +287,7 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
             else:
                 raise IndexError(index)
         elif isinstance(index, slice):
-            oNewParticles = Particles(list.__getitem__(self, index), fix_mom_cons=False)
+            oNewParticles = Particles(list.__getitem__(self, index), field=self.field, fix_mom_cons=False)
             oNewParticles.oRefVec = self.oRefVec
             return oNewParticles
         else:

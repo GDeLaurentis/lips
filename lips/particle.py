@@ -66,46 +66,46 @@ class Particle(object):
             return False
 
     def __neg__(self):
-        minus_self = Particle()
+        minus_self = Particle(field=self.field)
         minus_self.r2_sp = -1 * self.r2_sp
         return minus_self
 
     def __add__(self, other):
         """Sum: summs the four momenta."""
         if other == 0:
-            return Particle(kinematics=self.r2_sp)
+            return Particle(kinematics=self.r2_sp, field=self.field)
         assert isinstance(other, Particle)
-        return Particle(kinematics=self.r2_sp + other.r2_sp)
+        return Particle(kinematics=self.r2_sp + other.r2_sp, field=self.field)
 
     def __radd__(self, other):
         """Sum: summs the four momenta."""
         if other == 0:
-            return Particle(kinematics=self.r2_sp)
+            return Particle(kinematics=self.r2_sp, field=self.field)
         assert isinstance(other, Particle)
-        return Particle(kinematics=self.r2_sp + other.r2_sp)
+        return Particle(kinematics=self.r2_sp + other.r2_sp, field=self.field)
 
     def __sub__(self, other):
         """Sub: subtract the four momenta."""
         if other == 0:
-            return Particle(kinematics=self.r2_sp)
+            return Particle(kinematics=self.r2_sp, field=self.field)
         assert isinstance(other, Particle)
-        return Particle(kinematics=self.r2_sp - other.r2_sp)
+        return Particle(kinematics=self.r2_sp - other.r2_sp, field=self.field)
 
     def __mul__(self, other):
         """Mul: multiply momentum by number."""
-        return Particle(kinematics=self.r2_sp * other)
+        return Particle(kinematics=self.r2_sp * other, field=self.field)
 
     def __rmul__(self, other):
         """Mul: multiply momentum by number."""
-        return Particle(kinematics=self.r2_sp * other)
+        return Particle(kinematics=self.r2_sp * other, field=self.field)
 
     def __div__(self, other):
         """Div: divide momentum by number."""
-        return Particle(kinematics=self.r2_sp / other)
+        return Particle(kinematics=self.r2_sp / other, field=self.field)
 
     def __truediv__(self, other):
         """Div: divide momentum by number."""
-        return Particle(kinematics=self.r2_sp / other)
+        return Particle(kinematics=self.r2_sp / other, field=self.field)
 
     def __getitem__(self, key):
         return self.four_mom[key]
