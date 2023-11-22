@@ -20,10 +20,11 @@ import lips
 
 from sympy import NotInvertible
 
+from pyadic import PAdic, ModP
+from pyadic.field_extension import FieldExtension
+
 from .fields.field import Field
 from .fields.gaussian_rationals import GaussianRational, rand_rat_frac
-# from .fields import PAdic, ModP
-from pyadic import PAdic, ModP
 from .tools import MinkowskiMetric, LeviCivita, rand_frac, Pauli, Pauli_bar, flatten
 
 
@@ -367,7 +368,6 @@ class Particle(object):
 
     @property
     def spinors_are_in_field_extension(self):
-        from .fields.field_extension import FieldExtension
         return FieldExtension in set(map(type, flatten(self.r_sp_d) + flatten(self.l_sp_d)))
 
     # PRIVATE METHODS
