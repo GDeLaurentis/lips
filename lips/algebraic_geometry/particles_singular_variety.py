@@ -72,7 +72,10 @@ class Particles_SingularVariety:
             root_dicts = lex_groebner_solve(oSemiNumericalIdeal.groebner_basis, prime=prime)
             check_solutions(oSemiNumericalIdeal.groebner_basis, root_dicts, prime=prime)
 
-            root_dict = root_dicts[0]
+            try:
+                root_dict = root_dicts[0]
+            except IndexError:
+                raise IndexError(f"Got root_dicts: {root_dicts}, for lex Groebner basis:\n{oSemiNumericalIdeal.groebner_basis}.")
             root_dict = {key: root_dict[key] for key in root_dict.keys() if key not in indepSymbols}
 
             if iteration < iterations - 1:

@@ -36,6 +36,13 @@ def test_particles_compute_lNB(field):
     assert abs(oParticles("⟨1|2+3|4]") - oParticles("⟨1|2⟩[2|4]+⟨1|3⟩[3|4]")) <= field.tollerance
 
 
+@pytest.mark.parametrize("field", [mpc, modp, padic, ])
+def test_particles_compute_lNB_open(field):
+    oParticles = Particles(7, field=field)
+    assert numpy.all(abs(oParticles("|4+5|6+7|1]-|6+7|4+5|1]") - oParticles("|4]⟨4|6+7|1]+|5]⟨5|6+7|1]-|6]⟨6|4+5|1]-|7]⟨7|4+5|1]")) <= field.tollerance)
+    assert numpy.all(abs(oParticles("[1|4+5|6+7|-[1|6+7|4+5|") - oParticles("[1|4+5|6⟩[6|+[1|4+5|7⟩[7|-[1|6+7|4⟩[4|-[1|6+7|5⟩[5|")) <= field.tollerance)
+
+
 def test_particles_compute_Mandelstam():
     """Test computation of Mandelsta w.r.t. summed particles object."""
     oParticles = Particles(9)

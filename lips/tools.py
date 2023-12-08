@@ -44,6 +44,8 @@ pSd = re.compile(r'^(?:\[)(\d+)(?:\|)$')
 pSu = re.compile(r'^(?:\|)(\d+)(?:\])$')
 p3B = re.compile(r'^(?:⟨|\[)(\d+)(?:\|\({0,1})([\d+[\+-]*]*)(?:\){0,1}\|)(\d+)(?:⟩|\])$')
 pNB = re.compile(r'^(?:⟨|\[)(?P<start>\d+)(?:\|)(?P<middle>(?:(?:\([\d+\+|-]{1,}\))|(?:[\d+\+|-]{1,}))*)(?:\|)(?P<end>\d+)(?:⟩|\])$')
+pNB_open_begin = re.compile(r'^(?:\|)(?P<middle>(?:(?:\([\d+|-]{1,}\))|(?:[\d+|-]{1,}))*)(?:\|)(?P<end>\d+)(?:⟩|\])$')
+pNB_open_end = re.compile(r'^(?:⟨|\[)(?P<start>\d+)(?:\|)(?P<middle>(?:(?:\([\d+|-]{1,}\))|(?:[\d+|-]{1,}))*)(?:\|)$')
 
 # '(⟨a|b|c+d|e|a]-⟨b|f|c+d|e|b])'  -  from two-loop five-point one-mass alphabet
 p5Bdiff = re.compile(r'^\(⟨(?P<a>\d+)\|(?P<b>\d+)\|\({0,1}(?P<cd>[\d+[\+]*]*)\){0,1}\|(?P<e>\d+)\|(?P=a)\]\-⟨(?P=b)\|(?P<f>\d+)\|\({0,1}(?P=cd)\){0,1}\|(?P=e)\|(?P=b)\]\)$')

@@ -40,7 +40,8 @@ class Particles_Set:
                 temp_string, temp_value, self.compute(temp_string), abs_diff))
 
     def _set_inner(self, temp_string, temp_value, fix_mom=True, mode=1):
-        self.check_consistency(temp_string)                          # Check consistency of string
+
+        self.check_consistency(temp_string)                          # Check consistency of string - !Warning! Exceptions are disabled
 
         if pA2.findall(temp_string) != []:                           # Sets ⟨A|B⟩  --- Changes: |B⟩, Don't touch: ⟨A|
 
