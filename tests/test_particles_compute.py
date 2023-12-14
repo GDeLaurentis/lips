@@ -11,6 +11,7 @@ import numpy
 import pytest
 
 from sympy.functions.special.tensor_functions import LeviCivita
+from fractions import Fraction as Q
 
 from lips import Particles
 from lips.tools import pSijk, pDijk
@@ -41,6 +42,23 @@ def test_particles_compute_lNB_open(field):
     oParticles = Particles(7, field=field)
     assert numpy.all(abs(oParticles("|4+5|6+7|1]-|6+7|4+5|1]") - oParticles("|4]⟨4|6+7|1]+|5]⟨5|6+7|1]-|6]⟨6|4+5|1]-|7]⟨7|4+5|1]")) <= field.tollerance)
     assert numpy.all(abs(oParticles("[1|4+5|6+7|-[1|6+7|4+5|") - oParticles("[1|4+5|6⟩[6|+[1|4+5|7⟩[7|-[1|6+7|4⟩[4|-[1|6+7|5⟩[5|")) <= field.tollerance)
+
+
+@pytest.mark.parametrize("field", [mpc, modp, padic, ])
+def test_particles_eval_rational_function(field):
+    oParticles = Particles(7, field=field)
+    assert abs(oParticles("(+96/127[35]⟨4|2+3|1]⟨16⟩)/(⟨56⟩[56]⟨1|(2+4)|3]⟨2|(1+4)|3])") -
+               Q("+96/127") * oParticles("[35]") * oParticles("⟨4|2+3|1]") * oParticles("⟨1|6⟩") /
+               (oParticles("⟨56⟩") * oParticles("[56]") * oParticles("⟨1|(2+4)|3]") * oParticles("⟨2|(1+4)|3]"))) <= field.tollerance
+
+
+@pytest.mark.parametrize("field", [mpc, modp, padic, ])
+def test_particles_eval_expr_with_two_open_indices(field):
+    oPs = Particles(7, field=field)
+    assert numpy.all(numpy.abs(
+        oPs("|1⟩⟨2|4+5|1|-|2⟩⟨3|4+5|3]⟨1|+|2⟩⟨1|4+5|2|+|2⟩⟨1|4+5|3|+|3|4+5|2⟩⟨1|") -
+        oPs("-1*(|1⟩⟨1|)*⟨2|5⟩*[1|5]-1*(|1⟩⟨1|)*⟨2|4⟩*[1|4]+1*(|2⟩⟨1|)*⟨3|4⟩*[3|4]+1*(|2⟩⟨1|)*⟨3|5⟩*[3|5]-1*(|2⟩⟨2|)*⟨1|4⟩*[2|4]\
+            -1*(|2⟩⟨2|)*⟨1|5⟩*[2|5]-1*(|2⟩⟨3|)*⟨1|4⟩*[3|4]-1*(|2⟩⟨3|)*⟨1|5⟩*[3|5]-1*(|3⟩⟨1|)*⟨2|4⟩*[3|4]-1*(|3⟩⟨1|)*⟨2|5⟩*[3|5]")) <= field.tollerance)
 
 
 def test_particles_compute_Mandelstam():
