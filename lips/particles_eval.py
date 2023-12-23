@@ -3,11 +3,6 @@
 
 # Author: Giuseppe
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import sys
 import re
 import ast
@@ -15,8 +10,7 @@ import mpmath
 import operator as op
 
 from fractions import Fraction
-from lips.fields import GaussianRational   # , ModP, PAdic
-from pyadic import PAdic, ModP
+from pyadic import PAdic, ModP, GaussianRational
 
 operators = {ast.Add: op.add, ast.Sub: op.sub, ast.Mult: op.mul,
              ast.Div: op.truediv, ast.Pow: op.pow, ast.BitXor: op.xor,

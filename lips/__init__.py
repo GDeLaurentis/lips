@@ -16,10 +16,11 @@ Particles objects allow to:\n
    oParticles.set_pair(spinor_string_1, small_value_1, spinor_string_2, small_value_2)
 """
 
+from syngular import Field                       # noqa
+
 from .particle import Particle                   # noqa
 from .particles import Particles                 # noqa
 from .tools import myException, ldot, flatten    # noqa
-from .fields.field import Field                  # noqa
 from .invariants import Invariants               # noqa
 
 spinor_convention = 'symmetric'  # or 'asymmetric'

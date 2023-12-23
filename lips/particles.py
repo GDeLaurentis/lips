@@ -7,11 +7,6 @@
 
 # Author: Giuseppe
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import numpy
 import random
 import re
@@ -23,9 +18,9 @@ import sympy
 
 from sympy import NotInvertible
 
-from .fields.field import Field
-# from .fields import PAdic
+from syngular import Field
 from pyadic import PAdic
+
 from .tools import MinkowskiMetric, flatten, pNB, myException, indexing_decorator, pAu, pAd, pSu, pSd
 from .particle import Particle
 from .particles_compute import Particles_Compute
@@ -89,6 +84,10 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
     def masses(self):
         """Masses of all particles in phase space."""
         return [oParticle.mass for oParticle in self]
+
+    @property
+    def multiplicity(self):
+        return len(self)
 
     def randomise_all(self, real_momenta=False):
         """Randomises all particles. Breaks momentum conservation."""
@@ -158,11 +157,10 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
                 oParticle._four_mom_d = None
 
     def analytical_subs_d(self):
-        multiplicity = len(self)
-        la = sympy.symbols('a1:{}'.format(multiplicity + 1))
-        lb = sympy.symbols('b1:{}'.format(multiplicity + 1))
-        lc = sympy.symbols('c1:{}'.format(multiplicity + 1))
-        ld = sympy.symbols('d1:{}'.format(multiplicity + 1))
+        la = sympy.symbols('a1:{}'.format(self.multiplicity + 1))
+        lb = sympy.symbols('b1:{}'.format(self.multiplicity + 1))
+        lc = sympy.symbols('c1:{}'.format(self.multiplicity + 1))
+        ld = sympy.symbols('d1:{}'.format(self.multiplicity + 1))
         subs_dict = {}
         for i, iParticle in enumerate(self):
             subs_dict.update({la[i]: iParticle.r_sp_d[0, 0], lb[i]: iParticle.r_sp_d[1, 0]})

@@ -9,20 +9,11 @@
 
 # Author: Giuseppe
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import numpy
 import re
 import mpmath
-import sys
 
 from .tools import pSijk, pMi, pd5, pDijk, pOijk, pPijk, pA2, pAu, pAd, pS2, pSu, pSd, pNB, pNB_open_begin, pNB_open_end, ptr5, det2x2
-
-if sys.version_info[0] > 2:
-    unicode = str
 
 mpmath.mp.dps = 300
 
@@ -76,15 +67,15 @@ class Particles_Compute:
         if pOijk.findall(temp_string) != []:                        # Ω_ijk
             ijk = list(map(int, pOijk.findall(temp_string)[0]))
             nol = self.ijk_to_3NonOverlappingLists(ijk)
-            Omega = (2 * self.compute("s_" + "".join(map(unicode, nol[2]))) * self.compute("s_" + "".join(map(unicode, nol[1]))) -
-                     (self.compute("s_" + "".join(map(unicode, nol[2]))) + self.compute("s_" + "".join(map(unicode, nol[1]))) -
-                      self.compute("s_" + "".join(map(unicode, nol[0])))) * self.compute("s_" + "".join(map(unicode, nol[2] + [nol[0][0]]))))
+            Omega = (2 * self.compute("s_" + "".join(map(str, nol[2]))) * self.compute("s_" + "".join(map(str, nol[1]))) -
+                     (self.compute("s_" + "".join(map(str, nol[2]))) + self.compute("s_" + "".join(map(str, nol[1]))) -
+                      self.compute("s_" + "".join(map(str, nol[0])))) * self.compute("s_" + "".join(map(str, nol[2] + [nol[0][0]]))))
             return Omega
 
         if pPijk.findall(temp_string) != []:                        # Π_ijk, eg: Π_351 = s_123-s124
             ijk = list(map(int, pPijk.findall(temp_string)[0]))
             nol = self.ijk_to_3NonOverlappingLists(ijk)
-            Pi = (self.compute("s_" + "".join(map(unicode, nol[2] + [nol[0][0]]))) - self.compute("s_" + "".join(map(unicode, nol[2] + [nol[0][1]]))))
+            Pi = (self.compute("s_" + "".join(map(str, nol[2] + [nol[0][0]]))) - self.compute("s_" + "".join(map(str, nol[2] + [nol[0][1]]))))
             return Pi
 
         if pDijk.findall(temp_string) != []:                        # Δ_ijk or Δ_ij|kl|lm

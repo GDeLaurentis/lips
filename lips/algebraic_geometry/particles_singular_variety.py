@@ -1,22 +1,10 @@
-# -*- coding: utf-8 -*-
-
-# Author: Giuseppe
-
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-
-import random
 import numpy
-import sympy
-import mpmath
-import syngular
 
-# from lips.fields import ModP, PAdic
 from pyadic import ModP, PAdic
-from lips.algebraic_geometry.covariant_ideal import LipsIdeal
-from lips.algebraic_geometry.tools import lex_groebner_solve, check_solutions, lips_covariant_symbols
+
+from ..tools import flatten
+
+from .covariant_ideal import LipsIdeal
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -24,98 +12,24 @@ from lips.algebraic_geometry.tools import lex_groebner_solve, check_solutions, l
 
 class Particles_SingularVariety:
 
-    def _singular_variety(self, invariants, valuations=tuple(), generators=[], indepSetNbr=0, verbose=False):
-        """Given invariants and valuations, generates a variety of dimension zero and solves for a ps point valuations away from the zero surface.
-        If generators are given, they are used to construct the zero surface first, otherwise it is picked at random."""
-        assert all([valuation > 0 for valuation in valuations])  # if valuations == tuple() return zero surface
+    def _singular_variety(self, invariants, valuations=(), generators=[], indepSetNbr=None, seed=None, verbose=False):
 
-        if self.field.name == "padic":
-            prime, iterations = self.field.characteristic, self.field.digits
-            padic_to_finite_field(self)  # work with p ** k finite field itaratively, since Singular can only handle % p
-            if valuations == tuple():
-                valuations = tuple(self.field.digits for inv in invariants)
-        elif self.field.name == "finite field":
-            prime, iterations = self.field.characteristic, 1
-        elif self.field.name == "mpc":
-            prime, iterations = None, 1 if valuations == tuple() else 2
+        from ..particles import Particles
+
+        oPsAnalytical = Particles(self.multiplicity)
+        oPsAnalytical.make_analytical_d()
+        directions = flatten([oPsAnalytical(invariant) for invariant in invariants])
 
         if generators == []:
-            oIdeal = LipsIdeal(len(self), invariants)
-        else:
-            oIdeal = LipsIdeal(len(self), generators)
-        # oIdeal.ring.ordering = 'lp'  # no need to set lex ordering here - it just tanks the performance
+            generators = invariants
 
-        # print(oIdeal.generators)
+        oLipsIdeal = LipsIdeal(self.multiplicity, generators)
+        oLipsIdeal.to_mom_cons_qring()
 
-        indepSets = oIdeal.indepSets
-        if verbose:
-            print("Codimensions:", set(indepSet.count(0) - 4 for indepSet in indepSets))
-            print("Number of indepSets:", len(indepSets))
-        indepSet = indepSets[indepSetNbr]
-        indepSymbols = [symbol for i, symbol in enumerate(lips_covariant_symbols(len(self))) if indepSet[i] == 1]
-        if verbose:
-            print("Chosen indepSet:", indepSet)
+        point_dict = oLipsIdeal.point_on_variety(
+            self.field, base_point=self.analytical_subs_d(), directions=directions, valuations=valuations, indepSetNbr=indepSetNbr, seed=seed, verbose=verbose)
 
-        self.make_analytical_d(indepVars=indepSet)
-        oSemiNumericalIdeal = oIdeal.zero_dimensional_slice(self, invariants, valuations, prime=prime, iteration=0)
-
-        # print(repr(oSemiNumericalIdeal))
-
-        for iteration in range(iterations):
-
-            # make sure ordering is lexicographical and there is no cached groebner_basis
-            oSemiNumericalIdeal.ring.ordering = 'lp'
-            if hasattr(oSemiNumericalIdeal, "groebner_basis"):
-                del oSemiNumericalIdeal.groebner_basis
-            # print(repr(oSemiNumericalIdeal), oSemiNumericalIdeal.primary_decomposition, oSemiNumericalIdeal.groebner_basis, len(oSemiNumericalIdeal.groebner_basis))
-            syngular.DEGBOUND.set(0)
-            root_dicts = lex_groebner_solve(oSemiNumericalIdeal.groebner_basis, prime=prime)
-            check_solutions(oSemiNumericalIdeal.groebner_basis, root_dicts, prime=prime)
-
-            try:
-                root_dict = root_dicts[0]
-            except IndexError:
-                raise IndexError(f"Got root_dicts: {root_dicts}, for lex Groebner basis:\n{oSemiNumericalIdeal.groebner_basis}.")
-            root_dict = {key: root_dict[key] for key in root_dict.keys() if key not in indepSymbols}
-
-            if iteration < iterations - 1:
-                for key in root_dict.keys():
-                    root_dict[key] = root_dict[key] + (prime if prime is not None else 1) * key
-
-            # print(root_dict)
-
-            update_particles(self, root_dict)
-
-            if iteration < iterations - 1:
-                if prime is not None:
-                    valuations = [valuation - 1 for valuation in valuations]
-                invariants_valuations = list(filter(lambda x: x[1] > 0, zip(invariants, valuations)))
-                if invariants_valuations != []:
-                    invariants, valuations = zip(*invariants_valuations)
-                else:
-                    invariants, valuations = (), ()
-                if verbose:
-                    print("Invariants, valuations:", invariants, valuations)
-
-                oSemiNumericalIdeal = oIdeal.zero_dimensional_slice(self, invariants, valuations, prime=prime, iteration=iteration + 1)
-
-                # print(oSemiNumericalIdeal.generators)
-
-                if len(oSemiNumericalIdeal.indepSets) == 0:
-                    raise Exception("No independent set exists: is this the unit ideal?!")
-                currentIndepSet = oSemiNumericalIdeal.indepSets[0]
-                if verbose:
-                    print("Chosen indepSet:", currentIndepSet)
-                if currentIndepSet != indepSet:  # this happens only with padics
-                    random.seed(self.seed)  # reproducible p-adic extension
-                    newIndepSymbols = tuple(symbol for i, symbol in enumerate(lips_covariant_symbols(len(self))) if currentIndepSet[i] == 1 and indepSet[i] == 0)
-                    rand_dict = {newIndepSymbol: random.randrange(1, self.field.characteristic ** (self.field.digits - iteration)) for newIndepSymbol in newIndepSymbols}
-                    update_particles(self, rand_dict)
-                    indepSet = currentIndepSet
-                    oSemiNumericalIdeal = oIdeal.zero_dimensional_slice(self, invariants, valuations, prime=prime, iteration=iteration + 1)
-        else:
-            if self.field.name == "padic":
-                finite_field_to_padic(self)
+        update_particles(self, point_dict)
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -140,15 +54,7 @@ def finite_field_to_padic(oParticles):
 
 
 def update_particles(oParticles, dictionary):
-    sol = oParticles.analytical_subs_d()
-    for key in sol:
-        if key in dictionary and sol[key] == key:
-            sol[key] = dictionary[key]
-        elif key in dictionary:
-            sol[key] = sol[key].subs(dictionary)
-        if hasattr(sol[key], "free_symbols") and sol[key].free_symbols == set() and oParticles.field.name == "mpc":
-            sol[key] = mpmath.mpc(sol[key])
     for i in range(1, len(oParticles) + 1):
-        oParticles[i]._l_sp_d = numpy.array([[sol[sympy.symbols('c%i' % i)], sol[sympy.symbols('d%i' % i)]]], dtype=object)
+        oParticles[i]._l_sp_d = numpy.array([[dictionary[f'c{i}'], dictionary[f'd{i}']]], dtype=object)
         oParticles[i]._l_sp_d_to_l_sp_u()
-        oParticles[i].r_sp_d = numpy.array([[sol[sympy.symbols('a%i' % i)]], [sol[sympy.symbols('b%i' % i)]]], dtype=object)
+        oParticles[i].r_sp_d = numpy.array([[dictionary[f'a{i}']], [dictionary[f'b{i}']]], dtype=object)

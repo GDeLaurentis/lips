@@ -7,11 +7,6 @@
 
 # Author: Giuseppe
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import numpy
 import sympy
 import mpmath
@@ -20,11 +15,12 @@ import lips
 
 from sympy import NotInvertible
 
+from syngular import Field
+
 from pyadic import PAdic, ModP
 from pyadic.field_extension import FieldExtension
+from pyadic.gaussian_rationals import GaussianRational, rand_rat_frac
 
-from .fields.field import Field
-from .fields.gaussian_rationals import GaussianRational, rand_rat_frac
 from .tools import MinkowskiMetric, LeviCivita, rand_frac, Pauli, Pauli_bar, flatten
 
 
