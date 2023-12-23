@@ -29,11 +29,25 @@ jobs:
       uses: actions/checkout@v2
       with:
         path: lips-dev
+    - name: Checkout another private Repo (pyadic)
+      uses: actions/checkout@v4
+      with:
+        repository: GDeLaurentis/pyadic
+        token: ${{ secrets.GitHubActions_PAT }}
+        path: pyadic
+    - name: Checkout another private Repo (syngular)
+      uses: actions/checkout@v4
+      with:
+        repository: GDeLaurentis/syngular
+        token: ${{ secrets.GitHubActions_PAT }}
+        path: syngular
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install flake8 pytest pytest-cov
         pip install -e lips-dev
+        pip install -e --upgrade --force-reinstall pyadic
+        pip install -e --upgrade --force-reinstall syngular
     - name: Lint with flake8
       run: |
         cd lips-dev
