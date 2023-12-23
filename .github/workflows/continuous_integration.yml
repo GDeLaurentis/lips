@@ -46,8 +46,8 @@ jobs:
         python -m pip install --upgrade pip
         pip install flake8 pytest pytest-cov
         pip install -e lips-dev
-        pip install -e --upgrade --force-reinstall pyadic
-        pip install -e --upgrade --force-reinstall syngular
+        pip install --upgrade --force-reinstall -e pyadic
+        pip install --upgrade --force-reinstall -e syngular
     - name: Lint with flake8
       run: |
         cd lips-dev
