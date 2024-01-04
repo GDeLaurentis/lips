@@ -13,7 +13,7 @@ import numpy
 import re
 import mpmath
 
-from .tools import pSijk, pMi, pd5, pDijk, pOijk, pPijk, pA2, pAu, pAd, pS2, pSu, pSd, pNB, pNB_open_begin, pNB_open_end, ptr5, det2x2
+from .tools import pSijk, pMi, pd5, pDijk, pOijk, pPijk, pA2, pAu, pAd, pS2, pSu, pSd, pNB, pNB_open_begin, pNB_open_end, ptr5, ptr, det2x2
 
 mpmath.mp.dps = 300
 
@@ -63,6 +63,14 @@ class Particles_Compute:
             ijkl = list(map(int, ptr5.findall(temp_string)[0]))
             return (self.compute("[{a}|{b}|{c}|{d}|{a}⟩".format(a=ijkl[0], b=ijkl[1], c=ijkl[2], d=ijkl[3])) -
                     self.compute("⟨{a}|{b}|{c}|{d}|{a}]".format(a=ijkl[0], b=ijkl[1], c=ijkl[2], d=ijkl[3])))
+
+        if ptr.findall(temp_string) != []:                          # e.g.: tr(i+j|k-l|...)
+            abcd = ptr.search(temp_string)
+            bc = abcd.group("middle").replace("(", "").replace(")", "").split("|")
+            middle = ["(" + re.sub(r'(\d+)', r'self[\1].r2_sp_b', entry) + ")" if i % 2 == 0 else
+                      "(" + re.sub(r'(\d+)', r'self[\1].r2_sp', entry) + ")" for i, entry in enumerate(bc)]
+            middle = " @ ".join(middle)
+            return eval(middle).trace()
 
         if pOijk.findall(temp_string) != []:                        # Ω_ijk
             ijk = list(map(int, pOijk.findall(temp_string)[0]))

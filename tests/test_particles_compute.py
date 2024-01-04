@@ -61,6 +61,15 @@ def test_particles_eval_expr_with_two_open_indices(field):
             -1*(|2⟩⟨2|)*⟨1|5⟩*[2|5]-1*(|2⟩⟨3|)*⟨1|4⟩*[3|4]-1*(|2⟩⟨3|)*⟨1|5⟩*[3|5]-1*(|3⟩⟨1|)*⟨2|4⟩*[3|4]-1*(|3⟩⟨1|)*⟨2|5⟩*[3|5]")) <= field.tollerance)
 
 
+@pytest.mark.parametrize("field", [mpc, modp, padic, ])
+def test_particles_eval_trace(field):
+    oPs = Particles(7, field=field)
+    assert numpy.all(numpy.abs(oPs("⟨3|4+5-6-7|3]-⟨1|4+5-6-7|1]-⟨2|4+5-6-7|2]") - oPs("tr(3-1-2|4+5-6-7)")) <= field.tollerance)
+    assert numpy.all(numpy.abs(oPs("|3]⟨3|4+5-6-7|-|1]⟨1|4+5-6-7|-|2]⟨2|4+5-6-7|").trace() - oPs("tr(3-1-2|4+5-6-7)")) <= field.tollerance)
+    assert numpy.all(numpy.abs(oPs("|4+5-6-7|3]⟨3|-|4+5-6-7|1]⟨1|-|4+5-6-7|2]⟨2|").trace() - oPs("tr(3-1-2|4+5-6-7)")) <= field.tollerance)
+    oPs = Particles(7, field=Field("finite field", 2 ** 31 - 1, 1))
+
+
 def test_particles_compute_Mandelstam():
     """Test computation of Mandelsta w.r.t. summed particles object."""
     oParticles = Particles(9)

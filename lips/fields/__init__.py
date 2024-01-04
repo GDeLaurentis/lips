@@ -1,5 +1,5 @@
-from syngular.field import Field  # noqa
-from pyadic.gaussian_rationals import GaussianRational  # noqa
+from .field import Field  # noqa
+from .gaussian_rationals import GaussianRational  # noqa
 
 import warnings
 

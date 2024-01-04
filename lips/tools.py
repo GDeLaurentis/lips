@@ -30,6 +30,7 @@ pSijk = re.compile(r'^(?:s|S)(?:_){0,1}(\d+)$')
 pMi = re.compile(r'^(?:m|M)(?:_){0,1}(\d)$')
 pd5 = re.compile(r'^δ5$')
 ptr5 = re.compile(r'^(?:tr5_)(\d+)$')
+ptr = re.compile(r'^tr\((?P<middle>(?:(?:\([\d+\+|-]{1,}\))|(?:[\d+\+|-]{1,}))*)\)$')   # the 'middle' pattern should be like in pNB
 pDijk = re.compile(r'(?:^Δ_(\d+)$)|(?:^Δ_(\d+)\|(\d+)\|(\d+)$)')
 pOijk = re.compile(r'^(?:Ω_)(\d+)$')
 pPijk = re.compile(r'^(?:Π_)(\d+)$')
