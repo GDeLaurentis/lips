@@ -8,7 +8,10 @@ from __future__ import unicode_literals
 import pytest
 
 from lips.algebraic_geometry.covariant_ideal import LipsIdeal
-from lips.algebraic_geometry.tools import singular_found
+
+from shutil import which
+
+singular_found = True if which('Singular') is not None else False
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #

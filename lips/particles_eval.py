@@ -3,11 +3,6 @@
 
 # Author: Giuseppe
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import sys
 import re
 import ast
@@ -15,8 +10,7 @@ import mpmath
 import operator as op
 
 from fractions import Fraction
-from lips.fields import GaussianRational   # , ModP, PAdic
-from pyadic import PAdic, ModP
+from pyadic import PAdic, ModP, GaussianRational
 
 operators = {ast.Add: op.add, ast.Sub: op.sub, ast.Mult: op.mul,
              ast.Div: op.truediv, ast.Pow: op.pow, ast.BitXor: op.xor,
@@ -41,8 +35,26 @@ pPijk = re.compile(r'(?:Π_)(\d+)')
 pDijk_adjacent = re.compile(r'(?:Δ_(\d+)(?![\d\|]))')
 pDijk_non_adjacent = re.compile(r'(?:Δ_(\d+)\|(\d+)\|(\d+))')
 # p3B = re.compile(r'(?:\u27e8|\[)(\d+)(?:\|\({0,1})([\d+[\+|-]*]*)(?:\){0,1}\|)(\d+)(?:\u27e9|\])')
-pNB = re.compile(r'((?:⟨|\[)\d+\|(?:(?:\([\d+\+|-]{1,}\))|(?:[\d+\+|-]{1,}))*\|\d+(?:⟩|\]))')
+# pNB = re.compile(r'((?:⟨|\[)\d+\|(?:(?:\([\d+\+|-]{1,}\))|(?:[\d+\+|-]{1,}))*\|\d+(?:⟩|\]))')  # this messes up on strings like: '|2⟩⟨1|4+5|3|+|3|4+5|2⟩⟨1|'
+pNB = re.compile(r'((?:⟨|\[)\d+\|(?:(?:(?!\|[\+|-]\|)\([\d+\+|-]{1,}\))|(?:(?!\|[\+|-]\|)[\d+\+|-]))*\|\d+(?:⟩|\]))')
+pNB_open_begin = re.compile(r'(?<!⟨\d)(?<!\[\d)(?<![\+|-]\d\))(?<![\+|-]\d)((?:\|)(?:(?:\([\d+|-]{1,}\))|(?:[\d+|-]{1,}))*(?:\|)\d+(?:⟩|\]))')
+pNB_open_end = re.compile(r'((?:⟨|\[)\d+(?:\|)(?:(?:\([\d+|-]{1,}\))|(?:[\d+\+|-]{1,}))*(?:\|))(?!\d⟩)(?!\d\])(?!\d[\+|-])(?!\(\d[\+|-])')
 ptr5 = re.compile(r'(?:tr5_)(\d+)')
+ptr = re.compile(r'(tr\((?:(?:\([\d+\+|-]{1,}\))|(?:[\d+\+|-]{1,})*)\))')
+
+unicode_powers_dict = {"^0": "⁰", "^1": "¹", "^2": "²", "^3": "³", "^4": "⁴", "^5": "⁵", "^6": "⁶", "^7": "⁷", "^8": "⁸", "^9": "⁹"}
+
+
+def non_unicode_powers(string):
+    for hat_pow, uni_pow in unicode_powers_dict.items():
+        string = string.replace(uni_pow, hat_pow)
+    return string
+
+
+def unicode_powers(string):
+    for hat_pow, uni_pow in unicode_powers_dict.items():
+        string = string.replace(hat_pow, uni_pow)
+    return string
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
@@ -58,7 +70,7 @@ class Particles_Eval:
         string = string.replace("}+\\", ")+")
         string = string.replace("\n", "").replace(" ", "")
         string = re.sub(r"}$", ")", string)
-        string = string.replace("²", "^2", ).replace("³", "^3", ).replace("⁴", "^4")
+        string = non_unicode_powers(string)
         string = string.replace("^", "**")
         string = re.sub(r"{([\d\|]+)}", r"\1", string)
         string = pA2bis.sub(r"⟨\1|\2⟩", string)
@@ -74,9 +86,12 @@ class Particles_Eval:
         string = pOijk.sub(r"oPs.compute('Ω_\1')", string)
         string = pPijk.sub(r"oPs.compute('Π_\1')", string)
         string = ptr5.sub(r"oPs.compute('tr5_\1')", string)
+        string = ptr.sub(r"oPs.compute('\1')", string)
         string = pDijk_adjacent.sub(r"oPs.compute('Δ_\1')", string)
         string = pDijk_non_adjacent.sub(r"oPs.compute('Δ_\1|\2|\3')", string)
         string = pNB.sub(r"oPs.compute('\1')", string)
+        string = pNB_open_begin.sub(r"oPs.compute('\1')", string)
+        string = pNB_open_end.sub(r"oPs.compute('\1')", string)
         string = re.sub(r'(\d)s', r'\1*s', string)
         string = re.sub(r'(\d)o', r'\1*o', string)
         string = re.sub(r'(\d)\(', r'\1*(', string)

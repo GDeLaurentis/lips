@@ -7,15 +7,10 @@
 
 # Author: Giuseppe
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import numpy
 import re
 
-from ..tools import flatten, pSijk, pDijk, pOijk, pPijk, pA2, pS2, pNB, ptr5, myException
+from ..tools import flatten, pSijk, pDijk, pOijk, pPijk, pA2, pS2, pNB, ptr5, p5Bdiff, myException
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -40,7 +35,8 @@ class Particles_Set:
                 temp_string, temp_value, self.compute(temp_string), abs_diff))
 
     def _set_inner(self, temp_string, temp_value, fix_mom=True, mode=1):
-        self.check_consistency(temp_string)                          # Check consistency of string
+
+        self.check_consistency(temp_string)                          # Check consistency of string - !Warning! Exceptions are disabled
 
         if pA2.findall(temp_string) != []:                           # Sets ⟨A|B⟩  --- Changes: |B⟩, Don't touch: ⟨A|
 
@@ -73,6 +69,10 @@ class Particles_Set:
         elif ptr5.findall(temp_string) != []:
 
             self._set_tr5(temp_string, temp_value, fix_mom)
+
+        elif p5Bdiff.findall(temp_string) != []:
+
+            self._set_p5Bdiff(temp_string, temp_value, fix_mom)
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
@@ -463,27 +463,65 @@ class Particles_Set:
 
         a, b, c, d = [int(entry) for entry in ptr5.findall(temp_string)[0]]
         plist = list(map(int, self._complementary(map(str, [a, b, c, d]))))  # free momenta
-        if len(plist) < 2:
-            myException("Set_tr5 called with less than 6 particles. Cound't fix momentum conservation.")
 
-        x = temp_value
-        a1, b1 = self[a].r_sp_d[0, 0], self[a].r_sp_d[1, 0]
-        c1, d1 = self[a].l_sp_d[0, 0], self[a].l_sp_d[0, 1]
-        a2, b2 = self[b].r_sp_d[0, 0], self[b].r_sp_d[1, 0]
-        c2, d2 = self[b].l_sp_d[0, 0], self[b].l_sp_d[0, 1]
-        a3, b3 = self[c].r_sp_d[0, 0], self[c].r_sp_d[1, 0]
-        c3, d3 = self[c].l_sp_d[0, 0], self[c].l_sp_d[0, 1]
-        a4, b4 = self[d].r_sp_d[0, 0], self[d].r_sp_d[1, 0]
-        c4, d4 = self[d].l_sp_d[0, 0], self[d].l_sp_d[0, 1]
+        if len(self) < 5:  # 4-point or less
+            raise myException("Particles._set_tr5 called with less than 5 particles, but tr5 is identically zero below 5-point.")
 
-        a1 = (-a2 * a3 * b1 * b4 * c1 * c2 * d3 * d4 + a2 * a3 * b1 * b4 * c1 * c3 * d2 * d4 + a2 * a3 * b1 * b4 * c2 * c4 * d1 * d3 -
-              a2 * a3 * b1 * b4 * c3 * c4 * d1 * d2 + a2 * a4 * b1 * b3 * c1 * c2 * d3 * d4 - a2 * a4 * b1 * b3 * c1 * c4 * d2 * d3 -
-              a2 * a4 * b1 * b3 * c2 * c3 * d1 * d4 + a2 * a4 * b1 * b3 * c3 * c4 * d1 * d2 - a3 * a4 * b1 * b2 * c1 * c3 * d2 * d4 +
-              a3 * a4 * b1 * b2 * c1 * c4 * d2 * d3 + a3 * a4 * b1 * b2 * c2 * c3 * d1 * d4 - a3 * a4 * b1 * b2 * c2 * c4 * d1 * d3 - x) / (
-                  a2 * b3 * b4 * c1 * c3 * d2 * d4 - a2 * b3 * b4 * c1 * c4 * d2 * d3 - a2 * b3 * b4 * c2 * c3 * d1 * d4 + a2 * b3 * b4 * c2 * c4 * d1 * d3 -
-                  a3 * b2 * b4 * c1 * c2 * d3 * d4 + a3 * b2 * b4 * c1 * c4 * d2 * d3 + a3 * b2 * b4 * c2 * c3 * d1 * d4 - a3 * b2 * b4 * c3 * c4 * d1 * d2 +
-                  a4 * b2 * b3 * c1 * c2 * d3 * d4 - a4 * b2 * b3 * c1 * c3 * d2 * d4 - a4 * b2 * b3 * c2 * c4 * d1 * d3 + a4 * b2 * b3 * c3 * c4 * d1 * d2)
+        elif len(self) == 5:  # 5-point
+            """Hardcoded solution to the lexicographic Groebner basis."""
+            a1, b1 = self[1].r_sp_d.flatten().tolist()
+            c1, d1 = self[1].l_sp_d.flatten().tolist()
+            a2, b2 = self[2].r_sp_d.flatten().tolist()
+            c2, d2 = self[2].l_sp_d.flatten().tolist()
+            a3, b3 = self[3].r_sp_d.flatten().tolist()
+            c3, d3 = self[3].l_sp_d.flatten().tolist()
+            a4, b4 = self[4].r_sp_d.flatten().tolist()
+            c4, d4 = self[4].l_sp_d.flatten().tolist()
+            a5, b5 = self[5].r_sp_d.flatten().tolist()
+            c5, d5 = self[5].l_sp_d.flatten().tolist()
 
-        self[a].r_sp_d = numpy.array([[a1], [b1]])
-        if fix_mom is True:
-            self.fix_mom_cons(plist[0], plist[1], axis=1)
+            x = 4 * temp_value
+
+            b1 = (a2**2*b3**2*b4*c1*c2*c3*d2*d3*d4 - a2**2*b3**2*b4*c1*c2*c4*d2*d3**2 - a2**2*b3**2*b4*c1*c3**2*d2**2*d4 + a2**2*b3**2*b4*c1*c3*c4*d2**2*d3 - a2**2*b3**2*b4*c2**2*c3*d1*d3*d4 + a2**2*b3**2*b4*c2**2*c4*d1*d3**2 + a2**2*b3**2*b4*c2*c3**2*d1*d2*d4 - a2**2*b3**2*b4*c2*c3*c4*d1*d2*d3 + a2**2*b3*b4**2*c1*c2*c3*d2*d4**2 - a2**2*b3*b4**2*c1*c2*c4*d2*d3*d4 - a2**2*b3*b4**2*c1*c3*c4*d2**2*d4 + a2**2*b3*b4**2*c1*c4**2*d2**2*d3 - a2**2*b3*b4**2*c2**2*c3*d1*d4**2 + a2**2*b3*b4**2*c2**2*c4*d1*d3*d4 + a2**2*b3*b4**2*c2*c3*c4*d1*d2*d4 - a2**2*b3*b4**2*c2*c4**2*d1*d2*d3 - a2*a3*b2*b3*b4*c1*c2**2*d3**2*d4 + 2*a2*a3*b2*b3*b4*c1*c2*c4*d2*d3**2 + a2*a3*b2*b3*b4*c1*c3**2*d2**2*d4 - 2*a2*a3*b2*b3*b4*c1*c3*c4*d2**2*d3 + 2*a2*a3*b2*b3*b4*c2**2*c3*d1*d3*d4 - a2*a3*b2*b3*b4*c2**2*c4*d1*d3**2 - 2*a2*a3*b2*b3*b4*c2*c3**2*d1*d2*d4 + a2*a3*b2*b3*b4*c3**2*c4*d1*d2**2 - a2*a3*b2*b4**2*c1*c2**2*d3*d4**2 + 2*a2*a3*b2*b4**2*c1*c2*c4*d2*d3*d4 - a2*a3*b2*b4**2*c1*c4**2*d2**2*d3 + a2*a3*b2*b4**2*c2**2*c3*d1*d4**2 - 2*a2*a3*b2*b4**2*c2*c3*c4*d1*d2*d4 + a2*a3*b2*b4**2*c3*c4**2*d1*d2**2 + a2*a3*b3*b4**2*c1*c3**2*d2*d4**2 - 2*a2*a3*b3*b4**2*c1*c3*c4*d2*d3*d4 + a2*a3*b3*b4**2*c1*c4**2*d2*d3**2 - a2*a3*b3*b4**2*c2*c3**2*d1*d4**2 + 2*a2*a3*b3*b4**2*c2*c3*c4*d1*d3*d4 - a2*a3*b3*b4**2*c2*c4**2*d1*d3**2 + a2*a4*b2*b3**2*c1*c2**2*d3**2*d4 - 2*a2*a4*b2*b3**2*c1*c2*c3*d2*d3*d4 + a2*a4*b2*b3**2*c1*c3**2*d2**2*d4 - a2*a4*b2*b3**2*c2**2*c4*d1*d3**2 + 2*a2*a4*b2*b3**2*c2*c3*c4*d1*d2*d3 - a2*a4*b2*b3**2*c3**2*c4*d1*d2**2 + a2*a4*b2*b3*b4*c1*c2**2*d3*d4**2 - 2*a2*a4*b2*b3*b4*c1*c2*c3*d2*d4**2 + 2*a2*a4*b2*b3*b4*c1*c3*c4*d2**2*d4 - a2*a4*b2*b3*b4*c1*c4**2*d2**2*d3 + a2*a4*b2*b3*b4*c2**2*c3*d1*d4**2 - 2*a2*a4*b2*b3*b4*c2**2*c4*d1*d3*d4 + 2*a2*a4*b2*b3*b4*c2*c4**2*d1*d2*d3 - a2*a4*b2*b3*b4*c3*c4**2*d1*d2**2 - a2*a4*b3**2*b4*c1*c3**2*d2*d4**2 + 2*a2*a4*b3**2*b4*c1*c3*c4*d2*d3*d4 - a2*a4*b3**2*b4*c1*c4**2*d2*d3**2 + a2*a4*b3**2*b4*c2*c3**2*d1*d4**2 - 2*a2*a4*b3**2*b4*c2*c3*c4*d1*d3*d4 + a2*a4*b3**2*b4*c2*c4**2*d1*d3**2 + a3**2*b2**2*b4*c1*c2**2*d3**2*d4 - a3**2*b2**2*b4*c1*c2*c3*d2*d3*d4 - a3**2*b2**2*b4*c1*c2*c4*d2*d3**2 + a3**2*b2**2*b4*c1*c3*c4*d2**2*d3 - a3**2*b2**2*b4*c2**2*c3*d1*d3*d4 + a3**2*b2**2*b4*c2*c3**2*d1*d2*d4 + a3**2*b2**2*b4*c2*c3*c4*d1*d2*d3 - a3**2*b2**2*b4*c3**2*c4*d1*d2**2 - a3**2*b2*b4**2*c1*c2*c3*d3*d4**2 + a3**2*b2*b4**2*c1*c2*c4*d3**2*d4 + a3**2*b2*b4**2*c1*c3*c4*d2*d3*d4 - a3**2*b2*b4**2*c1*c4**2*d2*d3**2 + a3**2*b2*b4**2*c2*c3**2*d1*d4**2 - a3**2*b2*b4**2*c2*c3*c4*d1*d3*d4 - a3**2*b2*b4**2*c3**2*c4*d1*d2*d4 + a3**2*b2*b4**2*c3*c4**2*d1*d2*d3 - a3*a4*b2**2*b3*c1*c2**2*d3**2*d4 + 2*a3*a4*b2**2*b3*c1*c2*c3*d2*d3*d4 - a3*a4*b2**2*b3*c1*c3**2*d2**2*d4 + a3*a4*b2**2*b3*c2**2*c4*d1*d3**2 - 2*a3*a4*b2**2*b3*c2*c3*c4*d1*d2*d3 + a3*a4*b2**2*b3*c3**2*c4*d1*d2**2 + a3*a4*b2**2*b4*c1*c2**2*d3*d4**2 - 2*a3*a4*b2**2*b4*c1*c2*c4*d2*d3*d4 + a3*a4*b2**2*b4*c1*c4**2*d2**2*d3 - a3*a4*b2**2*b4*c2**2*c3*d1*d4**2 + 2*a3*a4*b2**2*b4*c2*c3*c4*d1*d2*d4 - a3*a4*b2**2*b4*c3*c4**2*d1*d2**2 + 2*a3*a4*b2*b3*b4*c1*c2*c3*d3*d4**2 - 2*a3*a4*b2*b3*b4*c1*c2*c4*d3**2*d4 - a3*a4*b2*b3*b4*c1*c3**2*d2*d4**2 + a3*a4*b2*b3*b4*c1*c4**2*d2*d3**2 - a3*a4*b2*b3*b4*c2*c3**2*d1*d4**2 + a3*a4*b2*b3*b4*c2*c4**2*d1*d3**2 + 2*a3*a4*b2*b3*b4*c3**2*c4*d1*d2*d4 - 2*a3*a4*b2*b3*b4*c3*c4**2*d1*d2*d3 - a4**2*b2**2*b3*c1*c2**2*d3*d4**2 + a4**2*b2**2*b3*c1*c2*c3*d2*d4**2 + a4**2*b2**2*b3*c1*c2*c4*d2*d3*d4 - a4**2*b2**2*b3*c1*c3*c4*d2**2*d4 + a4**2*b2**2*b3*c2**2*c4*d1*d3*d4 - a4**2*b2**2*b3*c2*c3*c4*d1*d2*d4 - a4**2*b2**2*b3*c2*c4**2*d1*d2*d3 + a4**2*b2**2*b3*c3*c4**2*d1*d2**2 - a4**2*b2*b3**2*c1*c2*c3*d3*d4**2 + a4**2*b2*b3**2*c1*c2*c4*d3**2*d4 + a4**2*b2*b3**2*c1*c3**2*d2*d4**2 - a4**2*b2*b3**2*c1*c3*c4*d2*d3*d4 + a4**2*b2*b3**2*c2*c3*c4*d1*d3*d4 - a4**2*b2*b3**2*c2*c4**2*d1*d3**2 - a4**2*b2*b3**2*c3**2*c4*d1*d2*d4 + a4**2*b2*b3**2*c3*c4**2*d1*d2*d3 - b2*c1*d2*x/4 + b2*c2*d1*x/4 - b3*c1*d3*x/4 + b3*c3*d1*x/4 - b4*c1*d4*x/4 + b4*c4*d1*x/4)/(a2**2*b3*b4*c1**2*c3*d2**2*d4 - a2**2*b3*b4*c1**2*c4*d2**2*d3 - 2*a2**2*b3*b4*c1*c2*c3*d1*d2*d4 + 2*a2**2*b3*b4*c1*c2*c4*d1*d2*d3 + a2**2*b3*b4*c2**2*c3*d1**2*d4 - a2**2*b3*b4*c2**2*c4*d1**2*d3 - a2*a3*b2*b4*c1**2*c3*d2**2*d4 + a2*a3*b2*b4*c1**2*c4*d2**2*d3 + 2*a2*a3*b2*b4*c1*c2*c3*d1*d2*d4 - 2*a2*a3*b2*b4*c1*c2*c4*d1*d2*d3 - a2*a3*b2*b4*c2**2*c3*d1**2*d4 + a2*a3*b2*b4*c2**2*c4*d1**2*d3 + a2*a3*b3*b4*c1**2*c2*d3**2*d4 - a2*a3*b3*b4*c1**2*c4*d2*d3**2 - 2*a2*a3*b3*b4*c1*c2*c3*d1*d3*d4 + 2*a2*a3*b3*b4*c1*c3*c4*d1*d2*d3 + a2*a3*b3*b4*c2*c3**2*d1**2*d4 - a2*a3*b3*b4*c3**2*c4*d1**2*d2 + a2*a3*b4**2*c1**2*c2*d3*d4**2 - a2*a3*b4**2*c1**2*c3*d2*d4**2 - 2*a2*a3*b4**2*c1*c2*c4*d1*d3*d4 + 2*a2*a3*b4**2*c1*c3*c4*d1*d2*d4 + a2*a3*b4**2*c2*c4**2*d1**2*d3 - a2*a3*b4**2*c3*c4**2*d1**2*d2 - a2*a4*b2*b3*c1**2*c3*d2**2*d4 + a2*a4*b2*b3*c1**2*c4*d2**2*d3 + 2*a2*a4*b2*b3*c1*c2*c3*d1*d2*d4 - 2*a2*a4*b2*b3*c1*c2*c4*d1*d2*d3 - a2*a4*b2*b3*c2**2*c3*d1**2*d4 + a2*a4*b2*b3*c2**2*c4*d1**2*d3 - a2*a4*b3**2*c1**2*c2*d3**2*d4 + a2*a4*b3**2*c1**2*c4*d2*d3**2 + 2*a2*a4*b3**2*c1*c2*c3*d1*d3*d4 - 2*a2*a4*b3**2*c1*c3*c4*d1*d2*d3 - a2*a4*b3**2*c2*c3**2*d1**2*d4 + a2*a4*b3**2*c3**2*c4*d1**2*d2 - a2*a4*b3*b4*c1**2*c2*d3*d4**2 + a2*a4*b3*b4*c1**2*c3*d2*d4**2 + 2*a2*a4*b3*b4*c1*c2*c4*d1*d3*d4 - 2*a2*a4*b3*b4*c1*c3*c4*d1*d2*d4 - a2*a4*b3*b4*c2*c4**2*d1**2*d3 + a2*a4*b3*b4*c3*c4**2*d1**2*d2 - a3**2*b2*b4*c1**2*c2*d3**2*d4 + a3**2*b2*b4*c1**2*c4*d2*d3**2 + 2*a3**2*b2*b4*c1*c2*c3*d1*d3*d4 - 2*a3**2*b2*b4*c1*c3*c4*d1*d2*d3 - a3**2*b2*b4*c2*c3**2*d1**2*d4 + a3**2*b2*b4*c3**2*c4*d1**2*d2 + a3*a4*b2**2*c1**2*c3*d2**2*d4 - a3*a4*b2**2*c1**2*c4*d2**2*d3 - 2*a3*a4*b2**2*c1*c2*c3*d1*d2*d4 + 2*a3*a4*b2**2*c1*c2*c4*d1*d2*d3 + a3*a4*b2**2*c2**2*c3*d1**2*d4 - a3*a4*b2**2*c2**2*c4*d1**2*d3 + a3*a4*b2*b3*c1**2*c2*d3**2*d4 - a3*a4*b2*b3*c1**2*c4*d2*d3**2 - 2*a3*a4*b2*b3*c1*c2*c3*d1*d3*d4 + 2*a3*a4*b2*b3*c1*c3*c4*d1*d2*d3 + a3*a4*b2*b3*c2*c3**2*d1**2*d4 - a3*a4*b2*b3*c3**2*c4*d1**2*d2 - a3*a4*b2*b4*c1**2*c2*d3*d4**2 + a3*a4*b2*b4*c1**2*c3*d2*d4**2 + 2*a3*a4*b2*b4*c1*c2*c4*d1*d3*d4 - 2*a3*a4*b2*b4*c1*c3*c4*d1*d2*d4 - a3*a4*b2*b4*c2*c4**2*d1**2*d3 + a3*a4*b2*b4*c3*c4**2*d1**2*d2 + a4**2*b2*b3*c1**2*c2*d3*d4**2 - a4**2*b2*b3*c1**2*c3*d2*d4**2 - 2*a4**2*b2*b3*c1*c2*c4*d1*d3*d4 + 2*a4**2*b2*b3*c1*c3*c4*d1*d2*d4 + a4**2*b2*b3*c2*c4**2*d1**2*d3 - a4**2*b2*b3*c3*c4**2*d1**2*d2)  # noqa
+            a1 = (a2**2*b1*b3*b4*c1*c3*d2**2*d4 - a2**2*b1*b3*b4*c1*c4*d2**2*d3 - a2**2*b1*b3*b4*c2*c3*d1*d2*d4 + a2**2*b1*b3*b4*c2*c4*d1*d2*d3 - a2**2*b3**2*b4*c2*c3*d2*d3*d4 + a2**2*b3**2*b4*c2*c4*d2*d3**2 + a2**2*b3**2*b4*c3**2*d2**2*d4 - a2**2*b3**2*b4*c3*c4*d2**2*d3 - a2**2*b3*b4**2*c2*c3*d2*d4**2 + a2**2*b3*b4**2*c2*c4*d2*d3*d4 + a2**2*b3*b4**2*c3*c4*d2**2*d4 - a2**2*b3*b4**2*c4**2*d2**2*d3 - a2*a3*b1*b2*b4*c1*c3*d2**2*d4 + a2*a3*b1*b2*b4*c1*c4*d2**2*d3 + a2*a3*b1*b2*b4*c2**2*d1*d3*d4 - 2*a2*a3*b1*b2*b4*c2*c4*d1*d2*d3 + a2*a3*b1*b2*b4*c3*c4*d1*d2**2 + a2*a3*b1*b3*b4*c1*c2*d3**2*d4 - a2*a3*b1*b3*b4*c1*c4*d2*d3**2 - a2*a3*b1*b3*b4*c2*c4*d1*d3**2 - a2*a3*b1*b3*b4*c3**2*d1*d2*d4 + 2*a2*a3*b1*b3*b4*c3*c4*d1*d2*d3 + a2*a3*b1*b4**2*c1*c2*d3*d4**2 - a2*a3*b1*b4**2*c1*c3*d2*d4**2 - a2*a3*b1*b4**2*c2*c4*d1*d3*d4 + a2*a3*b1*b4**2*c3*c4*d1*d2*d4 + a2*a3*b2*b3*b4*c2**2*d3**2*d4 - 2*a2*a3*b2*b3*b4*c2*c4*d2*d3**2 - a2*a3*b2*b3*b4*c3**2*d2**2*d4 + 2*a2*a3*b2*b3*b4*c3*c4*d2**2*d3 + a2*a3*b2*b4**2*c2**2*d3*d4**2 - 2*a2*a3*b2*b4**2*c2*c4*d2*d3*d4 + a2*a3*b2*b4**2*c4**2*d2**2*d3 - a2*a3*b3*b4**2*c3**2*d2*d4**2 + 2*a2*a3*b3*b4**2*c3*c4*d2*d3*d4 - a2*a3*b3*b4**2*c4**2*d2*d3**2 - a2*a4*b1*b2*b3*c1*c3*d2**2*d4 + a2*a4*b1*b2*b3*c1*c4*d2**2*d3 - a2*a4*b1*b2*b3*c2**2*d1*d3*d4 + 2*a2*a4*b1*b2*b3*c2*c3*d1*d2*d4 - a2*a4*b1*b2*b3*c3*c4*d1*d2**2 - a2*a4*b1*b3**2*c1*c2*d3**2*d4 + a2*a4*b1*b3**2*c1*c4*d2*d3**2 + a2*a4*b1*b3**2*c2*c3*d1*d3*d4 - a2*a4*b1*b3**2*c3*c4*d1*d2*d3 - a2*a4*b1*b3*b4*c1*c2*d3*d4**2 + a2*a4*b1*b3*b4*c1*c3*d2*d4**2 + a2*a4*b1*b3*b4*c2*c3*d1*d4**2 - 2*a2*a4*b1*b3*b4*c3*c4*d1*d2*d4 + a2*a4*b1*b3*b4*c4**2*d1*d2*d3 - a2*a4*b2*b3**2*c2**2*d3**2*d4 + 2*a2*a4*b2*b3**2*c2*c3*d2*d3*d4 - a2*a4*b2*b3**2*c3**2*d2**2*d4 - a2*a4*b2*b3*b4*c2**2*d3*d4**2 + 2*a2*a4*b2*b3*b4*c2*c3*d2*d4**2 - 2*a2*a4*b2*b3*b4*c3*c4*d2**2*d4 + a2*a4*b2*b3*b4*c4**2*d2**2*d3 + a2*a4*b3**2*b4*c3**2*d2*d4**2 - 2*a2*a4*b3**2*b4*c3*c4*d2*d3*d4 + a2*a4*b3**2*b4*c4**2*d2*d3**2 - a3**2*b1*b2*b4*c1*c2*d3**2*d4 + a3**2*b1*b2*b4*c1*c4*d2*d3**2 + a3**2*b1*b2*b4*c2*c3*d1*d3*d4 - a3**2*b1*b2*b4*c3*c4*d1*d2*d3 - a3**2*b2**2*b4*c2**2*d3**2*d4 + a3**2*b2**2*b4*c2*c3*d2*d3*d4 + a3**2*b2**2*b4*c2*c4*d2*d3**2 - a3**2*b2**2*b4*c3*c4*d2**2*d3 + a3**2*b2*b4**2*c2*c3*d3*d4**2 - a3**2*b2*b4**2*c2*c4*d3**2*d4 - a3**2*b2*b4**2*c3*c4*d2*d3*d4 + a3**2*b2*b4**2*c4**2*d2*d3**2 + a3*a4*b1*b2**2*c1*c3*d2**2*d4 - a3*a4*b1*b2**2*c1*c4*d2**2*d3 - a3*a4*b1*b2**2*c2*c3*d1*d2*d4 + a3*a4*b1*b2**2*c2*c4*d1*d2*d3 + a3*a4*b1*b2*b3*c1*c2*d3**2*d4 - a3*a4*b1*b2*b3*c1*c4*d2*d3**2 - 2*a3*a4*b1*b2*b3*c2*c3*d1*d3*d4 + a3*a4*b1*b2*b3*c2*c4*d1*d3**2 + a3*a4*b1*b2*b3*c3**2*d1*d2*d4 - a3*a4*b1*b2*b4*c1*c2*d3*d4**2 + a3*a4*b1*b2*b4*c1*c3*d2*d4**2 - a3*a4*b1*b2*b4*c2*c3*d1*d4**2 + 2*a3*a4*b1*b2*b4*c2*c4*d1*d3*d4 - a3*a4*b1*b2*b4*c4**2*d1*d2*d3 + a3*a4*b2**2*b3*c2**2*d3**2*d4 - 2*a3*a4*b2**2*b3*c2*c3*d2*d3*d4 + a3*a4*b2**2*b3*c3**2*d2**2*d4 - a3*a4*b2**2*b4*c2**2*d3*d4**2 + 2*a3*a4*b2**2*b4*c2*c4*d2*d3*d4 - a3*a4*b2**2*b4*c4**2*d2**2*d3 - 2*a3*a4*b2*b3*b4*c2*c3*d3*d4**2 + 2*a3*a4*b2*b3*b4*c2*c4*d3**2*d4 + a3*a4*b2*b3*b4*c3**2*d2*d4**2 - a3*a4*b2*b3*b4*c4**2*d2*d3**2 + a4**2*b1*b2*b3*c1*c2*d3*d4**2 - a4**2*b1*b2*b3*c1*c3*d2*d4**2 - a4**2*b1*b2*b3*c2*c4*d1*d3*d4 + a4**2*b1*b2*b3*c3*c4*d1*d2*d4 + a4**2*b2**2*b3*c2**2*d3*d4**2 - a4**2*b2**2*b3*c2*c3*d2*d4**2 - a4**2*b2**2*b3*c2*c4*d2*d3*d4 + a4**2*b2**2*b3*c3*c4*d2**2*d4 + a4**2*b2*b3**2*c2*c3*d3*d4**2 - a4**2*b2*b3**2*c2*c4*d3**2*d4 - a4**2*b2*b3**2*c3**2*d2*d4**2 + a4**2*b2*b3**2*c3*c4*d2*d3*d4 + b2*d2*x/4 + b3*d3*x/4 + b4*d4*x/4)/(d1*(a2*b3**2*b4*c2*c3*d3*d4 - a2*b3**2*b4*c2*c4*d3**2 - a2*b3**2*b4*c3**2*d2*d4 + a2*b3**2*b4*c3*c4*d2*d3 + a2*b3*b4**2*c2*c3*d4**2 - a2*b3*b4**2*c2*c4*d3*d4 - a2*b3*b4**2*c3*c4*d2*d4 + a2*b3*b4**2*c4**2*d2*d3 + a3*b2**2*b4*c2**2*d3*d4 - a3*b2**2*b4*c2*c3*d2*d4 - a3*b2**2*b4*c2*c4*d2*d3 + a3*b2**2*b4*c3*c4*d2**2 - a3*b2*b4**2*c2*c3*d4**2 + a3*b2*b4**2*c2*c4*d3*d4 + a3*b2*b4**2*c3*c4*d2*d4 - a3*b2*b4**2*c4**2*d2*d3 - a4*b2**2*b3*c2**2*d3*d4 + a4*b2**2*b3*c2*c3*d2*d4 + a4*b2**2*b3*c2*c4*d2*d3 - a4*b2**2*b3*c3*c4*d2**2 - a4*b2*b3**2*c2*c3*d3*d4 + a4*b2*b3**2*c2*c4*d3**2 + a4*b2*b3**2*c3**2*d2*d4 - a4*b2*b3**2*c3*c4*d2*d3))  # noqa
+            c5 = d5*(-4*a2**2*b3*b4*c1*c2*c3*d2*d4 + 4*a2**2*b3*b4*c1*c2*c4*d2*d3 + 4*a2**2*b3*b4*c2**2*c3*d1*d4 - 4*a2**2*b3*b4*c2**2*c4*d1*d3 + 4*a2*a3*b2*b4*c1*c2*c3*d2*d4 - 4*a2*a3*b2*b4*c1*c2*c4*d2*d3 - 4*a2*a3*b2*b4*c2**2*c3*d1*d4 + 4*a2*a3*b2*b4*c2**2*c4*d1*d3 - 4*a2*a3*b3*b4*c1*c2*c3*d3*d4 + 4*a2*a3*b3*b4*c1*c3*c4*d2*d3 + 4*a2*a3*b3*b4*c2*c3**2*d1*d4 - 4*a2*a3*b3*b4*c3**2*c4*d1*d2 - 4*a2*a3*b4**2*c1*c2*c4*d3*d4 + 4*a2*a3*b4**2*c1*c3*c4*d2*d4 + 4*a2*a3*b4**2*c2*c4**2*d1*d3 - 4*a2*a3*b4**2*c3*c4**2*d1*d2 + 4*a2*a4*b2*b3*c1*c2*c3*d2*d4 - 4*a2*a4*b2*b3*c1*c2*c4*d2*d3 - 4*a2*a4*b2*b3*c2**2*c3*d1*d4 + 4*a2*a4*b2*b3*c2**2*c4*d1*d3 + 4*a2*a4*b3**2*c1*c2*c3*d3*d4 - 4*a2*a4*b3**2*c1*c3*c4*d2*d3 - 4*a2*a4*b3**2*c2*c3**2*d1*d4 + 4*a2*a4*b3**2*c3**2*c4*d1*d2 + 4*a2*a4*b3*b4*c1*c2*c4*d3*d4 - 4*a2*a4*b3*b4*c1*c3*c4*d2*d4 - 4*a2*a4*b3*b4*c2*c4**2*d1*d3 + 4*a2*a4*b3*b4*c3*c4**2*d1*d2 + 4*a3**2*b2*b4*c1*c2*c3*d3*d4 - 4*a3**2*b2*b4*c1*c3*c4*d2*d3 - 4*a3**2*b2*b4*c2*c3**2*d1*d4 + 4*a3**2*b2*b4*c3**2*c4*d1*d2 - 4*a3*a4*b2**2*c1*c2*c3*d2*d4 + 4*a3*a4*b2**2*c1*c2*c4*d2*d3 + 4*a3*a4*b2**2*c2**2*c3*d1*d4 - 4*a3*a4*b2**2*c2**2*c4*d1*d3 - 4*a3*a4*b2*b3*c1*c2*c3*d3*d4 + 4*a3*a4*b2*b3*c1*c3*c4*d2*d3 + 4*a3*a4*b2*b3*c2*c3**2*d1*d4 - 4*a3*a4*b2*b3*c3**2*c4*d1*d2 + 4*a3*a4*b2*b4*c1*c2*c4*d3*d4 - 4*a3*a4*b2*b4*c1*c3*c4*d2*d4 - 4*a3*a4*b2*b4*c2*c4**2*d1*d3 + 4*a3*a4*b2*b4*c3*c4**2*d1*d2 - 4*a4**2*b2*b3*c1*c2*c4*d3*d4 + 4*a4**2*b2*b3*c1*c3*c4*d2*d4 + 4*a4**2*b2*b3*c2*c4**2*d1*d3 - 4*a4**2*b2*b3*c3*c4**2*d1*d2 + c1*x)/(-4*a2**2*b3*b4*c1*c3*d2**2*d4 + 4*a2**2*b3*b4*c1*c4*d2**2*d3 + 4*a2**2*b3*b4*c2*c3*d1*d2*d4 - 4*a2**2*b3*b4*c2*c4*d1*d2*d3 + 4*a2*a3*b2*b4*c1*c3*d2**2*d4 - 4*a2*a3*b2*b4*c1*c4*d2**2*d3 - 4*a2*a3*b2*b4*c2*c3*d1*d2*d4 + 4*a2*a3*b2*b4*c2*c4*d1*d2*d3 - 4*a2*a3*b3*b4*c1*c2*d3**2*d4 + 4*a2*a3*b3*b4*c1*c4*d2*d3**2 + 4*a2*a3*b3*b4*c2*c3*d1*d3*d4 - 4*a2*a3*b3*b4*c3*c4*d1*d2*d3 - 4*a2*a3*b4**2*c1*c2*d3*d4**2 + 4*a2*a3*b4**2*c1*c3*d2*d4**2 + 4*a2*a3*b4**2*c2*c4*d1*d3*d4 - 4*a2*a3*b4**2*c3*c4*d1*d2*d4 + 4*a2*a4*b2*b3*c1*c3*d2**2*d4 - 4*a2*a4*b2*b3*c1*c4*d2**2*d3 - 4*a2*a4*b2*b3*c2*c3*d1*d2*d4 + 4*a2*a4*b2*b3*c2*c4*d1*d2*d3 + 4*a2*a4*b3**2*c1*c2*d3**2*d4 - 4*a2*a4*b3**2*c1*c4*d2*d3**2 - 4*a2*a4*b3**2*c2*c3*d1*d3*d4 + 4*a2*a4*b3**2*c3*c4*d1*d2*d3 + 4*a2*a4*b3*b4*c1*c2*d3*d4**2 - 4*a2*a4*b3*b4*c1*c3*d2*d4**2 - 4*a2*a4*b3*b4*c2*c4*d1*d3*d4 + 4*a2*a4*b3*b4*c3*c4*d1*d2*d4 + 4*a3**2*b2*b4*c1*c2*d3**2*d4 - 4*a3**2*b2*b4*c1*c4*d2*d3**2 - 4*a3**2*b2*b4*c2*c3*d1*d3*d4 + 4*a3**2*b2*b4*c3*c4*d1*d2*d3 - 4*a3*a4*b2**2*c1*c3*d2**2*d4 + 4*a3*a4*b2**2*c1*c4*d2**2*d3 + 4*a3*a4*b2**2*c2*c3*d1*d2*d4 - 4*a3*a4*b2**2*c2*c4*d1*d2*d3 - 4*a3*a4*b2*b3*c1*c2*d3**2*d4 + 4*a3*a4*b2*b3*c1*c4*d2*d3**2 + 4*a3*a4*b2*b3*c2*c3*d1*d3*d4 - 4*a3*a4*b2*b3*c3*c4*d1*d2*d3 + 4*a3*a4*b2*b4*c1*c2*d3*d4**2 - 4*a3*a4*b2*b4*c1*c3*d2*d4**2 - 4*a3*a4*b2*b4*c2*c4*d1*d3*d4 + 4*a3*a4*b2*b4*c3*c4*d1*d2*d4 - 4*a4**2*b2*b3*c1*c2*d3*d4**2 + 4*a4**2*b2*b3*c1*c3*d2*d4**2 + 4*a4**2*b2*b3*c2*c4*d1*d3*d4 - 4*a4**2*b2*b3*c3*c4*d1*d2*d4 + d1*x)  # noqa
+            b5 = (-b1*d1 - b2*d2 - b3*d3 - b4*d4)/d5  # noqa
+            a5 = b5*(a2*c1*d2 - a2*c2*d1 + a3*c1*d3 - a3*c3*d1 + a4*c1*d4 - a4*c4*d1)/(b2*c1*d2 - b2*c2*d1 + b3*c1*d3 - b3*c3*d1 + b4*c1*d4 - b4*c4*d1)  # noqa
+
+            self[1].r_sp_d = numpy.array([[a1], [b1]], dtype=object)
+            self[1].l_sp_d = numpy.array([[c1, d1]], dtype=object)
+            self[2].r_sp_d = numpy.array([[a2], [b2]], dtype=object)
+            self[2].l_sp_d = numpy.array([[c2, d2]], dtype=object)
+            self[3].r_sp_d = numpy.array([[a3], [b3]], dtype=object)
+            self[3].l_sp_d = numpy.array([[c3, d3]], dtype=object)
+            self[4].r_sp_d = numpy.array([[a4], [b4]], dtype=object)
+            self[4].l_sp_d = numpy.array([[c4, d4]], dtype=object)
+            self[5].r_sp_d = numpy.array([[a5], [b5]], dtype=object)
+            self[5].l_sp_d = numpy.array([[c5, d5]], dtype=object)
+
+        else:  # at 6-point and above there is a simple solution, as the system becomes block diagonal with a suitable choice of variables.
+            X = temp_value
+            A, B = (self(f"[{a}|{b}|{c}|{d}]") * self(f"⟨{d}|") - self(f"[{a}|{d}|{c}|{b}]") * self(f"⟨{b}|")).flatten().tolist()
+            C, D = self[a].r_sp_d[0, 0], self[a].r_sp_d[1, 0]
+            C = (X - B * D) / A
+            self[a].r_sp_d = numpy.array([C, D], dtype=type(C))
+
+            if fix_mom is True:
+                self.fix_mom_cons(plist[0], plist[1], axis=1)
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+    def _set_p5Bdiff(self, temp_string, temp_value, fix_mom=True):
+        # not tested beyond 6-point massless kinematics
+        a, b, cd, e, f = p5Bdiff.findall(temp_string)[0]
+        a, b, c, d, e, f = map(int, [a, b, ] + cd.split("+") + [e, f])
+
+        # (⟨a|b|c+d|e|a]-⟨b|f|c+d|e|b]) = (⟨a|b|c+d|e⟩[e|a]-⟨b|f|c+d|e⟩[e|b]) = (-⟨a|b|c+d|e⟩[a|-⟨b|f|c+d|e⟩[b|)|e]
+        X = temp_value
+        A, B = self(f"(⟨{a}|{b}|{c}+{d}|{e}⟩[{a}|-⟨{b}|{f}|{c}+{d}|{e}⟩[{b}|)").flatten().tolist()
+        C, D = self[e].l_sp_u[0, 0], self[e].l_sp_u[1, 0]
+        C = (- X - B * D) / A
+        self[e].l_sp_u = numpy.array([C, D], dtype=type(C))  # set |e]
+
+        if fix_mom:
+            self.fix_mom_cons(c, d)

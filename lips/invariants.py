@@ -74,7 +74,7 @@ class Invariants(object):
         self.invs_D = all_strings(n, "D")   # This is Δ_ijk
         self.invs_O = all_strings(n, "O")   # This is Ω_ijk
         self.invs_P = all_strings(n, "P")   # This is Π_ijk
-        self.invs_tr5 = all_strings(n, "tr5")   # This is Π_ijk
+        self.invs_tr5 = all_strings(n, "tr5")   # This is tr5
 
         # Remove all non minimal, non neighbouring 3 Bracktes
         if Restrict3Brackets is True:
@@ -158,7 +158,7 @@ def all_strings(n, temp_string):
             return []
 
     if len(temp_string) >= 3 and temp_string[0:3] == "tr5":                     # tr5
-        if n > 5:   # eventualy should be >= 5, but missing set at 5pt
+        if n >= 5:
             return generate_tr5_ijkls(n)
         else:
             return []
@@ -374,7 +374,7 @@ def generate_O_ijk(n):
 
 
 def generate_tr5_ijkls(n):
-    tr5_ijkls = ["tr5_" + "".join(entry) for entry in itertools.combinations("".join(map(str, range(1, n + 1))), 4)]
+    tr5_ijkls = ["tr5_" + "".join(entry) for entry in itertools.combinations("".join(map(str, range(1, n))), 4)]
     return tr5_ijkls
 
 

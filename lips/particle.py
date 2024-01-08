@@ -7,23 +7,21 @@
 
 # Author: Giuseppe
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import numpy
 import sympy
 import mpmath
 import random
 import lips
 
+from copy import copy
 from sympy import NotInvertible
 
-from .fields.field import Field
-from .fields.gaussian_rationals import GaussianRational, rand_rat_frac
-# from .fields import PAdic, ModP
+from syngular import Field
+
 from pyadic import PAdic, ModP
+from pyadic.field_extension import FieldExtension
+from pyadic.gaussian_rationals import GaussianRational, rand_rat_frac
+
 from .tools import MinkowskiMetric, LeviCivita, rand_frac, Pauli, Pauli_bar, flatten
 
 
@@ -35,66 +33,77 @@ class Particle(object):
 
     # MAGIC METHODS
 
-    def __init__(self, four_mom=None, r2_sp=None, real_momentum=False, field=Field('mpc', 0, 300)):
-        """Initialisation. Calls randomise if None, else initialises the four momentum."""
+    def __init__(self, kinematics=None, real_momentum=False, field=Field('mpc', 0, 300)):
+        """
+        Initialisation of Particle object.
+        Calls randomise if kinematics is None,
+        else initialises the appropriate variable based on the tensor shape of kinematics:
+        (4, ) : four momentum;
+        (2, 2) : rank 2 spinor;
+        ( (2, 1), (1, 2) ) : (right spinor index down, left spinor index down).
+        """
         self.field = field
-        if four_mom is None and r2_sp is None and field.name in ("mpc", "gaussian rational", "finite field", "padic"):
+        if kinematics is None and field.name in ("mpc", "gaussian rational", "finite field", "padic"):
             self.randomise(real_momentum=real_momentum)
-        elif four_mom is not None:
-            self.four_mom = four_mom
-        elif r2_sp is not None:
-            self.r2_sp = r2_sp
+        elif isinstance(kinematics, numpy.ndarray) and kinematics.shape == (4, ):
+            self.four_mom = kinematics
+        elif isinstance(kinematics, numpy.ndarray) and kinematics.shape == (2, 2):
+            self.r2_sp = kinematics
+        elif isinstance(kinematics, tuple) and len(kinematics) == 2 and kinematics[0].shape == (2, 1) and kinematics[1].shape == (1, 2):
+            self._r_sp_d = kinematics[0]
+            self._r_sp_d_to_r_sp_u()
+            self.l_sp_d = kinematics[1]
         else:
             raise Exception('Bad Particle Constructor')
 
     def __eq__(self, other):
         """Equality: checks equality of four momenta."""
-        if type(self) == type(other):
+        if isinstance(other, Particle):
             return numpy.all(self.r2_sp == other.r2_sp)
         else:
             return False
 
     def __neg__(self):
-        minus_self = Particle()
+        minus_self = Particle(field=self.field)
         minus_self.r2_sp = -1 * self.r2_sp
         return minus_self
 
     def __add__(self, other):
         """Sum: summs the four momenta."""
         if other == 0:
-            return Particle(r2_sp=self.r2_sp)
+            return copy(self)
         assert isinstance(other, Particle)
-        return Particle(r2_sp=self.r2_sp + other.r2_sp)
+        return Particle(kinematics=self.r2_sp + other.r2_sp, field=self.field)
 
     def __radd__(self, other):
         """Sum: summs the four momenta."""
         if other == 0:
-            return Particle(r2_sp=self.r2_sp)
+            return copy(self)
         assert isinstance(other, Particle)
-        return Particle(r2_sp=self.r2_sp + other.r2_sp)
+        return Particle(kinematics=self.r2_sp + other.r2_sp, field=self.field)
 
     def __sub__(self, other):
         """Sub: subtract the four momenta."""
         if other == 0:
-            return Particle(r2_sp=self.r2_sp)
+            return copy(self)
         assert isinstance(other, Particle)
-        return Particle(r2_sp=self.r2_sp - other.r2_sp)
+        return Particle(kinematics=self.r2_sp - other.r2_sp, field=self.field)
 
     def __mul__(self, other):
         """Mul: multiply momentum by number."""
-        return Particle(r2_sp=self.r2_sp * other)
+        return Particle(kinematics=self.r2_sp * other, field=self.field)
 
     def __rmul__(self, other):
         """Mul: multiply momentum by number."""
-        return Particle(r2_sp=self.r2_sp * other)
+        return Particle(kinematics=self.r2_sp * other, field=self.field)
 
     def __div__(self, other):
         """Div: divide momentum by number."""
-        return Particle(r2_sp=self.r2_sp / other)
+        return Particle(kinematics=self.r2_sp / other, field=self.field)
 
     def __truediv__(self, other):
         """Div: divide momentum by number."""
-        return Particle(r2_sp=self.r2_sp / other)
+        return Particle(kinematics=self.r2_sp / other, field=self.field)
 
     def __getitem__(self, key):
         return self.four_mom[key]
@@ -356,7 +365,6 @@ class Particle(object):
 
     @property
     def spinors_are_in_field_extension(self):
-        from .fields.field_extension import FieldExtension
         return FieldExtension in set(map(type, flatten(self.r_sp_d) + flatten(self.l_sp_d)))
 
     # PRIVATE METHODS

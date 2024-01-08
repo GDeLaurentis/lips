@@ -5,7 +5,10 @@ import pytest
 
 from lips import Particles
 from lips.fields.field import Field
-from lips.algebraic_geometry.tools import singular_found
+
+from shutil import which
+
+singular_found = True if which('Singular') is not None else False
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #

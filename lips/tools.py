@@ -3,9 +3,6 @@
 
 # Author: Giuseppe
 
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import random
 import numpy
 import mpmath
@@ -33,6 +30,7 @@ pSijk = re.compile(r'^(?:s|S)(?:_){0,1}(\d+)$')
 pMi = re.compile(r'^(?:m|M)(?:_){0,1}(\d)$')
 pd5 = re.compile(r'^δ5$')
 ptr5 = re.compile(r'^(?:tr5_)(\d+)$')
+ptr = re.compile(r'^tr\((?P<middle>(?:(?:\([\d+\+|-]{1,}\))|(?:[\d+\+|-]{1,}))*)\)$')   # the 'middle' pattern should be like in pNB
 pDijk = re.compile(r'(?:^Δ_(\d+)$)|(?:^Δ_(\d+)\|(\d+)\|(\d+)$)')
 pOijk = re.compile(r'^(?:Ω_)(\d+)$')
 pPijk = re.compile(r'^(?:Π_)(\d+)$')
@@ -44,6 +42,11 @@ pSd = re.compile(r'^(?:\[)(\d+)(?:\|)$')
 pSu = re.compile(r'^(?:\|)(\d+)(?:\])$')
 p3B = re.compile(r'^(?:⟨|\[)(\d+)(?:\|\({0,1})([\d+[\+-]*]*)(?:\){0,1}\|)(\d+)(?:⟩|\])$')
 pNB = re.compile(r'^(?:⟨|\[)(?P<start>\d+)(?:\|)(?P<middle>(?:(?:\([\d+\+|-]{1,}\))|(?:[\d+\+|-]{1,}))*)(?:\|)(?P<end>\d+)(?:⟩|\])$')
+pNB_open_begin = re.compile(r'^(?:\|)(?P<middle>(?:(?:\([\d+|-]{1,}\))|(?:[\d+|-]{1,}))*)(?:\|)(?P<end>\d+)(?:⟩|\])$')
+pNB_open_end = re.compile(r'^(?:⟨|\[)(?P<start>\d+)(?:\|)(?P<middle>(?:(?:\([\d+|-]{1,}\))|(?:[\d+|-]{1,}))*)(?:\|)$')
+
+# '(⟨a|b|c+d|e|a]-⟨b|f|c+d|e|b])'  -  from two-loop five-point one-mass alphabet
+p5Bdiff = re.compile(r'^\(⟨(?P<a>\d+)\|(?P<b>\d+)\|\({0,1}(?P<cd>[\d+[\+]*]*)\){0,1}\|(?P<e>\d+)\|(?P=a)\]\-⟨(?P=b)\|(?P<f>\d+)\|\({0,1}(?P=cd)\){0,1}\|(?P=e)\|(?P=b)\]\)$')
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -61,14 +64,14 @@ def flatten(temp_list, recursion_level=0, treat_list_subclasses_as_list=True, tr
     from numpy import ndarray
     flat_list = []
     for entry in temp_list:
-        if type(entry) == list and (max_recursion is None or recursion_level < max_recursion):
+        if type(entry) is list and (max_recursion is None or recursion_level < max_recursion):
             flat_list += flatten(entry, recursion_level=recursion_level + 1, treat_list_subclasses_as_list=treat_list_subclasses_as_list,
                                  treat_tuples_as_lists=treat_tuples_as_lists, max_recursion=max_recursion)
         elif ((issubclass(type(entry), list) or type(entry) in [MutableDenseMatrix, ndarray]) and
               treat_list_subclasses_as_list is True and (max_recursion is None or recursion_level < max_recursion)):
             flat_list += flatten(entry, recursion_level=recursion_level + 1, treat_list_subclasses_as_list=treat_list_subclasses_as_list,
                                  treat_tuples_as_lists=treat_tuples_as_lists, max_recursion=max_recursion)
-        elif (type(entry) == tuple and treat_tuples_as_lists is True and (max_recursion is None or recursion_level < max_recursion)):
+        elif (type(entry) is tuple and treat_tuples_as_lists is True and (max_recursion is None or recursion_level < max_recursion)):
             flat_list += flatten(entry, recursion_level=recursion_level + 1, treat_list_subclasses_as_list=treat_list_subclasses_as_list,
                                  treat_tuples_as_lists=treat_tuples_as_lists, max_recursion=max_recursion)
         else:

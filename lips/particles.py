@@ -7,11 +7,6 @@
 
 # Author: Giuseppe
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import numpy
 import random
 import re
@@ -23,9 +18,9 @@ import sympy
 
 from sympy import NotInvertible
 
-from .fields.field import Field
-# from .fields import PAdic
+from syngular import Field
 from pyadic import PAdic
+
 from .tools import MinkowskiMetric, flatten, pNB, myException, indexing_decorator, pAu, pAd, pSu, pSd
 from .particle import Particle
 from .particles_compute import Particles_Compute
@@ -48,7 +43,7 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
         """Initialisation. Requires either multiplicity of phace space or list of Particle objects."""
         list.__init__(self)
         self.field = field
-        self.seed = seed
+        self.seed = seed  # This should be removed
         if isinstance(number_of_particles_or_particles, int):
             random.seed(seed) if seed is not None else random.seed()
             for i in range(number_of_particles_or_particles):
@@ -58,7 +53,7 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
                 self.append(oParticle)
         elif number_of_particles_or_particles is not None:
             raise Exception("Invalid initialisation of Particles instance.")
-        self.oRefVec = Particle(real_momentum=real_momenta, field=field)
+        self.oRefVec = Particle(real_momentum=real_momenta, field=field)  # This should not be added by default
         if fix_mom_cons is True and max(map(abs, flatten(self.total_mom))) > field.tollerance:
             self.fix_mom_cons(real_momenta=real_momenta)
 
@@ -67,7 +62,7 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
 
     def __eq__(self, other):
         """Checks equality of each particle in particles."""
-        if type(self) == type(other):
+        if isinstance(other, Particles):
             return all(self[i] == other[i] for i in range(1, len(self) + 1))
         else:
             return False
@@ -89,6 +84,10 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
     def masses(self):
         """Masses of all particles in phase space."""
         return [oParticle.mass for oParticle in self]
+
+    @property
+    def multiplicity(self):
+        return len(self)
 
     def randomise_all(self, real_momenta=False):
         """Randomises all particles. Breaks momentum conservation."""
@@ -124,7 +123,8 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
 
     def cluster(self, llIntegers):
         """Returns clustered particle objects according to lists of lists of integers (e.g. corners of one loop diagram)."""
-        return Particles([sum([self[i] for i in corner_as_integers]) for corner_as_integers in llIntegers], fix_mom_cons=False)
+        return Particles([sum([self[i] for i in corner_as_integers]) for corner_as_integers in llIntegers],
+                         field=self.field, fix_mom_cons=False)
 
     def make_analytical_d(self, indepVars=None, symbols=('a', 'b', 'c', 'd')):
         """ """
@@ -157,11 +157,10 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
                 oParticle._four_mom_d = None
 
     def analytical_subs_d(self):
-        multiplicity = len(self)
-        la = sympy.symbols('a1:{}'.format(multiplicity + 1))
-        lb = sympy.symbols('b1:{}'.format(multiplicity + 1))
-        lc = sympy.symbols('c1:{}'.format(multiplicity + 1))
-        ld = sympy.symbols('d1:{}'.format(multiplicity + 1))
+        la = sympy.symbols('a1:{}'.format(self.multiplicity + 1))
+        lb = sympy.symbols('b1:{}'.format(self.multiplicity + 1))
+        lc = sympy.symbols('c1:{}'.format(self.multiplicity + 1))
+        ld = sympy.symbols('d1:{}'.format(self.multiplicity + 1))
         subs_dict = {}
         for i, iParticle in enumerate(self):
             subs_dict.update({la[i]: iParticle.r_sp_d[0, 0], lb[i]: iParticle.r_sp_d[1, 0]})
@@ -286,7 +285,7 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
             else:
                 raise IndexError(index)
         elif isinstance(index, slice):
-            oNewParticles = Particles(list.__getitem__(self, index), fix_mom_cons=False)
+            oNewParticles = Particles(list.__getitem__(self, index), field=self.field, fix_mom_cons=False)
             oNewParticles.oRefVec = self.oRefVec
             return oNewParticles
         else:
@@ -339,7 +338,7 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
 
     def _complementary(self, temp_list):                            # returns the list obtained by using momentum conservation
         temp_list = flatten(temp_list)
-        if type(temp_list) == list:                                 # make sure it is a set (no double entries)
+        if isinstance(temp_list, list):                                 # make sure it is a set (no double entries)
             temp_list = set(temp_list)
         original_type = type(list(temp_list)[0])
         if type(list(temp_list)[0]) is not int:                         # make sure entries are integers (representing particle #)

@@ -1,17 +1,7 @@
-# -*- coding: utf-8 -*-
-
-# Author: Giuseppe
-
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import re
 import numpy
 import sympy
 
-from copy import deepcopy
 from lips.tools import flatten
 from lips.algebraic_geometry.tools import lips_covariant_symbols, lips_invariant_symbols, conversionIdeal
 from lips.algebraic_geometry.invariant_ideal import SpinorIdeal
@@ -60,36 +50,6 @@ class LipsIdeal(Ideal):
             super().__init__(Ring('0', lips_covariant_symbols(self.multiplicity), 'dp'), generators)
         elif isinstance(ring_or_multiplicity, Ring):
             super().__init__(ring_or_multiplicity, generators)
-
-    def zero_dimensional_slice(self, oParticles, invariants, valuations, prime=None, iteration=0):
-        """Returns a new ideal corresponding to a zero-dimensional (potentially perturbed) slice of the origial ideal self."""
-
-        # regenerate the ideal (potentiallty losing branch information), beacuse: (floats) need to append perturbations to equations, (padics) may need to solve less equations.
-        if iteration > 0:
-            oSemiNumericalIdeal = LipsIdeal(len(oParticles), invariants)
-            if prime is None:
-                for i, valuation in enumerate(valuations):
-                    oSemiNumericalIdeal.generators[i] = oSemiNumericalIdeal.generators[i] + str(-4 * sympy.sympify(valuation))
-        else:
-            oSemiNumericalIdeal = deepcopy(self)
-
-        subs = oParticles.analytical_subs_d()
-        # print("Subs:", subs)
-        oSemiNumericalIdeal.generators = sympy.sympify(oSemiNumericalIdeal.generators)
-        oSemiNumericalIdeal.generators = [sympy.expand(generator.subs(subs)) for generator in oSemiNumericalIdeal.generators]
-        oSemiNumericalIdeal.generators = list(filter(lambda x: x != 0, oSemiNumericalIdeal.generators))
-
-        if prime is None:
-            oSemiNumericalIdeal.generators = [str(generator) for generator in oSemiNumericalIdeal.generators]
-        else:
-            oSemiNumericalIdeal.generators = [re.sub(r"(?<![a-z])(\d+)", lambda match: str(int(match.group(1)) // prime ** iteration % prime), str(generator))
-                                              for generator in oSemiNumericalIdeal.generators]
-            oSemiNumericalIdeal.generators = sympy.sympify(oSemiNumericalIdeal.generators)
-            oSemiNumericalIdeal.generators = list(filter(lambda x: x != 0, oSemiNumericalIdeal.generators))
-
-        oSemiNumericalIdeal.oParticles = oParticles
-        oSemiNumericalIdeal.ring.field = oParticles.field.singular_notation
-        return oSemiNumericalIdeal
 
     def __contains__(self, covariant):
         """Extends ideal membership to Lorentz covariant expressions computable with lips."""

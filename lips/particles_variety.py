@@ -9,8 +9,8 @@ from __future__ import unicode_literals
 
 from copy import deepcopy
 
-# from .fields.padic import PAdic, full_range_random_padic_filling
 from pyadic.padic import PAdic, full_range_random_padic_filling
+
 from .tools import flatten, myException
 
 

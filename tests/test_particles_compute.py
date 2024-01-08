@@ -8,25 +8,66 @@ from __future__ import unicode_literals
 import mpmath
 import sympy
 import numpy
+import pytest
 
 from sympy.functions.special.tensor_functions import LeviCivita
+from fractions import Fraction as Q
 
 from lips import Particles
 from lips.tools import pSijk, pDijk
+from lips.fields.field import Field
 
+mpc = Field('mpc', 0, 300)
+modp = Field('finite field', 2 ** 31 - 1, 1)
+padic = Field('padic', 2 ** 31 - 1, 6)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 
-def test_particles_compute_ldot():
-    oParticles = Particles(5)
-    assert abs(oParticles.ldot(1, 2) - numpy.trace(numpy.dot(oParticles[1].r2_sp, oParticles[2].r2_sp_b)) / 2) < 10 ** -290
+@pytest.mark.parametrize("field", [mpc, modp, padic, ])
+def test_particles_compute_ldot(field):
+    oParticles = Particles(5, field=field)
+    assert abs(oParticles.ldot(1, 2) - numpy.trace(numpy.dot(oParticles[1].r2_sp, oParticles[2].r2_sp_b)) / 2) <= field.tollerance
 
 
-def test_particles_compute_lNB():
-    oParticles = Particles(6)
-    assert abs(oParticles("⟨1|2-3|4]") - oParticles("⟨1|2⟩[2|4]-⟨1|3⟩[3|4]")) < 10 ** -290
-    assert abs(oParticles("⟨1|2+3|4]") - oParticles("⟨1|2⟩[2|4]+⟨1|3⟩[3|4]")) < 10 ** -290
+@pytest.mark.parametrize("field", [mpc, modp, padic, ])
+def test_particles_compute_lNB(field):
+    oParticles = Particles(6, field=field)
+    assert abs(oParticles("⟨1|2-3|4]") - oParticles("⟨1|2⟩[2|4]-⟨1|3⟩[3|4]")) <= field.tollerance
+    assert abs(oParticles("⟨1|2+3|4]") - oParticles("⟨1|2⟩[2|4]+⟨1|3⟩[3|4]")) <= field.tollerance
+
+
+@pytest.mark.parametrize("field", [mpc, modp, padic, ])
+def test_particles_compute_lNB_open(field):
+    oParticles = Particles(7, field=field)
+    assert numpy.all(abs(oParticles("|4+5|6+7|1]-|6+7|4+5|1]") - oParticles("|4]⟨4|6+7|1]+|5]⟨5|6+7|1]-|6]⟨6|4+5|1]-|7]⟨7|4+5|1]")) <= field.tollerance)
+    assert numpy.all(abs(oParticles("[1|4+5|6+7|-[1|6+7|4+5|") - oParticles("[1|4+5|6⟩[6|+[1|4+5|7⟩[7|-[1|6+7|4⟩[4|-[1|6+7|5⟩[5|")) <= field.tollerance)
+
+
+@pytest.mark.parametrize("field", [mpc, modp, padic, ])
+def test_particles_eval_rational_function(field):
+    oParticles = Particles(7, field=field)
+    assert abs(oParticles("(+96/127[35]⟨4|2+3|1]⟨16⟩)/(⟨56⟩[56]⟨1|(2+4)|3]⟨2|(1+4)|3])") -
+               Q("+96/127") * oParticles("[35]") * oParticles("⟨4|2+3|1]") * oParticles("⟨1|6⟩") /
+               (oParticles("⟨56⟩") * oParticles("[56]") * oParticles("⟨1|(2+4)|3]") * oParticles("⟨2|(1+4)|3]"))) <= field.tollerance
+
+
+@pytest.mark.parametrize("field", [mpc, modp, padic, ])
+def test_particles_eval_expr_with_two_open_indices(field):
+    oPs = Particles(7, field=field)
+    assert numpy.all(numpy.abs(
+        oPs("|1⟩⟨2|4+5|1|-|2⟩⟨3|4+5|3]⟨1|+|2⟩⟨1|4+5|2|+|2⟩⟨1|4+5|3|+|3|4+5|2⟩⟨1|") -
+        oPs("-1*(|1⟩⟨1|)*⟨2|5⟩*[1|5]-1*(|1⟩⟨1|)*⟨2|4⟩*[1|4]+1*(|2⟩⟨1|)*⟨3|4⟩*[3|4]+1*(|2⟩⟨1|)*⟨3|5⟩*[3|5]-1*(|2⟩⟨2|)*⟨1|4⟩*[2|4]\
+            -1*(|2⟩⟨2|)*⟨1|5⟩*[2|5]-1*(|2⟩⟨3|)*⟨1|4⟩*[3|4]-1*(|2⟩⟨3|)*⟨1|5⟩*[3|5]-1*(|3⟩⟨1|)*⟨2|4⟩*[3|4]-1*(|3⟩⟨1|)*⟨2|5⟩*[3|5]")) <= field.tollerance)
+
+
+@pytest.mark.parametrize("field", [mpc, modp, padic, ])
+def test_particles_eval_trace(field):
+    oPs = Particles(7, field=field)
+    assert numpy.all(numpy.abs(oPs("⟨3|4+5-6-7|3]-⟨1|4+5-6-7|1]-⟨2|4+5-6-7|2]") - oPs("tr(3-1-2|4+5-6-7)")) <= field.tollerance)
+    assert numpy.all(numpy.abs(oPs("|3]⟨3|4+5-6-7|-|1]⟨1|4+5-6-7|-|2]⟨2|4+5-6-7|").trace() - oPs("tr(3-1-2|4+5-6-7)")) <= field.tollerance)
+    assert numpy.all(numpy.abs(oPs("|4+5-6-7|3]⟨3|-|4+5-6-7|1]⟨1|-|4+5-6-7|2]⟨2|").trace() - oPs("tr(3-1-2|4+5-6-7)")) <= field.tollerance)
+    oPs = Particles(7, field=Field("finite field", 2 ** 31 - 1, 1))
 
 
 def test_particles_compute_Mandelstam():

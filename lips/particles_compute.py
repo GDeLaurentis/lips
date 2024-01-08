@@ -9,20 +9,11 @@
 
 # Author: Giuseppe
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import numpy
 import re
 import mpmath
-import sys
 
-from .tools import pSijk, pMi, pd5, pDijk, pOijk, pPijk, pA2, pAu, pAd, pS2, pSu, pSd, pNB, ptr5, det2x2
-
-if sys.version_info[0] > 2:
-    unicode = str
+from .tools import pSijk, pMi, pd5, pDijk, pOijk, pPijk, pA2, pAu, pAd, pS2, pSu, pSd, pNB, pNB_open_begin, pNB_open_end, ptr5, ptr, det2x2
 
 mpmath.mp.dps = 300
 
@@ -66,25 +57,33 @@ class Particles_Compute:
         """Computes spinor strings.\n
         Available variables: ⟨a|b⟩, [a|b], ⟨a|b+c|d], ⟨a|b+c|d+e|f], ..., s_ijk, Δ_ijk, Ω_ijk, Π_ijk, tr5_ijkl"""
 
-        self.check_consistency(temp_string)                         # Check consistency of string
+        # Consistency of string check is left to ast parser.
 
         if ptr5.findall(temp_string) != []:                         # tr5_ijkl [i|j|k|l|i⟩ - ⟨i|j|k|l|i]
             ijkl = list(map(int, ptr5.findall(temp_string)[0]))
             return (self.compute("[{a}|{b}|{c}|{d}|{a}⟩".format(a=ijkl[0], b=ijkl[1], c=ijkl[2], d=ijkl[3])) -
                     self.compute("⟨{a}|{b}|{c}|{d}|{a}]".format(a=ijkl[0], b=ijkl[1], c=ijkl[2], d=ijkl[3])))
 
+        if ptr.findall(temp_string) != []:                          # e.g.: tr(i+j|k-l|...)
+            abcd = ptr.search(temp_string)
+            bc = abcd.group("middle").replace("(", "").replace(")", "").split("|")
+            middle = ["(" + re.sub(r'(\d+)', r'self[\1].r2_sp_b', entry) + ")" if i % 2 == 0 else
+                      "(" + re.sub(r'(\d+)', r'self[\1].r2_sp', entry) + ")" for i, entry in enumerate(bc)]
+            middle = " @ ".join(middle)
+            return eval(middle).trace()
+
         if pOijk.findall(temp_string) != []:                        # Ω_ijk
             ijk = list(map(int, pOijk.findall(temp_string)[0]))
             nol = self.ijk_to_3NonOverlappingLists(ijk)
-            Omega = (2 * self.compute("s_" + "".join(map(unicode, nol[2]))) * self.compute("s_" + "".join(map(unicode, nol[1]))) -
-                     (self.compute("s_" + "".join(map(unicode, nol[2]))) + self.compute("s_" + "".join(map(unicode, nol[1]))) -
-                      self.compute("s_" + "".join(map(unicode, nol[0])))) * self.compute("s_" + "".join(map(unicode, nol[2] + [nol[0][0]]))))
+            Omega = (2 * self.compute("s_" + "".join(map(str, nol[2]))) * self.compute("s_" + "".join(map(str, nol[1]))) -
+                     (self.compute("s_" + "".join(map(str, nol[2]))) + self.compute("s_" + "".join(map(str, nol[1]))) -
+                      self.compute("s_" + "".join(map(str, nol[0])))) * self.compute("s_" + "".join(map(str, nol[2] + [nol[0][0]]))))
             return Omega
 
         if pPijk.findall(temp_string) != []:                        # Π_ijk, eg: Π_351 = s_123-s124
             ijk = list(map(int, pPijk.findall(temp_string)[0]))
             nol = self.ijk_to_3NonOverlappingLists(ijk)
-            Pi = (self.compute("s_" + "".join(map(unicode, nol[2] + [nol[0][0]]))) - self.compute("s_" + "".join(map(unicode, nol[2] + [nol[0][1]]))))
+            Pi = (self.compute("s_" + "".join(map(str, nol[2] + [nol[0][0]]))) - self.compute("s_" + "".join(map(str, nol[2] + [nol[0][1]]))))
             return Pi
 
         if pDijk.findall(temp_string) != []:                        # Δ_ijk or Δ_ij|kl|lm
@@ -114,61 +113,118 @@ class Particles_Compute:
                     1 * self.compute("s_34") * self.compute("s_34") * self.compute("s_45") * self.compute("s_45") +
                     1 * self.compute("s_45") * self.compute("s_45") * self.compute("s_51") * self.compute("s_51"))
 
-        elif pMi.findall(temp_string) != []:
+        if pMi.findall(temp_string) != []:
             """Mass of the i^{th} particle (m_i = s_i)."""
             return self.compute(temp_string.replace("m", "s").replace("M", "S"))
 
-        elif pSijk.findall(temp_string) != []:                      # S_ijk...
+        if pSijk.findall(temp_string) != []:                      # S_ijk...
             r"""Mandelstam variables: s_{i \dots k} = (P_i + \dots + P_k)^2. Computed via determinant of rank 2 spinor."""
             ijk = list(map(int, pSijk.findall(temp_string)[0]))
             tot_r2_sp = sum([self[_i].r2_sp for _i in ijk])
             return det2x2(tot_r2_sp)
 
-        elif pA2.findall(temp_string) != []:                        # ⟨A|B⟩ -- contraction is up -> down : lambda[A]^alpha.lambda[B]_alpha
+        if pA2.findall(temp_string) != []:                        # ⟨A|B⟩ -- contraction is up -> down : lambda[A]^alpha.lambda[B]_alpha
             A, B = map(int, pA2.findall(temp_string)[0])
             return numpy.dot(self[A].r_sp_u, self[B].r_sp_d)[0, 0]
 
-        elif pAu.findall(temp_string) != []:                        # ⟨A|
+        if pAu.findall(temp_string) != []:                        # ⟨A|
             A = int(pAu.findall(temp_string)[0])
             return self[A].r_sp_u
 
-        elif pAd.findall(temp_string) != []:                        # |B⟩
+        if pAd.findall(temp_string) != []:                        # |B⟩
             B = int(pAd.findall(temp_string)[0])
             return self[B].r_sp_d
 
-        elif pS2.findall(temp_string) != []:                        # [A|B] -- contraction is down -> up : lambda_bar[A]_alpha_dot.lambda_bar[B]^alpha_dot
+        if pS2.findall(temp_string) != []:                        # [A|B] -- contraction is down -> up : lambda_bar[A]_alpha_dot.lambda_bar[B]^alpha_dot
             A, B = map(int, pS2.findall(temp_string)[0])
             return numpy.dot(self[A].l_sp_d, self[B].l_sp_u)[0, 0]
 
-        elif pSu.findall(temp_string) != []:                        # |A]
+        if pSu.findall(temp_string) != []:                        # |A]
             A = int(pSu.findall(temp_string)[0])
             return self[A].l_sp_u
 
-        elif pSd.findall(temp_string) != []:                        # [B|
+        if pSd.findall(temp_string) != []:                        # [B|
             B = int(pSd.findall(temp_string)[0])
             return self[B].l_sp_d
 
-        elif pNB.findall(temp_string) != []:                        # ⟨A|(B+C+..)..|D]
+        if pNB.findall(temp_string) != []:                        # ⟨A|(B+C+...)|...|D]
             abcd = pNB.search(temp_string)
             a = int(abcd.group('start'))
             bc = abcd.group('middle').replace("(", "").replace(")", "").split("|")
             d = int(abcd.group('end'))
 
+            # Check the contraction is valid
+            if len(bc) % 2 == 0 and temp_string[0] == "⟨" and temp_string[-1] != "⟩":
+                raise SyntaxError(f"Expected closing \'⟩\', instead found \'{temp_string[-1]}\'.")
+            elif len(bc) % 2 == 1 and temp_string[0] == "⟨" and temp_string[-1] != "]":
+                raise SyntaxError(f"Expected closing \']\', instead found \'{temp_string[-1]}\'.")
+            elif len(bc) % 2 == 0 and temp_string[0] == "[" and temp_string[-1] != "]":
+                raise SyntaxError(f"Expected closing \']\', instead found \'{temp_string[-1]}\'.")
+            elif len(bc) % 2 == 1 and temp_string[0] == "[" and temp_string[-1] != "⟩":
+                raise SyntaxError(f"Expected closing \']\', instead found \'{temp_string[-1]}\'.")
+
             if temp_string[0] == "⟨":
                 middle = ["(" + re.sub(r'(\d+)', r'self[\1].r2_sp_b', entry) + ")" if i % 2 == 0 else
                           "(" + re.sub(r'(\d+)', r'self[\1].r2_sp', entry) + ")" for i, entry in enumerate(bc)]
-                middle = ".dot(".join(middle) + ")" * (len(middle) - 1)
-                result = self[a].r_sp_u.dot(eval(middle))
+                middle = " @ ".join(middle)
+                result = self[a].r_sp_u @ eval(middle)
             else:
                 middle = ["(" + re.sub(r'(\d+)', r'self[\1].r2_sp', entry) + ")" if i % 2 == 0 else
                           "(" + re.sub(r'(\d+)', r'self[\1].r2_sp_b', entry) + ")" for i, entry in enumerate(bc)]
-                middle = ".dot(".join(middle) + ")" * (len(middle) - 1)
-                result = self[a].l_sp_d.dot(eval(middle))
+                middle = " @ ".join(middle)
+                result = self[a].l_sp_d @ eval(middle)
 
             if temp_string[-1] == "⟩":
-                return result.dot(self[d].r_sp_d)[0][0]
+                result = result @ self[d].r_sp_d
             else:
-                return result.dot(self[d].l_sp_u)[0][0]
+                result = result @ self[d].l_sp_u
 
-        else:
-            return self._eval(temp_string)
+            # convert to scalar
+            assert result.shape == (1, 1)
+            result = result[0, 0]
+
+            return result
+
+        if pNB_open_begin.findall(temp_string) != []:                        # |(B+C+...)|...|D⟩ or |(B+C+...)|...|D]
+            abcd = pNB_open_begin.search(temp_string)
+            bc = abcd.group('middle').replace("(", "").replace(")", "").split("|")
+            d = int(abcd.group('end'))
+
+            if (temp_string[-1] == "⟩" and len(bc) % 2 == 0) or (temp_string[-1] == "]" and len(bc) % 2 == 1):
+                middle = ["(" + re.sub(r'(\d+)', r'self[\1].r2_sp_b', entry) + ")" if i % 2 == 0 else
+                          "(" + re.sub(r'(\d+)', r'self[\1].r2_sp', entry) + ")" for i, entry in enumerate(bc)]
+                middle = " @ ".join(middle)
+                result = eval(middle)
+            else:
+                middle = ["(" + re.sub(r'(\d+)', r'self[\1].r2_sp', entry) + ")" if i % 2 == 0 else
+                          "(" + re.sub(r'(\d+)', r'self[\1].r2_sp_b', entry) + ")" for i, entry in enumerate(bc)]
+                middle = " @ ".join(middle)
+                result = eval(middle)
+
+            if temp_string[-1] == "⟩":
+                result = result @ self[d].r_sp_d
+            else:
+                result = result @ self[d].l_sp_u
+
+            return result
+
+        if pNB_open_end.findall(temp_string) != []:                        # ⟨A|(B+C+...)|...| or [A|(B+C+...)|...|
+            abcd = pNB_open_end.search(temp_string)
+            a = int(abcd.group('start'))
+            bc = abcd.group('middle').replace("(", "").replace(")", "").split("|")
+
+            if temp_string[0] == "⟨":
+                middle = ["(" + re.sub(r'(\d+)', r'self[\1].r2_sp_b', entry) + ")" if i % 2 == 0 else
+                          "(" + re.sub(r'(\d+)', r'self[\1].r2_sp', entry) + ")" for i, entry in enumerate(bc)]
+                middle = " @ ".join(middle)
+                result = self[a].r_sp_u @ eval(middle)
+            else:
+                middle = ["(" + re.sub(r'(\d+)', r'self[\1].r2_sp', entry) + ")" if i % 2 == 0 else
+                          "(" + re.sub(r'(\d+)', r'self[\1].r2_sp_b', entry) + ")" for i, entry in enumerate(bc)]
+                middle = " @ ".join(middle)
+                result = self[a].l_sp_d @ eval(middle)
+
+            return result
+
+        # if nothing matches, use abstract syntactic tree parser
+        return self._eval(temp_string)
