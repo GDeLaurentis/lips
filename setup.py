@@ -7,7 +7,7 @@ long_description = (this_directory / "README.md").read_text()
 
 setup(
     name='lips',
-    version='v0.3.1',
+    version='v0.4.0',
     license='GNU General Public License v3.0',
     description='Lorentz Invariant Phase Space',
     long_description=long_description,
@@ -15,7 +15,7 @@ setup(
     author='Giuseppe De Laurentis',
     author_email='g.dl@hotmail.it',
     url='https://github.com/GDeLaurentis/lips',
-    download_url='https://github.com/GDeLaurentis/lips/archive/v0.3.1.tar.gz',
+    download_url='https://github.com/GDeLaurentis/lips/archive/v0.4.0.tar.gz',
     project_urls={
         'Documentation': 'https://gdelaurentis.github.io/lips/',
         'Issues': 'https://github.com/GDeLaurentis/lips/issues',
@@ -29,10 +29,10 @@ setup(
                       'pyadic',
                       'syngular'],
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering :: Physics',
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
-        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.9',
     ],
 )

@@ -1,21 +1,23 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lorentz Invariant Phase Space &mdash; lips v0.3.0 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <title>Lorentz Invariant Phase Space &mdash; lips v0.4.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=97b6c874"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -27,11 +29,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="#" class="icon icon-home"> lips
+
+          
+          
+          <a href="#" class="icon icon-home">
+            lips
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -55,8 +61,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="#" class="icon icon-home"></a> &raquo;</li>
-      <li>Lorentz Invariant Phase Space</li>
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Lorentz Invariant Phase Space</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -66,21 +72,21 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="lorentz-invariant-phase-space">
-<h1>Lorentz Invariant Phase Space<a class="headerlink" href="#lorentz-invariant-phase-space" title="Permalink to this heading"></a></h1>
+  <section id="lorentz-invariant-phase-space">
+<h1>Lorentz Invariant Phase Space<a class="headerlink" href="#lorentz-invariant-phase-space" title="Link to this heading"></a></h1>
 <div class="toctree-wrapper compound">
 </div>
 <p>lips is an object-oriented phase space generator for theory computations.</p>
-<div class="section" id="installation">
-<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading"></a></h2>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h2>
 <p>Installation is easy with pip:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">lips</span>
 </pre></div>
 </div>
 <p>alternatively the package can be cloned from github at <a class="reference external" href="https://github.com/GDeLaurentis/lips">https://github.com/GDeLaurentis/lips</a>.</p>
-</div>
-<div class="section" id="quick-start">
-<h2>Quick start<a class="headerlink" href="#quick-start" title="Permalink to this heading"></a></h2>
+</section>
+<section id="quick-start">
+<h2>Quick start<a class="headerlink" href="#quick-start" title="Link to this heading"></a></h2>
 <p>To generate a phase space point follow this very simple example:</p>
 <blockquote>
 <div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span>   <span class="kn">import</span> <span class="nn">lips</span>
@@ -98,9 +104,9 @@ For a real phase space point pass an optional argument:</p>
 </div></blockquote>
 <p>Particle objects have several attributes, corresponding to the different representations of the Lorentz group. For a full list check <a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a>.
 Changing an attribute, for instance oParticles[1].four_mom, automatically updates all other representations, such as the rank two spinor oParticles[1].r2_sp.</p>
-</div>
-<div class="section" id="indices-and-tables">
-<h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this heading"></a></h2>
+</section>
+<section id="indices-and-tables">
+<h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
 <li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
@@ -119,8 +125,8 @@ Changing an attribute, for instance oParticles[1].four_mom, automatically update
 </li>
 </ul>
 </div>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
