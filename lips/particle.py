@@ -13,6 +13,7 @@ import mpmath
 import random
 import lips
 
+from copy import copy
 from sympy import NotInvertible
 
 from syngular import Field
@@ -70,21 +71,21 @@ class Particle(object):
     def __add__(self, other):
         """Sum: summs the four momenta."""
         if other == 0:
-            return Particle(kinematics=self.r2_sp, field=self.field)
+            return copy(self)
         assert isinstance(other, Particle)
         return Particle(kinematics=self.r2_sp + other.r2_sp, field=self.field)
 
     def __radd__(self, other):
         """Sum: summs the four momenta."""
         if other == 0:
-            return Particle(kinematics=self.r2_sp, field=self.field)
+            return copy(self)
         assert isinstance(other, Particle)
         return Particle(kinematics=self.r2_sp + other.r2_sp, field=self.field)
 
     def __sub__(self, other):
         """Sub: subtract the four momenta."""
         if other == 0:
-            return Particle(kinematics=self.r2_sp, field=self.field)
+            return copy(self)
         assert isinstance(other, Particle)
         return Particle(kinematics=self.r2_sp - other.r2_sp, field=self.field)
 
