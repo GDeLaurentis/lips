@@ -21,7 +21,7 @@ from sympy import NotInvertible
 from syngular import Field
 from pyadic import PAdic
 
-from .tools import MinkowskiMetric, flatten, pNB, myException, indexing_decorator, pAu, pAd, pSu, pSd
+from .tools import MinkowskiMetric, flatten, pNB, myException, indexing_decorator, pAu, pAd, pSu, pSd, pMVar
 from .particle import Particle
 from .particles_compute import Particles_Compute
 from .particles_eval import Particles_Eval
@@ -39,13 +39,15 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
 
     # MAGIC METHODS
 
-    def __init__(self, number_of_particles_or_particles=None, seed=None, real_momenta=False, field=Field('mpc', 0, 300), fix_mom_cons=True):
+    def __init__(self, number_of_particles_or_particles=None, seed=None, real_momenta=False, field=Field('mpc', 0, 300),
+                 fix_mom_cons=True, internal_masses=None):
         """Initialisation. Requires either multiplicity of phace space or list of Particle objects."""
         super().__init__()
         self.field = field
         self.seed = seed  # This should be removed
+        random.seed(seed) if seed is not None else random.seed()
+        # External Kinematics
         if isinstance(number_of_particles_or_particles, int):
-            random.seed(seed) if seed is not None else random.seed()
             for i in range(number_of_particles_or_particles):
                 self.append(Particle(real_momentum=real_momenta, field=field))
         elif isinstance(number_of_particles_or_particles, list):
@@ -56,6 +58,24 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
         self.oRefVec = Particle(real_momentum=real_momenta, field=field)  # This should not be added by default
         if fix_mom_cons is True and max(map(abs, flatten(self.total_mom))) > field.tollerance:
             self.fix_mom_cons(real_momenta=real_momenta)
+        # Internal Kinematics
+        if isinstance(internal_masses, dict):
+            for internal_mass, value in internal_masses.items():
+                self.__setattr__(internal_mass, value)
+            self.internal_masses = set(internal_masses.keys())
+        elif isinstance(internal_masses, (list, tuple, set)) and all(isinstance(internal_mass, str) for internal_mass in internal_masses):
+            self.internal_masses = internal_masses
+            for internal_mass in internal_masses:
+                self.__setattr__(internal_mass, self.field.random())
+        elif internal_masses is None:
+            self.internal_masses = set()
+        else:
+            raise Exception(f"Internal masses not understood, received {internal_masses} of type {type(internal_masses)}.")
+
+    def __setattr__(self, name, value):
+        if pMVar.match(name):
+            self.internal_masses.add(name)
+        super().__setattr__(name, value)
 
     def __call__(self, string_expression):
         return self.compute(string_expression)
