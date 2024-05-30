@@ -400,7 +400,7 @@ class Particle(object):
             lambda_one = mpmath.sqrt(P0_plus_P3)
             lambda_two = P1_minus_iP2 / lambda_one
         elif lips.spinor_convention == 'asymmetric':
-            lambda_one = 1
+            lambda_one = self.field(1)
             lambda_two = P1_minus_iP2 / P0_plus_P3
         self._l_sp_d = numpy.array([lambda_one, lambda_two], dtype=object)
         self._l_sp_d.shape = (1, 2)    # column vector

@@ -13,7 +13,8 @@ import numpy
 import re
 import mpmath
 
-from .tools import pSijk, pMi, pd5, pDijk, pOijk, pPijk, pA2, pAu, pAd, pS2, pSu, pSd, pNB, pNB_open_begin, pNB_open_end, ptr5, ptr, det2x2
+from .tools import pSijk, pMi, pMVar, pd5, pDijk, pOijk, pPijk, pA2, pAu, pAd, pS2, pSu, pSd, \
+    pNB, pNB_open_begin, pNB_open_end, ptr5, ptr, det2x2
 
 mpmath.mp.dps = 300
 
@@ -225,6 +226,9 @@ class Particles_Compute:
                 result = self[a].l_sp_d @ eval(middle)
 
             return result
+
+        if pMVar.findall(temp_string) != []:
+            return getattr(self, temp_string)
 
         # if nothing matches, use abstract syntactic tree parser
         return self._eval(temp_string)

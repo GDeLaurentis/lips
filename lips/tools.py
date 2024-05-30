@@ -28,6 +28,7 @@ Pauli_bar = numpy.array([Pauli_zero, -Pauli_x, -Pauli_y, -Pauli_z])
 
 pSijk = re.compile(r'^(?:s|S)(?:_){0,1}(\d+)$')
 pMi = re.compile(r'^(?:m|M)(?:_){0,1}(\d)$')
+pMVar = re.compile(r'^((?:m|M)(?:_){0,1}[\da-zA-Z]+)$')
 pd5 = re.compile(r'^δ5$')
 ptr5 = re.compile(r'^(?:tr5_)(\d+)$')
 ptr = re.compile(r'^tr\((?P<middle>(?:(?:\([\d+\+|-]{1,}\))|(?:[\d+\+|-]{1,}))*)\)$')   # the 'middle' pattern should be like in pNB

@@ -41,7 +41,7 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
 
     def __init__(self, number_of_particles_or_particles=None, seed=None, real_momenta=False, field=Field('mpc', 0, 300), fix_mom_cons=True):
         """Initialisation. Requires either multiplicity of phace space or list of Particle objects."""
-        list.__init__(self)
+        super().__init__()
         self.field = field
         self.seed = seed  # This should be removed
         if isinstance(number_of_particles_or_particles, int):
@@ -111,6 +111,8 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
     def image(self, permutation_or_rule):
         """Returns the image of self under a given permutation or rule. Remember, this is a passive transformation."""
         if type(permutation_or_rule) is str:
+            if not permutation_or_rule.isdigit():
+                raise ValueError(f"Permutation to map phase space points should be a string of integers, got: {permutation_or_rule}.")
             oResParticles = copy.deepcopy(Particles(sorted(self, key=lambda x: permutation_or_rule[self.index(x)]), field=self.field, fix_mom_cons=False))
             oResParticles.oRefVec = copy.deepcopy(self.oRefVec)
             return oResParticles
