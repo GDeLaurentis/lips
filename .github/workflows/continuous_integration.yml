@@ -70,5 +70,5 @@ jobs:
       uses: stefanzweifel/git-auto-commit-action@v4
       with:
         file_pattern: README.md
-        repository: lips-dev
+        repository: lips
         commit_message: "Automatic badge update"
