@@ -8,7 +8,6 @@ on:
   pull_request:
     branches: [ master, public ]
   workflow_dispatch:
-    branches: [ master, public ]
 
 jobs:
 
@@ -47,7 +46,7 @@ jobs:
         pip install flake8 pytest pytest-cov
         pip install -e pyadic
         pip install -e syngular
-        pip install -e lips-dev
+        pip install -e lips
     - name: Lint with flake8
       run: |
         cd lips
