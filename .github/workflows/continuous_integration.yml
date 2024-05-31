@@ -28,7 +28,7 @@ jobs:
     - name: Checkout this Repo
       uses: actions/checkout@v2
       with:
-        path: lips-dev
+        path: lips
     - name: Checkout another private Repo (pyadic)
       uses: actions/checkout@v4
       with:
@@ -45,20 +45,27 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install flake8 pytest pytest-cov
+        pip install -e pyadic
+        pip install -e syngular
         pip install -e lips-dev
-        pip install --upgrade --force-reinstall --no-deps -e pyadic
-        pip install --upgrade --force-reinstall --no-deps -e syngular
     - name: Lint with flake8
       run: |
-        cd lips-dev
+        cd lips
         flake8 lips/ --count --max-line-length=190 --statistics --verbose
     - name: Test with pytest
       run: |
-        cd lips-dev
+        cd lips
         pytest |& tee coverage.txt
+        PYTEST_EXIT_CODE=${PIPESTATUS[0]}
+        if [ "$PYTEST_EXIT_CODE" -ne 0 ]; then
+          echo "pytest failed with exit code $PYTEST_EXIT_CODE"
+          exit 1
+        else
+          echo "pytest passed with exit code 0"
+        fi
     - name: Run update-badges script
       run: |
-        cd lips-dev
+        cd lips
         python update-badges.py
     - name: Update badges and commit README.md
       uses: stefanzweifel/git-auto-commit-action@v4
