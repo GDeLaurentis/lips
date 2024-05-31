@@ -60,9 +60,9 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
             self.fix_mom_cons(real_momenta=real_momenta)
         # Internal Kinematics
         if isinstance(internal_masses, dict):
+            self.internal_masses = set()
             for internal_mass, value in internal_masses.items():
                 self.__setattr__(internal_mass, value)
-            self.internal_masses = set(internal_masses.keys())
         elif isinstance(internal_masses, (list, tuple, set)) and all(isinstance(internal_mass, str) for internal_mass in internal_masses):
             self.internal_masses = internal_masses
             for internal_mass in internal_masses:
