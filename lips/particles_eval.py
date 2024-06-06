@@ -6,6 +6,7 @@
 import sys
 import re
 import ast
+import functools
 import mpmath
 import operator as op
 
@@ -14,7 +15,7 @@ from pyadic import PAdic, ModP, GaussianRational
 
 operators = {ast.Add: op.add, ast.Sub: op.sub, ast.Mult: op.mul,
              ast.Div: op.truediv, ast.Pow: op.pow, ast.BitXor: op.xor,
-             ast.USub: op.neg, ast.UAdd: op.pos}
+             ast.USub: op.neg, ast.UAdd: op.pos, ast.MatMult: op.matmul}
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -30,6 +31,7 @@ pSu = re.compile(r'(?<!\[\d)(?<![\+|-]\d\))(?<![\+|-]\d)(?:\|)(\d+)(?:\])')
 pS2bis = re.compile(r'(?:\[)(\d)(\d)(?:\])')
 pSijk = re.compile(r'(?:s|S)(?:_){0,1}(\d+)')
 pMi = re.compile(r'(?:m|M)(?:_){0,1}(\d)')
+pMVar = re.compile(r'(?<![a-zA-Z])((?:m|M|μ)(?:_){0,1}[\da-zA-Z]*)')
 pOijk = re.compile(r'(?:Ω_)(\d+)')
 pPijk = re.compile(r'(?:Π_)(\d+)')
 pDijk_adjacent = re.compile(r'(?:Δ_(\d+)(?![\d\|]))')
@@ -55,6 +57,20 @@ def unicode_powers(string):
     for hat_pow, uni_pow in unicode_powers_dict.items():
         string = string.replace(hat_pow, uni_pow)
     return string
+
+
+def as_scalar_if_scalar(func):
+    """Turns numpy arrays with zero dimensions into 'real' scalars."""
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        res = func(*args, **kwargs)
+        if hasattr(res, "shape"):
+            if res.shape == ():
+                return res[()]  # pops the scalar out of array(scalar) or does nothing if array has non-trivial dimensions.
+            elif functools.reduce(op.mul, res.shape) == 1:
+                return res.flatten()[0]
+        return res
+    return wrapper
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
@@ -83,6 +99,7 @@ class Particles_Eval:
         string = pSu.sub(r"oPs.compute('|\1]')", string)
         string = pSijk.sub(r"oPs.compute('s_\1')", string)
         string = pMi.sub(r"oPs.compute('m_\1')", string)
+        string = pMVar.sub(r"oPs.compute('\1')", string)
         string = pOijk.sub(r"oPs.compute('Ω_\1')", string)
         string = pPijk.sub(r"oPs.compute('Π_\1')", string)
         string = ptr5.sub(r"oPs.compute('tr5_\1')", string)
@@ -101,6 +118,7 @@ class Particles_Eval:
         string = re_rat_nbr.sub(r"Fraction(\1,\2)", string)
         return string
 
+    @as_scalar_if_scalar
     def _eval(self, string):
         return ast_eval_expr(self._parse(string), {'oPs': self})
 

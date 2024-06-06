@@ -70,6 +70,18 @@ def test_particles_eval_trace(field):
     oPs = Particles(7, field=Field("finite field", 2 ** 31 - 1, 1))
 
 
+def test_particles_eval_with_internal_masses_invalid():
+    oPs = Particles(7, field=padic)
+    with pytest.raises(AttributeError):
+        oPs("-1/8(s12s23mt2(8mt2-s_123-2s_45)(s_123-2s_45)[1|3]^2)/([1|6+7|4+5|3][1|4+5|6+7|3])")
+
+
+@pytest.mark.parametrize("field", [mpc, modp, padic, ])
+def test_particles_eval_with_internal_masses(field):
+    oPs = Particles(7, field=field, internal_masses={'mt2'})
+    oPs("-1/8(s12s23mt2(8mt2-s_123-2s_45)(s_123-2s_45)[1|3]^2)/([1|6+7|4+5|3][1|4+5|6+7|3])")
+
+
 def test_particles_compute_Mandelstam():
     """Test computation of Mandelsta w.r.t. summed particles object."""
     oParticles = Particles(9)

@@ -98,7 +98,7 @@ class Invariants(object):
                 if mom_cons is True and on_shell is True and len(small_outliers) == 0:
                     self.invs_3 += [inv]
         if n == 6:
-            self.invs_D += ["Δ_15|26|34", "Δ_14|23|56"]
+            self.invs_D += ["Δ_15|26|34", "Δ_14|23|56", "Δ_13|24|56"]
         if n == 7:
             self.invs_4 += ["⟨1|(5+6)|(2+7)|1⟩", "[1|(5+6)|(2+7)|1]", "Δ_12|347|56", ]
 

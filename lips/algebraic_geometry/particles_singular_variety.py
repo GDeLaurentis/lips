@@ -12,13 +12,16 @@ from .covariant_ideal import LipsIdeal
 
 class Particles_SingularVariety:
 
-    def _singular_variety(self, invariants, valuations=(), generators=[], indepSetNbr=None, seed=None, verbose=False):
+    def _singular_variety(self, invariants, valuations=(), generators=[], indepSetNbr=None, seed=None, verbose=False, no_base_point=False):
 
         from ..particles import Particles
 
-        oPsAnalytical = Particles(self.multiplicity)
-        oPsAnalytical.make_analytical_d()
-        directions = flatten([oPsAnalytical(invariant) for invariant in invariants])
+        if self.field.name != "finite field":
+            oPsAnalytical = Particles(self.multiplicity)
+            oPsAnalytical.make_analytical_d()
+            directions = flatten([oPsAnalytical(invariant) for invariant in invariants])
+        else:
+            directions = None
 
         if generators == []:
             generators = invariants
@@ -27,10 +30,16 @@ class Particles_SingularVariety:
         oLipsIdeal.to_mom_cons_qring()
 
         point_dict = oLipsIdeal.point_on_variety(
-            self.field, base_point=self.analytical_subs_d(), directions=directions, valuations=valuations, indepSetNbr=indepSetNbr, seed=seed, verbose=verbose)
+            self.field, base_point={} if no_base_point else self.analytical_subs_d(), directions=directions,
+            valuations=valuations, indepSetNbr=indepSetNbr, seed=seed, verbose=verbose)
 
         update_particles(self, point_dict)
 
+    @classmethod
+    def from_singular_variety(cls, multiplicity, field, invariants, valuations=(), generators=[], indepSetNbr=None, seed=None, verbose=False):
+        oPs = cls(multiplicity, field=field)  # dummy point
+        oPs._singular_variety(invariants, valuations=valuations, generators=generators, indepSetNbr=indepSetNbr, seed=seed, verbose=verbose, no_base_point=True)
+        return oPs
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
