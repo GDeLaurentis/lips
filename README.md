@@ -1,9 +1,12 @@
 # Lorentz Invariant Phase Space
 
-[![Continuous Integration Status](https://github.com/GDeLaurentis/lips-dev/actions/workflows/continuous_integration.yml/badge.svg)](https://github.com/GDeLaurentis/lips-dev/actions)
+[![CI Lint](https://github.com/GDeLaurentis/lips-dev/actions/workflows/ci_lint.yml/badge.svg)](https://github.com/GDeLaurentis/lips-dev/actions/workflows/ci_lint.yml)
+[![CI Test](https://github.com/GDeLaurentis/lips-dev/actions/workflows/ci_test.yml/badge.svg)](https://github.com/GDeLaurentis/lips-dev/actions/workflows/ci_test.yml)
 [![Coverage](https://img.shields.io/badge/Coverage-81%25-greenyellow?labelColor=2a2f35)](https://github.com/GDeLaurentis/lips-dev/actions)
+[![Docs](https://github.com/GDeLaurentis/lips/actions/workflows/cd_docs.yml/badge.svg?label=Docs)](https://gdelaurentis.github.io/lips/)
 [![PyPI Downloads](https://img.shields.io/pypi/dm/lips.svg?label=PyPI%20downloads)](https://pypi.org/project/lips/)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/GDeLaurentis/lips/HEAD)
+[![Python](https://img.shields.io/pypi/pyversions/lips?label=Python)](https://pypi.org/project/lips/)
 
 
 `Lips` is a Python 3 library that provides a phase-space generator and manipulator that is tailored to the needs of modern theoretical calculations in quantum field theory. At present, the package is designed to handle the kinematics of scattering processes involving an arbitrary number of massless particles. Use cases include: 
