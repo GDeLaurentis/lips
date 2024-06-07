@@ -9,9 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `Particles` accepts new keyword argumnet `internal_masses`. It can be a dictionary of strings: values or one of list, tuple or set containing strings representing the masses. The format is expected to be `m` or `M` or `μ`, possibly followed by an underscore, and letters or numbers (explicitly: `^((?:m|M|μ)(?:_){0,1}[\da-zA-Z]*)$`). If it ends in numbers, those will be considered as an exponent (for mass dimension considerations).
+- `Particles.from_singular_variety` classmethod to instantiate directly from a point on a variety.
+
 ### Changed
 
+- Improved variety point generation, following updated to syngular.
+- Tests run over python version 3.9 to 3.12.
+
 ### Fixed
+
+- Fixed issue where a spinor component was the integer 1 instead of being 1 in the field.
 
 ### Deprecated
 
@@ -27,7 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Updated `Particle.__init__` to accept rank-1 and rank-2 spinors as input, as well as 4-momenta.
-- Updated `Particles.eal` to accept all unicode digits.
+- Updated `Particles.eval` to accept all unicode digits.
 - Tweaked `Invariants` to return $\text{tr}_5$ invariant at 5-point.
 - Simplified singular setter for $\text{tr}_5$ beyond 5-point.
 - Number types can now be found in [pyadic](https://github.com/GDeLaurentis/pyadic).
