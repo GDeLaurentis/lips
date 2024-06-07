@@ -15,7 +15,7 @@ setup(
     author='Giuseppe De Laurentis',
     author_email='g.dl@hotmail.it',
     url='https://github.com/GDeLaurentis/lips',
-    download_url='https://github.com/GDeLaurentis/lips/archive/v0.4.0.tar.gz',
+    download_url=f'https://github.com/GDeLaurentis/lips/archive/v{version}.tar.gz',
     project_urls={
         'Documentation': 'https://gdelaurentis.github.io/lips/',
         'Issues': 'https://github.com/GDeLaurentis/lips/issues',
