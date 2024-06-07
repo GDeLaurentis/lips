@@ -7,6 +7,7 @@
 [![PyPI](https://img.shields.io/pypi/v/lips?label=PyPI)](https://pypi.org/project/lips/)
 [![PyPI Downloads](https://img.shields.io/pypi/dm/lips.svg?label=PyPI%20downloads)](https://pypi.org/project/lips/)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/GDeLaurentis/lips/HEAD)
+[![DOI](https://zenodo.org/badge/210320784.svg)](https://zenodo.org/doi/10.5281/zenodo.11518261)
 [![Python](https://img.shields.io/pypi/pyversions/lips?label=Python)](https://pypi.org/project/lips/)
 
 
