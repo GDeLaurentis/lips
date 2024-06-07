@@ -2,9 +2,9 @@ name: CI Test
 
 on:
   push:
-    branches: [ main, public ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, public ]
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
