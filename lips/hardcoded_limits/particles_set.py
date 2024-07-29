@@ -459,10 +459,18 @@ class Particles_Set:
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
-    def _set_tr5(self, temp_string, temp_value, fix_mom=True):       # ⟨A|B⟩ = (a, b).(c, d) = ac+bd = X ----> c = (X - bd)/a
+    def _set_tr5(self, temp_string, temp_value, fix_mom=True):
 
-        a, b, c, d = [int(entry) for entry in ptr5.findall(temp_string)[0]]
-        plist = list(map(int, self._complementary(map(str, [a, b, c, d]))))  # free momenta
+        abcd = ptr5.findall(temp_string)[0][0 if "_" in temp_string else 1]
+        a, b, c, d = abcd.split("|") if "|" in abcd else abcd
+        for _ in range(4):
+            if len(a) == 1:
+                break
+            a, b, c, d = b, c, d, a
+        else:
+            raise NotImplementedError("tr5 set implementation requires at least 1 massless particle.")
+
+        plist = list(map(int, self._complementary(flatten(re.findall("\d+", x) for x in (a, b, c, d)))))  # free momenta
 
         if len(self) < 5:  # 4-point or less
             raise myException("Particles._set_tr5 called with less than 5 particles, but tr5 is identically zero below 5-point.")
@@ -501,7 +509,7 @@ class Particles_Set:
 
         else:  # at 6-point and above there is a simple solution, as the system becomes block diagonal with a suitable choice of variables.
             X = temp_value
-            A, B = (self(f"[{a}|{b}|{c}|{d}]") * self(f"⟨{d}|") - self(f"[{a}|{d}|{c}|{b}]") * self(f"⟨{b}|")).flatten().tolist()
+            A, B = self(f"[{a}|{b}|{c}|{d}|-[{a}|{d}|{c}|{b}|").flatten().tolist()
             C, D = self[a].r_sp_d[0, 0], self[a].r_sp_d[1, 0]
             C = (X - B * D) / A
             self[a].r_sp_d = numpy.array([C, D], dtype=type(C))

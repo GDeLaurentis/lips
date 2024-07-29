@@ -41,7 +41,7 @@ pDijk_non_adjacent = re.compile(r'(?:Δ_(\d+)\|(\d+)\|(\d+))')
 pNB = re.compile(r'((?:⟨|\[)\d+\|(?:(?:(?!\|[\+|-]\|)\([\d+\+|-]{1,}\))|(?:(?!\|[\+|-]\|)[\d+\+|-]))*\|\d+(?:⟩|\]))')
 pNB_open_begin = re.compile(r'(?<!⟨\d)(?<!\[\d)(?<![\+|-]\d\))(?<![\+|-]\d)((?:\|)(?:(?:\([\d+|-]{1,}\))|(?:[\d+|-]{1,}))*(?:\|)\d+(?:⟩|\]))')
 pNB_open_end = re.compile(r'((?:⟨|\[)\d+(?:\|)(?:(?:\([\d+|-]{1,}\))|(?:[\d+\+|-]{1,}))*(?:\|))(?!\d⟩)(?!\d\])(?!\d[\+|-])(?!\(\d[\+|-])')
-ptr5 = re.compile(r'(?:tr5_)(\d+)')
+ptr5 = re.compile(r'tr5(_\d+|\([\d\|\+\-]+\))')
 ptr = re.compile(r'(tr\((?:(?:\([\d+\+|-]{1,}\))|(?:[\d+\+|-]{1,})*)\))')
 
 unicode_powers_dict = {"^0": "⁰", "^1": "¹", "^2": "²", "^3": "³", "^4": "⁴", "^5": "⁵", "^6": "⁶", "^7": "⁷", "^8": "⁸", "^9": "⁹"}
@@ -102,7 +102,7 @@ class Particles_Eval:
         string = pMVar.sub(r"oPs.compute('\1')", string)
         string = pOijk.sub(r"oPs.compute('Ω_\1')", string)
         string = pPijk.sub(r"oPs.compute('Π_\1')", string)
-        string = ptr5.sub(r"oPs.compute('tr5_\1')", string)
+        string = ptr5.sub(r"oPs.compute('tr5\1')", string)
         string = ptr.sub(r"oPs.compute('\1')", string)
         string = pDijk_adjacent.sub(r"oPs.compute('Δ_\1')", string)
         string = pDijk_non_adjacent.sub(r"oPs.compute('Δ_\1|\2|\3')", string)
