@@ -106,6 +106,10 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
         return [oParticle.mass for oParticle in self]
 
     @property
+    def internal_masses_dict(self):
+        return {key: getattr(self, key) for key in self.internal_masses}
+
+    @property
     def multiplicity(self):
         return len(self)
 
@@ -133,7 +137,8 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
         if type(permutation_or_rule) is str:
             if not permutation_or_rule.isdigit():
                 raise ValueError(f"Permutation to map phase space points should be a string of integers, got: {permutation_or_rule}.")
-            oResParticles = copy.deepcopy(Particles(sorted(self, key=lambda x: permutation_or_rule[self.index(x)]), field=self.field, fix_mom_cons=False))
+            oResParticles = copy.deepcopy(Particles(sorted(self, key=lambda x: permutation_or_rule[self.index(x)]),
+                                                    field=self.field, fix_mom_cons=False, internal_masses=self.internal_masses_dict))
             oResParticles.oRefVec = copy.deepcopy(self.oRefVec)
             return oResParticles
         else:
@@ -146,7 +151,7 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
     def cluster(self, llIntegers):
         """Returns clustered particle objects according to lists of lists of integers (e.g. corners of one loop diagram)."""
         return Particles([sum([self[i] for i in corner_as_integers]) for corner_as_integers in llIntegers],
-                         field=self.field, fix_mom_cons=False)
+                         field=self.field, fix_mom_cons=False, internal_masses=self.internal_masses_dict)
 
     def make_analytical_d(self, indepVars=None, symbols=('a', 'b', 'c', 'd')):
         """ """
