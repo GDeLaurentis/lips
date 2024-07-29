@@ -470,7 +470,7 @@ class Particles_Set:
         else:
             raise NotImplementedError("tr5 set implementation requires at least 1 massless particle.")
 
-        plist = list(map(int, self._complementary(flatten(re.findall("\d+", x) for x in (a, b, c, d)))))  # free momenta
+        plist = list(map(int, self._complementary(flatten(re.findall(r"\d+", x) for x in (a, b, c, d)))))  # free momenta
 
         if len(self) < 5:  # 4-point or less
             raise myException("Particles._set_tr5 called with less than 5 particles, but tr5 is identically zero below 5-point.")
