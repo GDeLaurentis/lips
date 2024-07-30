@@ -111,7 +111,7 @@ class Particles_Eval:
         string = pNB_open_end.sub(r"oPs.compute('\1')", string)
         string = re.sub(r'(\d)s', r'\1*s', string)
         string = re.sub(r'(\d)o', r'\1*o', string)
-        string = re.sub(r'(\d)\(', r'\1*(', string)
+        string = re.sub(r'(?<!tr)(\d)\(', r'\1*(', string)
         string = re.sub(r'\)(\d)', r')*\1', string)
         string = string.replace(')(', ')*(').replace(")o", ")*o")
         re_rat_nbr = re.compile(r"(?<!\*\*)(\d+)\/(\d+)")

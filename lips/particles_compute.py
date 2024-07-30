@@ -234,7 +234,10 @@ class Particles_Compute:
             return result
 
         if pMVar.findall(temp_string) != []:
-            return getattr(self, temp_string)
+            res = getattr(self, temp_string)
+            if isinstance(res, str):
+                return self.compute(res)
+            return res
 
         # if nothing matches, use abstract syntactic tree parser
         return self._eval(temp_string)

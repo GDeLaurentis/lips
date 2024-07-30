@@ -1,14 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-
+import itertools
 import mpmath
-import sympy
 import numpy
 import pytest
+import sympy
 
 from sympy.functions.special.tensor_functions import LeviCivita
 from fractions import Fraction as Q
@@ -20,6 +16,7 @@ from lips.fields.field import Field
 mpc = Field('mpc', 0, 300)
 modp = Field('finite field', 2 ** 31 - 1, 1)
 padic = Field('padic', 2 ** 31 - 1, 6)
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
@@ -82,6 +79,16 @@ def test_particles_eval_with_internal_masses(field):
     oPs("-1/8(s12s23mt2(8mt2-s_123-2s_45)(s_123-2s_45)[1|3]^2)/([1|6+7|4+5|3][1|4+5|6+7|3])")
 
 
+@pytest.mark.parametrize("field", [mpc, modp, padic, ])
+def test_particles_eval_mass_as_alias_with_cluster(field):
+    oPs = Particles(7, field=field, internal_masses={'mt2'})
+    oPs.mh2 = "s_45"
+    oPs_5pt = oPs.cluster([[1], [2], [3], [4, 5], [6, 7]])
+    expr = "-1/8(s12s23mt2(8mt2-s_123-2s_45)(s_123-2s_45)[1|3]^2)/([1|6+7|4+5|3][1|4+5|6+7|3])"
+    expr_5pt = "-1/8(s12s23mt2(8mt2-s_123-2mh2)(s_123-2mh2)[1|3]^2)/([1|5|4|3][1|4|5|3])"
+    assert abs(oPs(expr) - oPs_5pt(expr_5pt)) <= oPs.field.tollerance
+
+
 def test_particles_compute_Mandelstam():
     """Test computation of Mandelsta w.r.t. summed particles object."""
     oParticles = Particles(9)
@@ -106,14 +113,10 @@ def test_particles_compute_three_mass_gram():
 def test_particles_compute_tr5_1234():
     oParticles = Particles(5)
     tr5 = 0
-    for i in range(0, 4):
-        for j in range(0, 4):
-            for k in range(0, 4):
-                for l in range(0, 4):
-                    tr5 += mpmath.mpc(sympy.simplify(4j *
-                                                     LeviCivita(i, j, k, l) *
-                                                     oParticles[1].four_mom[i] *
-                                                     oParticles[2].four_mom[j] *
-                                                     oParticles[3].four_mom[k] *
-                                                     oParticles[4].four_mom[l]))
+    for (i, j, k, l) in itertools.product(range(4), repeat=4):
+        tr5 += mpmath.mpc(sympy.simplify(4j * LeviCivita(i, j, k, l) *
+                                         oParticles[1].four_mom[i] *
+                                         oParticles[2].four_mom[j] *
+                                         oParticles[3].four_mom[k] *
+                                         oParticles[4].four_mom[l]))
     assert abs(tr5 - oParticles("tr5_1234")) < 10 ** -290

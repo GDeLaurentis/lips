@@ -3,9 +3,9 @@
 
 # Author: Giuseppe
 
-import random
-import numpy
 import mpmath
+import numpy
+import random
 import re
 
 mpmath.mp.dps = 300
@@ -78,6 +78,15 @@ def flatten(temp_list, recursion_level=0, treat_list_subclasses_as_list=True, tr
         else:
             flat_list += [entry]
     return flat_list
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+
+def subs_dict(text, substitutions):
+    pattern = re.compile("|".join(map(re.escape, substitutions.keys())))
+    result = pattern.sub(lambda match: substitutions[match.group(0)], text)
+    return result
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
