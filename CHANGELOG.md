@@ -15,6 +15,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Deprecated
 
+## [0.4.2] - 2024-08-20
+
+### Added
+
+- `Particles.cluster` and `Particles.image` now copy the `internal_masses` values.
+- Implemented new regular expression for trace of gamma five, e.g. `tr5(1|2|3|4+5)` is now valid. This shadows the definition of normal traces, `tr`, and allows for massive legs. NB: with the current implementation at least one of the four legs has to be massless (doesn't matter which one).
+- `Particles.internal_masses` can be used to alias kinematic expressions to masses, e.g. `Particles.Mh2 = 's_45'` will define the squared Higgs mass as the Mandelstam 's_45'. Clustering, e.g. [4, 5] will correctly map this to 's_4'.
+
+### Changed
+
+- Numbers in the name of masses associated with the phase space point in `Particles.internal_masses` must appear at the end and will be interpreted as powers (for mass dimension considerations). NB: `m1` refers to the mass of the `Particle` at `Particles[1]`, `m2` to the second one, etc. Avoid name clashes.
+- `Particles.variety` by default will now try the lex-groebner solver `Particles._singular_variety` when an hardcoded limit fails.
+
+### Fixed
+
+- Fixed issue with `Particles.variety` not correctly recognizing when an hardcoded limit failed with p-adics.
+
+### Deprecated
+
 
 ## [0.4.1] - 2024-01-08
 
@@ -73,8 +92,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Numerical computation of Lorentz invariant spinor strings.
 
 
-[unreleased]: https://github.com/GDeLaurentis/lips/compare/v0.4.1...HEAD
-[0.4.1]: https://github.com/GDeLaurentis/lips/releases/tag/v0.4.1
-[0.4.0]: https://github.com/GDeLaurentis/lips/releases/tag/v0.4.0
-[0.3.1]: https://github.com/GDeLaurentis/lips/releases/tag/v0.3.1
+[unreleased]: https://github.com/GDeLaurentis/lips/compare/v0.4.2...HEAD
+[0.4.2]: https://github.com/GDeLaurentis/lips/compare/v0.4.1...v0.4.2
+[0.4.1]: https://github.com/GDeLaurentis/lips/compare/v0.4.0...v0.4.1
+[0.4.0]: https://github.com/GDeLaurentis/lips/compare/v0.3.1...v0.4.0
+[0.3.1]: https://github.com/GDeLaurentis/lips/compare/v0.1.3...v0.3.1
 [0.1.3]: https://github.com/GDeLaurentis/lips/releases/tag/v0.1.3
