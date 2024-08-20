@@ -3,9 +3,9 @@
 
 # Author: Giuseppe
 
-import random
-import numpy
 import mpmath
+import numpy
+import random
 import re
 
 mpmath.mp.dps = 300
@@ -28,9 +28,9 @@ Pauli_bar = numpy.array([Pauli_zero, -Pauli_x, -Pauli_y, -Pauli_z])
 
 pSijk = re.compile(r'^(?:s|S)(?:_){0,1}(\d+)$')
 pMi = re.compile(r'^(?:m|M)(?:_){0,1}(\d)$')
-pMVar = re.compile(r'^((?:m|M|μ)(?:_){0,1}[\da-zA-Z]*)$')
+pMVar = re.compile(r'^((?:m|M|μ)(?:_){0,1}[a-zA-Z]*[\d]*)$')
 pd5 = re.compile(r'^δ5$')
-ptr5 = re.compile(r'^(?:tr5_)(\d+)$')
+ptr5 = re.compile(r'^tr5_(\d+)$|^tr5\(([\d\|\+\-]+)\)$')
 ptr = re.compile(r'^tr\((?P<middle>(?:(?:\([\d+\+|-]{1,}\))|(?:[\d+\+|-]{1,}))*)\)$')   # the 'middle' pattern should be like in pNB
 pDijk = re.compile(r'(?:^Δ_(\d+)$)|(?:^Δ_(\d+)\|(\d+)\|(\d+)$)')
 pOijk = re.compile(r'^(?:Ω_)(\d+)$')
@@ -78,6 +78,15 @@ def flatten(temp_list, recursion_level=0, treat_list_subclasses_as_list=True, tr
         else:
             flat_list += [entry]
     return flat_list
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+
+def subs_dict(text, substitutions):
+    pattern = re.compile("|".join(map(re.escape, substitutions.keys())))
+    result = pattern.sub(lambda match: substitutions[match.group(0)], text)
+    return result
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #

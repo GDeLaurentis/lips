@@ -3,8 +3,10 @@
 import numpy
 import pytest
 
+from syngular import Field
+
 from lips import Particles
-from lips.fields.field import Field
+from lips.tools import myException
 
 from shutil import which
 
@@ -60,3 +62,30 @@ def test_5_point_codim2_variety_mpc():
     assert numpy.isclose(complex(oParticles("⟨2|1+5|2]")), 10 ** -30)
     assert numpy.isclose(complex(oParticles("⟨3|1+2|3]")), 2 * 10 ** -30)
     assert numpy.all(oParticles.phasespace_consistency_check()[:2])
+
+
+@pytest.mark.parametrize(
+    "field, invariants, valuations",
+    [
+        (Field('mpc', 0, 300), ('s_45-s_67', ), (10 ** -100, )),
+        (Field('finite field', 2 ** 31 - 1, 1), ('s_45-s_67', ), (0, )),
+        (Field('padic', 2 ** 31 - 1, 10), ('s_45-s_67', ), (5, ))
+    ]
+)
+def test_variety_dynamic_function(field, invariants, valuations):
+    oPs = Particles(7, field=field)
+    oPs.variety(invariants, valuations)
+
+
+@pytest.mark.parametrize(
+    "field, invariants, valuations",
+    [
+        (Field('mpc', 0, 300), ('s_45-s_67', ), (10 ** -100, )),
+        (Field('finite field', 2 ** 31 - 1, 1), ('s_45-s_67', ), (0, )),
+        (Field('padic', 2 ** 31 - 1, 10), ('s_45-s_67', ), (5, ))
+    ]
+)
+def test_variety_dynamic_function_unsuccessful(field, invariants, valuations):
+    oPs = Particles(7, field=field)
+    with pytest.raises(myException):
+        oPs.variety(invariants, valuations, try_singular_variety_solver=False)

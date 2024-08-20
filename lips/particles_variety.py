@@ -21,7 +21,7 @@ class Particles_Variety:
 
     # PUBLIC METHODS
 
-    def variety(self, invariants, valuations, try_singular_variety_solver=False, verbose=False):
+    def variety(self, invariants, valuations, try_singular_variety_solver=True, verbose=False):
         """Constructs the required phase space point by first trying hardcoded limits and then the singular variety."""
         assert len(invariants) == len(valuations)
         try:
@@ -50,14 +50,24 @@ class Particles_Variety:
 
         if verbose:
             print("Checking result...")
-        abs_diffs = [min(abs(self.compute(invariant) - valuation), abs(self.compute(invariant) + valuation)) for (invariant, valuation) in zip(invariants, valuations)]
-        if self.field.name == 'padic':
-            abs_diffs = [abs_diff.n for abs_diff in abs_diffs]
+
         mom_cons, on_shell = self.momentum_conservation_check(), self.onshell_relation_check()
-        # mom_cons, on_shell, big_outliers, small_outliers = self.phasespace_consistency_check()  # this would be more thorough.. is it needed tho?
+        # the following would be more thorough... is it needed tho?
+        # mom_cons, on_shell, big_outliers, small_outliers = self.phasespace_consistency_check()
         if mom_cons is False:
             raise myException("Momentum conservation is not satisfied: ", max(map(abs, flatten(self.total_mom))))
         elif on_shell is False:
             raise myException("On shellness is not satisfied: ", max(map(abs, flatten(self.masses))))
-        elif not (all([abs_diff == 0 for abs_diff in abs_diffs]) or all([abs_diff <= self.field.tollerance for abs_diff in abs_diffs])):
-            raise myException("Failed to set {} to {}. Instead got {}.".format(invariants, valuations, abs_diffs))
+
+        if self.field.characteristic == 0:
+            abs_diffs = [min(abs(self(invariant) - valuation), abs(self(invariant) + valuation))
+                         for (invariant, valuation) in zip(invariants, _valuations)]
+            if not all([abs_diff <= self.field.tollerance for abs_diff in abs_diffs]):
+                raise myException("Failed to set {} to {}. Instead got {}.".format(invariants, valuations, abs_diffs))
+        else:
+            numerical_invariants = [self(invariant) for invariant in invariants]
+            abs_diffs = [abs(entry) for entry in numerical_invariants]
+            if self.field.name == 'padic':
+                abs_diffs = [abs_diff.n - valuation for abs_diff, valuation in zip(abs_diffs, valuations)]
+            if not all(abs_diff == 0 for abs_diff in abs_diffs):
+                raise myException("Failed to set {} to valuation {}. Instead got {}.".format(invariants, valuations, numerical_invariants))

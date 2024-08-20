@@ -61,9 +61,15 @@ class Particles_Compute:
         # Consistency of string check is left to ast parser.
 
         if ptr5.findall(temp_string) != []:                         # tr5_ijkl [i|j|k|l|i⟩ - ⟨i|j|k|l|i]
-            ijkl = list(map(int, ptr5.findall(temp_string)[0]))
-            return (self.compute("[{a}|{b}|{c}|{d}|{a}⟩".format(a=ijkl[0], b=ijkl[1], c=ijkl[2], d=ijkl[3])) -
-                    self.compute("⟨{a}|{b}|{c}|{d}|{a}]".format(a=ijkl[0], b=ijkl[1], c=ijkl[2], d=ijkl[3])))
+            abcd = ptr5.findall(temp_string)[0][0 if "_" in temp_string else 1]
+            a, b, c, d = abcd.split("|") if "|" in abcd else abcd
+            for _ in range(4):
+                if len(a) == 1:
+                    break
+                a, b, c, d = b, c, d, a
+            else:
+                raise NotImplementedError("tr5 implementation requires at least 1 massless particle.")
+            return self.compute(f"[{a}|{b}|{c}|{d}|{a}⟩") - self.compute(f"⟨{a}|{b}|{c}|{d}|{a}]")
 
         if ptr.findall(temp_string) != []:                          # e.g.: tr(i+j|k-l|...)
             abcd = ptr.search(temp_string)
@@ -228,7 +234,10 @@ class Particles_Compute:
             return result
 
         if pMVar.findall(temp_string) != []:
-            return getattr(self, temp_string)
+            res = getattr(self, temp_string)
+            if isinstance(res, str):
+                return self.compute(res)
+            return res
 
         # if nothing matches, use abstract syntactic tree parser
         return self._eval(temp_string)
