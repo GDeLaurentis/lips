@@ -25,3 +25,7 @@ def inverse(permutation_or_symmetry):
         return (inverse(permutation_or_symmetry[0]), permutation_or_symmetry[1])
     else:
         raise Exception(f"Input for inverse not understood: {permutation_or_symmetry}.")
+
+
+def identity(n):
+    return (''.join(str(i) for i in range(1, n + 1)), False)

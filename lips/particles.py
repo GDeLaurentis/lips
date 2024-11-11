@@ -148,6 +148,10 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
                 oResParticles.angles_for_squares()
             return oResParticles
 
+    def copy(self):
+        from .symmetries import identity
+        return self.image(identity(len(self)))
+
     def cluster(self, llIntegers):
         """Returns clustered particle objects according to lists of lists of integers (e.g. corners of one loop diagram)."""
         drule1 = dict(zip(["s" + "".join(map(str, entry)) for entry in llIntegers], [f"s{i}" for i in range(1, len(llIntegers) + 1)]))
