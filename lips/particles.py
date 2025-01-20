@@ -267,6 +267,8 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
         values = []                                                 # smallest and biggest invariants
         for _invar in _invars:
             values += [abs(self.compute(_invar))]
+            if isinstance(values[-1], numpy.ndarray):
+                values[-1] = values[-1].max()
             if "n" in str(values[len(values) - 1]) and silent is False:
                 print("not a number!", values[len(values) - 1], "invariant", _invar)
                 return False, False, [], []
