@@ -348,20 +348,12 @@ class Particle(object):
 
     def angles_for_squares(self):
         """Flips left and right spinors."""
-        self._l_sp_u, self._r_sp_u = self._r_sp_u, self._l_sp_u
-        self._l_sp_u.shape = (2, 1)
-        self._r_sp_u.shape = (1, 2)
-        self._l_sp_u_to_l_sp_d()
-        self._r_sp_u_to_r_sp_d()
-        self._r1_sp_to_r2_sp()
-        self._r1_sp_to_r2_sp_b()
-        # should I check if four_mom is in the field?
-        try:
-            self._r2_sp_b_to_four_momentum()
-            self._four_mom_to_four_mom_d()
-        except (ValueError, TypeError, SystemError, NotInvertible):
-            self._four_mom = None
-            self._four_mom_d = None
+        l_sp_d_shape, r_sp_d_shape = self.l_sp_d.shape, self.r_sp_d.shape
+        self._l_sp_d, self._r_sp_d = self._r_sp_d, self._l_sp_d
+        self._l_sp_d.shape, self._r_sp_d.shape = l_sp_d_shape, r_sp_d_shape
+        self._sps_d_to_sps_u()
+        self._r2_sp = self._r2_sp.T
+        self._r2_sp_b = self._r2_sp_b.T
 
     @property
     def spinors_are_in_field_extension(self):
@@ -462,6 +454,14 @@ class Particle(object):
     def _l_sp_u_to_l_sp_d(self):
         self._l_sp_d = numpy.dot(numpy.transpose(LeviCivita), self.l_sp_u)
         self._l_sp_d.shape = (1, 2)    # row vector
+
+    def _sps_u_to_sps_d(self):
+        self._l_sp_u_to_l_sp_d()
+        self._r_sp_u_to_r_sp_d()
+
+    def _sps_d_to_sps_u(self):
+        self._l_sp_d_to_l_sp_u()
+        self._r_sp_d_to_r_sp_u()
 
     # TWISTOR METHODS
 

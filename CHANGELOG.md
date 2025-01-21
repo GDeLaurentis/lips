@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
 ## [Unreleased]
 
 ### Added
@@ -15,12 +16,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Deprecated
 
+
+## [0.4.4] - 2025-01-21
+
+### Added
+
+- `_sps_u_to_sps_d` and `_sps_d_to_sps_u` as shorthands to update lower-index spinors from upper-index spinors, or viceversa.
+
+### Changed
+
+- Conjugation operation `angles_for_squares` has been reworked to better support massive particles.
+- `phasespace_consistency_check` can now handle open-index inputs.
+
+
 ## [0.4.3] - 2024-12-16
 
 ### Added
 
 - `symmetries` submodule.
 - `Particles.copy`.
+
 
 ## [0.4.2] - 2024-08-20
 
@@ -99,8 +114,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Numerical computation of Lorentz invariant spinor strings.
 
 
-[unreleased]: https://github.com/GDeLaurentis/lips/compare/v0.4.3...HEAD
-[0.4.2]: https://github.com/GDeLaurentis/lips/compare/v0.4.2...v0.4.3
+[unreleased]: https://github.com/GDeLaurentis/lips/compare/v0.4.4...HEAD
+[0.4.4]: https://github.com/GDeLaurentis/lips/compare/v0.4.3...v0.4.4
+[0.4.3]: https://github.com/GDeLaurentis/lips/compare/v0.4.2...v0.4.3
 [0.4.2]: https://github.com/GDeLaurentis/lips/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/GDeLaurentis/lips/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/GDeLaurentis/lips/compare/v0.3.1...v0.4.0
