@@ -99,6 +99,7 @@ class Particles_Eval:
         string = pSu.sub(r"oPs.compute('|\1]')", string)
         string = pSijk.sub(r"oPs.compute('s_\1')", string)
         string = pMi.sub(r"oPs.compute('m_\1')", string)
+        string = re.sub(r"([a-zA-Z\d]+)oPs", r"\1*oPs", string)
         string = pMVar.sub(r"oPs.compute('\1')", string)
         string = pOijk.sub(r"oPs.compute('Ω_\1')", string)
         string = pPijk.sub(r"oPs.compute('Π_\1')", string)

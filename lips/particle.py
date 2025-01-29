@@ -348,12 +348,20 @@ class Particle(object):
 
     def angles_for_squares(self):
         """Flips left and right spinors."""
-        l_sp_d_shape, r_sp_d_shape = self.l_sp_d.shape, self.r_sp_d.shape
-        self._l_sp_d, self._r_sp_d = self._r_sp_d, self._l_sp_d
-        self._l_sp_d.shape, self._r_sp_d.shape = l_sp_d_shape, r_sp_d_shape
-        self._sps_d_to_sps_u()
+        if self.l_sp_d is not None and self.r_sp_d is not None:  # massive scalars do not have these defined
+            l_sp_d_shape, r_sp_d_shape = self.l_sp_d.shape, self.r_sp_d.shape
+            self._l_sp_d, self._r_sp_d = self._r_sp_d, self._l_sp_d
+            self._l_sp_d.shape, self._r_sp_d.shape = l_sp_d_shape, r_sp_d_shape
+            self._sps_d_to_sps_u()
         self._r2_sp = self._r2_sp.T
         self._r2_sp_b = self._r2_sp_b.T
+        # should I check if four_mom is in the field?
+        try:
+            self._r2_sp_b_to_four_momentum()
+            self._four_mom_to_four_mom_d()
+        except (ValueError, TypeError, SystemError, NotInvertible):
+            self._four_mom = None
+            self._four_mom_d = None
 
     @property
     def spinors_are_in_field_extension(self):
@@ -406,14 +414,12 @@ class Particle(object):
     def _r2_sp_to_four_momentum(self):
         if not hasattr(self, "_four_mom") or self._four_mom is None:
             self._four_mom = numpy.array([None, None, None, None])
-        for i in range(4):
-            self._four_mom[i] = numpy.trace(numpy.dot(Pauli_bar[i], self.r2_sp)) / 2
+        self._four_mom = numpy.array([numpy.trace(numpy.dot(Pauli_bar[i], self.r2_sp)) / 2 for i in range(4)])
 
     def _r2_sp_b_to_four_momentum(self):
         if not hasattr(self, "_four_mom") or self._four_mom is None:
             self._four_mom = numpy.array([None, None, None, None])
-        for i in range(4):
-            self._four_mom[i] = numpy.trace(numpy.dot(Pauli[i], self.r2_sp_b)) / 2
+        self._four_mom = numpy.array([numpy.trace(numpy.dot(Pauli[i], self.r2_sp_b)) / 2 for i in range(4)])
 
     def _four_mom_to_four_mom_d(self):
         self._four_mom_d = numpy.dot(MinkowskiMetric, self.four_mom)
