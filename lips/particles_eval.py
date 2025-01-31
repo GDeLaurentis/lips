@@ -159,10 +159,10 @@ def _eval_node(node, locals_={}):
             allowed_func_call = "{function}({arguments})".format(function=function, arguments=", ".join(map(str, arguments)))
         else:
             raise TypeError(node)
-        return eval(allowed_func_call)
+        return eval(allowed_func_call, None, locals_)
     elif isinstance(node, ast.Name):
         if node.id in locals() and type(locals()[node.id]) in [int, float, GaussianRational, PAdic, ModP, mpmath.mpc, mpmath.mpc, Fraction]:
-            return eval(node.id)
+            return eval(node.id, None, locals_)
         else:
             raise TypeError(node)
     else:
