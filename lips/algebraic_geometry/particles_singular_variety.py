@@ -12,7 +12,8 @@ from .covariant_ideal import LipsIdeal
 
 class Particles_SingularVariety:
 
-    def _singular_variety(self, invariants, valuations=(), generators=[], indepSetNbr=None, seed=None, verbose=False, no_base_point=False):
+    def _singular_variety(self, invariants, valuations=(), generators=[], indepSetNbr=None, indepSet=None,
+                          seed=None, verbose=False, no_base_point=False):
 
         from ..particles import Particles
 
@@ -31,14 +32,16 @@ class Particles_SingularVariety:
 
         point_dict = oLipsIdeal.point_on_variety(
             self.field, base_point={} if no_base_point else self.analytical_subs_d(), directions=directions,
-            valuations=valuations, indepSetNbr=indepSetNbr, seed=seed, verbose=verbose)
+            valuations=valuations, indepSetNbr=indepSetNbr, indepSet=indepSet, seed=seed, verbose=verbose)
 
         update_particles(self, point_dict)
 
     @classmethod
-    def from_singular_variety(cls, multiplicity, field, invariants, valuations=(), generators=[], indepSetNbr=None, seed=None, verbose=False):
+    def from_singular_variety(cls, multiplicity, field, invariants, valuations=(), generators=[],
+                              indepSetNbr=None, indepSet=None, seed=None, verbose=False):
         oPs = cls(multiplicity, field=field)  # dummy point
-        oPs._singular_variety(invariants, valuations=valuations, generators=generators, indepSetNbr=indepSetNbr, seed=seed, verbose=verbose, no_base_point=True)
+        oPs._singular_variety(invariants, valuations=valuations, generators=generators, indepSetNbr=indepSetNbr,
+                              indepSet=indepSet, seed=seed, verbose=verbose, no_base_point=True)
         return oPs
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #

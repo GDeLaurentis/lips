@@ -99,6 +99,7 @@ class Particles_Eval:
         string = pSu.sub(r"oPs.compute('|\1]')", string)
         string = pSijk.sub(r"oPs.compute('s_\1')", string)
         string = pMi.sub(r"oPs.compute('m_\1')", string)
+        string = re.sub(r"([a-zA-Z\d]+)oPs", r"\1*oPs", string)
         string = pMVar.sub(r"oPs.compute('\1')", string)
         string = pOijk.sub(r"oPs.compute('Ω_\1')", string)
         string = pPijk.sub(r"oPs.compute('Π_\1')", string)
@@ -158,10 +159,10 @@ def _eval_node(node, locals_={}):
             allowed_func_call = "{function}({arguments})".format(function=function, arguments=", ".join(map(str, arguments)))
         else:
             raise TypeError(node)
-        return eval(allowed_func_call)
+        return eval(allowed_func_call, None, locals_)
     elif isinstance(node, ast.Name):
         if node.id in locals() and type(locals()[node.id]) in [int, float, GaussianRational, PAdic, ModP, mpmath.mpc, mpmath.mpc, Fraction]:
-            return eval(node.id)
+            return eval(node.id, None, locals_)
         else:
             raise TypeError(node)
     else:
