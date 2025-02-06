@@ -12,7 +12,7 @@ from .covariant_ideal import LipsIdeal
 
 class Particles_SingularVariety:
 
-    def _singular_variety(self, invariants, valuations=(), generators=[], indepSetNbr=None, indepSet=None,
+    def _singular_variety(self, invariants, valuations=(), generators=[], indepSetNbr=None, indepSet='guess',
                           seed=None, verbose=False, no_base_point=False):
 
         from ..particles import Particles
@@ -38,7 +38,7 @@ class Particles_SingularVariety:
 
     @classmethod
     def from_singular_variety(cls, multiplicity, field, invariants, valuations=(), generators=[],
-                              indepSetNbr=None, indepSet=None, seed=None, verbose=False):
+                              indepSetNbr=None, indepSet='guess', seed=None, verbose=False):
         oPs = cls(multiplicity, field=field)  # dummy point
         oPs._singular_variety(invariants, valuations=valuations, generators=generators, indepSetNbr=indepSetNbr,
                               indepSet=indepSet, seed=seed, verbose=verbose, no_base_point=True)
