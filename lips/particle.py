@@ -42,6 +42,7 @@ class Particle(object):
         (2, 2) : rank 2 spinor;
         ( (2, 1), (1, 2) ) : (right spinor index down, left spinor index down).
         """
+        # Should check the field is consistent with the kinematics info, or even compute it from there.
         self.field = field
         if kinematics is None and field.name in ("mpc", "gaussian rational", "finite field", "padic"):
             self.randomise(real_momentum=real_momentum)
