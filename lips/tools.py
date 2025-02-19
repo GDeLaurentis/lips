@@ -7,6 +7,7 @@ import mpmath
 import numpy
 import random
 import re
+import warnings
 
 mpmath.mp.dps = 300
 
@@ -32,7 +33,7 @@ pMVar = re.compile(r'^((?:m|M|μ)(?:_){0,1}[a-zA-Z]*[\d]*)$')
 pd5 = re.compile(r'^δ5$')
 ptr5 = re.compile(r'^tr5_(\d+)$|^tr5\(([\d\|\+\-]+)\)$')
 ptr = re.compile(r'^tr\((?P<middle>(?:(?:\([\d+\+|-]{1,}\))|(?:[\d+\+|-]{1,}))*)\)$')   # the 'middle' pattern should be like in pNB
-pDijk = re.compile(r'(?:^Δ_(\d+)$)|(?:^Δ_(\d+)\|(\d+)\|(\d+)$)')
+pDijk = re.compile(r'^Δ_(\d+(?:\|\d+)*)$')
 pOijk = re.compile(r'^(?:Ω_)(\d+)$')
 pPijk = re.compile(r'^(?:Π_)(\d+)$')
 pAu = re.compile(r'^(?:⟨|<)(\d+)(?:\|)$')
@@ -92,8 +93,21 @@ def subs_dict(text, substitutions):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 
-def det2x2(array):
-    return array[0, 0] * array[1, 1] - array[0, 1] * array[1, 0]
+def det(matrix):
+    if matrix.shape == (1, 1):
+        return matrix[0, 0]
+
+    det_sum = 0
+    for col in range(matrix.shape[1]):
+        sub_matrix = matrix[1:, [i for i in range(matrix.shape[1]) if i != col]]
+        det_sum += (-1) ** col * matrix[0, col] * det(sub_matrix)
+
+    return det_sum
+
+
+def det2x2(matrix):
+    warnings.warn("det2x2 is deprecated, use det.", DeprecationWarning, stacklevel=2)
+    return det(matrix)
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
