@@ -10,9 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Support for arbitrary Gram determinants, e.g. for a box gram: `Δ_12|3|4|5`
+
 ### Changed
 
 ### Fixed
+
+- Sphinx fails if autodoc fails, instead of quitely raising a warning.
 
 ### Deprecated
 
