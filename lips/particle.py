@@ -9,7 +9,6 @@
 
 import numpy
 import sympy
-import mpmath
 import random
 import lips
 
@@ -42,6 +41,7 @@ class Particle(object):
         (2, 2) : rank 2 spinor;
         ( (2, 1), (1, 2) ) : (right spinor index down, left spinor index down).
         """
+        # Should check the field is consistent with the kinematics info, or even compute it from there.
         self.field = field
         if kinematics is None and field.name in ("mpc", "gaussian rational", "finite field", "padic"):
             self.randomise(real_momentum=real_momentum)
@@ -320,7 +320,7 @@ class Particle(object):
             if not (abs(p[0]) == 0 and abs(p[1]) == 0 and p[2].real <= 0 and p[2].imag == 0):     # make sure it is not in the
                 break                                                                             # negative z direction or null
         p2 = p[0] * p[0] + p[1] * p[1] + p[2] * p[2]
-        p_zero = mpmath.sqrt(p2)
+        p_zero = self.field.sqrt(p2)
         self.four_mom = numpy.array([p_zero] + p)
 
     def randomise_rational(self):
@@ -379,7 +379,7 @@ class Particle(object):
         if lips.spinor_convention == 'symmetric' and abs(P0_plus_P3) <= self.field.tollerance:
             raise ValueError("Encountered zero denominator in spinor.")
         elif lips.spinor_convention == 'symmetric':
-            lambda_one = mpmath.sqrt(P0_plus_P3)
+            lambda_one = self.field.sqrt(P0_plus_P3)
             lambda_two = P1_plus_iP2 / lambda_one
         elif lips.spinor_convention == 'asymmetric':
             lambda_one = P0_plus_P3
@@ -397,7 +397,7 @@ class Particle(object):
         if lips.spinor_convention == 'symmetric' and abs(P0_plus_P3) <= self.field.tollerance:
             raise ValueError("Encountered zero denominator in spinor.")
         elif lips.spinor_convention == 'symmetric':
-            lambda_one = mpmath.sqrt(P0_plus_P3)
+            lambda_one = self.field.sqrt(P0_plus_P3)
             lambda_two = P1_minus_iP2 / lambda_one
         elif lips.spinor_convention == 'asymmetric':
             lambda_one = self.field(1)

@@ -101,11 +101,11 @@ def test_particles_compute_three_mass_gram():
     """Test computation of 3-mass Gram w.r.t. summed particles object."""
     oParticles = Particles(9)
     temp_string = "Δ_135|249|678"
-    match_list = pDijk.findall(temp_string)[0]
-    if match_list[0] == '':
-        NonOverlappingLists = [list(map(int, corner)) for corner in match_list[1:]]
+    match = pDijk.findall(temp_string)[0]
+    if "|" in match:
+        NonOverlappingLists = [list(map(int, corner)) for corner in match.split("|")]
     else:
-        NonOverlappingLists = oParticles.ijk_to_3NonOverlappingLists(list(map(int, match_list[0])))
+        NonOverlappingLists = oParticles.ijk_to_3NonOverlappingLists(list(map(int, match)))
     temp_oParticles = oParticles.cluster(NonOverlappingLists)
     assert temp_oParticles.ldot(1, 2)**2 - temp_oParticles.ldot(1, 1) * temp_oParticles.ldot(2, 2) == oParticles(temp_string)
 
@@ -120,3 +120,14 @@ def test_particles_compute_tr5_1234():
                                          oParticles[3].four_mom[k] *
                                          oParticles[4].four_mom[l]))
     assert abs(tr5 - oParticles("tr5_1234")) < 10 ** -290
+
+
+def test_particles_compute_four_mass_box_gram():
+    oPs = Particles(8, field=Field("finite field", 2 ** 31 - 19, 1), seed=0)
+    oPs._singular_variety(("⟨34⟩+[34]", "⟨34⟩-⟨56⟩", "⟨56⟩+[56]"), (1, 1, 1))
+    oPs.mt2 = oPs("s_34")
+    oPs.mt = oPs("<34>")
+    oPs = oPs.cluster([[1, ], [2, ], [3, 4], [5, 6], [7, 8]])
+    assert oPs.mt ** 2 == oPs.mt2
+    assert oPs("Δ_12|3|4|5") == oPs("(1/4*(s12*(tr(3|3)²-tr(3|4)²)+tr(3|4)*tr(1+2|4)*tr(1+2|3)-1/2*tr(3|3)*(tr(1+2|4)²+tr(1+2|3)²)))")
+    assert oPs("Δ_12|3|4|5²") == oPs("(1/4*(s12*(tr(3|3)²-tr(3|4)²)+tr(3|4)*tr(1+2|4)*tr(1+2|3)-1/2*tr(3|3)*(tr(1+2|4)²+tr(1+2|3)²)))²")

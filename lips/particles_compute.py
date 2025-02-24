@@ -12,9 +12,10 @@
 import numpy
 import re
 import mpmath
+import warnings
 
 from .tools import pSijk, pMi, pMVar, pd5, pDijk, pOijk, pPijk, pA2, pAu, pAd, pS2, pSu, pSd, \
-    pNB, pNB_open_begin, pNB_open_end, ptr5, ptr, det2x2
+    pNB, pNB_open_begin, pNB_open_end, ptr5, ptr, det
 
 mpmath.mp.dps = 300
 
@@ -94,14 +95,19 @@ class Particles_Compute:
             return Pi
 
         if pDijk.findall(temp_string) != []:                        # Δ_ijk or Δ_ij|kl|lm
-            match_list = pDijk.findall(temp_string)[0]
-            if match_list[0] == '':
-                NonOverlappingLists = [list(map(int, corner)) for corner in match_list[1:]]
-            else:
-                NonOverlappingLists = self.ijk_to_3NonOverlappingLists(list(map(int, match_list[0])))
+            match = pDijk.findall(temp_string)[0]
+            if "|" in match:
+                indices_in_corners = [list(map(int, corner)) for corner in match.split("|")]
+                r2_sps = [sum([self[_i].r2_sp for _i in indices]) for indices in indices_in_corners]
+                r2_sps_b = [sum([self[_i].r2_sp_b for _i in indices]) for indices in indices_in_corners]
+                n = len(indices_in_corners)
+                matrix = numpy.array([[numpy.trace(numpy.dot(r2_sps[i], r2_sps_b[j])) / 2 for j in range(n)] for i in range(n)])
+                return (-1) ** n * det(matrix[:-1, :-1])
+            warnings.warn("The shorthand Δ_ijk is deprecated and will be removed.", DeprecationWarning, stacklevel=2)
+            NonOverlappingLists = self.ijk_to_3NonOverlappingLists(list(map(int, match)))
             r2_sp_1 = sum([self[_i].r2_sp for _i in NonOverlappingLists[0]])
             r2_sp_b_2 = sum([self[_i].r2_sp_b for _i in NonOverlappingLists[1]])
-            return (numpy.trace(numpy.dot(r2_sp_1, r2_sp_b_2)) / 2) ** 2 - det2x2(r2_sp_1) * det2x2(r2_sp_b_2)
+            return (numpy.trace(numpy.dot(r2_sp_1, r2_sp_b_2)) / 2) ** 2 - det(r2_sp_1) * det(r2_sp_b_2)
 
         if pd5.findall(temp_string) != []:
             return (2 * self.compute("s_12") * self.compute("s_23") * self.compute("s_34") * self.compute("s_45") +
@@ -128,7 +134,7 @@ class Particles_Compute:
             r"""Mandelstam variables: s_{i \dots k} = (P_i + \dots + P_k)^2. Computed via determinant of rank 2 spinor."""
             ijk = list(map(int, pSijk.findall(temp_string)[0]))
             tot_r2_sp = sum([self[_i].r2_sp for _i in ijk])
-            return det2x2(tot_r2_sp)
+            return det(tot_r2_sp)
 
         if pA2.findall(temp_string) != []:                        # ⟨A|B⟩ -- contraction is up -> down : lambda[A]^alpha.lambda[B]_alpha
             A, B = map(int, pA2.findall(temp_string)[0])
