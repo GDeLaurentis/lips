@@ -15,7 +15,7 @@ import mpmath
 import warnings
 
 from .tools import pSijk, pMi, pMVar, pd5, pDijk, pOijk, pPijk, pA2, pAu, pAd, pS2, pSu, pSd, \
-    pNB, pNB_open_begin, pNB_open_end, ptr5, ptr, det
+    pNB, pNB_open_begin, pNB_open_end, pNB_double_open, ptr5, ptr, det
 
 mpmath.mp.dps = 300
 
@@ -236,6 +236,17 @@ class Particles_Compute:
                           "(" + re.sub(r'(\d+)', r'self[\1].r2_sp_b', entry) + ")" for i, entry in enumerate(bc)]
                 middle = " @ ".join(middle)
                 result = self[a].l_sp_d @ eval(middle)
+
+            return result
+
+        if pNB_double_open.findall(temp_string) != []:  # |(B+C+...)|...| assumes first entry is r2_sp_b (lower alpha open)
+            abcd = pNB_double_open.search(temp_string)
+            bc = abcd.group('middle').replace("(", "").replace(")", "").split("|")
+
+            middle = ["(" + re.sub(r'(\d+)', r'self[\1].r2_sp_b', entry) + ")" if i % 2 == 0 else
+                      "(" + re.sub(r'(\d+)', r'self[\1].r2_sp', entry) + ")" for i, entry in enumerate(bc)]
+            middle = " @ ".join(middle)
+            result = eval(middle)
 
             return result
 

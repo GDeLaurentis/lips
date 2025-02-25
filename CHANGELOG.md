@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Support for arbitrary Gram determinants, e.g. for a box gram: `Δ_12|3|4|5`
+- Support for spinor strings with two open indices, e.g.: `|1+2|3|4|`. The first open index is assumed to be a lower alpha, .
 
 ### Changed
 

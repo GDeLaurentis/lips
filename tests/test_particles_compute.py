@@ -42,6 +42,13 @@ def test_particles_compute_lNB_open(field):
 
 
 @pytest.mark.parametrize("field", [mpc, modp, padic, ])
+def test_particles_compute_lNB_doubly_open(field):
+    oParticles = Particles(8, field=field)
+    oPsClustered = oParticles.cluster([[1,], [2,], [3, 4], [5, 6], [7, 8]])
+    assert numpy.all(abs(oPsClustered("⟨2|3|4|2⟩") - (oPsClustered("⟨2|") @ oPsClustered("|3|4|") @ oPsClustered("|2⟩"))[0, 0]) <= field.tollerance)
+
+
+@pytest.mark.parametrize("field", [mpc, modp, padic, ])
 def test_particles_eval_rational_function(field):
     oParticles = Particles(7, field=field)
     assert abs(oParticles("(+96/127[35]⟨4|2+3|1]⟨16⟩)/(⟨56⟩[56]⟨1|(2+4)|3]⟨2|(1+4)|3])") -
