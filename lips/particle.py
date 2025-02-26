@@ -352,6 +352,13 @@ class Particle(object):
             l_sp_d_shape, r_sp_d_shape = self.l_sp_d.shape, self.r_sp_d.shape
             self._l_sp_d, self._r_sp_d = self._r_sp_d, self._l_sp_d
             self._l_sp_d.shape, self._r_sp_d.shape = l_sp_d_shape, r_sp_d_shape
+            if hasattr(self, 'spin_indices'):
+                if self.spin_indices == 'u':
+                    self._l_sp_d *= -1
+                elif self.spin_indices == 'd':
+                    self._r_sp_d *= -1
+                else:
+                    raise Exception("Spin indices not understood.")
             self._sps_d_to_sps_u()
         self._r2_sp = self._r2_sp.T
         self._r2_sp_b = self._r2_sp_b.T
