@@ -110,6 +110,7 @@ class Particles_Eval:
         string = pNB.sub(r"oPs.compute('\1')", string)
         string = pNB_open_begin.sub(r"oPs.compute('\1')", string)
         string = pNB_open_end.sub(r"oPs.compute('\1')", string)
+        string = string.replace("sqrt", "oPs.field.sqrt")
         string = re.sub(r'(\d)s', r'\1*s', string)
         string = re.sub(r'(\d)o', r'\1*o', string)
         string = re.sub(r'(?<!tr)(\d)\(', r'\1*(', string)
@@ -133,30 +134,31 @@ def ast_eval_expr(expr, locals_={}):
 
 def _eval_node(node, locals_={}):
     locals().update(locals_)
-    if isinstance(node, ast.Num):
+    if isinstance(node, ast.Constant):
         return node.n
     elif isinstance(node, ast.BinOp):
         return operators[type(node.op)](_eval_node(node.left, locals_), _eval_node(node.right, locals_))
     elif isinstance(node, ast.UnaryOp):
         return operators[type(node.op)](_eval_node(node.operand, locals_))
     elif isinstance(node, ast.Call):
-        if isinstance(node.func, ast.Attribute) and node.func.value.id == 'oPs' and node.func.attr == 'compute':
+        if isinstance(node.func, ast.Attribute) and node.func.attr == 'compute' and hasattr(node.func.value, 'id') and node.func.value.id == 'oPs':
             function, method = node.func.value.id, node.func.attr
             argument = node.args[0].s if sys.version_info[0] > 2 else node.args[0].s.decode('utf-8')
-            allowed_func_call = "{function}.{method}('{argument}')".format(function=function, method=method, argument=argument)
-        elif isinstance(node.func, ast.Attribute) and node.func.value.id == 'mpmath' and node.func.attr in ['mpf', 'sqrt']:
-            function, method = 'mpmath', node.func.attr
+            allowed_func_call = f"{function}.{method}('{argument}')"
+        elif isinstance(node.func, ast.Attribute) and node.func.attr in ['mpf', 'sqrt']:
+            function, method = 'oPs.field', node.func.attr
             if hasattr(node.args[0], 'id'):
                 argument = ast_eval_expr(node.args[0].id, locals_)
             else:
                 argument = _eval_node(node.args[0], locals_)
-            allowed_func_call = "{function}.{method}('{argument}')".format(function=function, method=method, argument=argument)
-        elif isinstance(node.func, ast.Name) and node.func.id == 'PAdic':
-            function, arguments = 'PAdic', [arg.n for arg in node.args]
-            allowed_func_call = "{function}({arguments})".format(function=function, arguments=", ".join(map(str, arguments)))
-        elif isinstance(node.func, ast.Name) and node.func.id == 'Fraction':
-            function, arguments = 'Fraction', [arg.n for arg in node.args]
-            allowed_func_call = "{function}({arguments})".format(function=function, arguments=", ".join(map(str, arguments)))
+            # return locals_['oPs'].field.sqrt(argument)  # could also avoid re-parsing the argument
+            allowed_func_call = f"{function}.{method}({function}('{argument}'))"
+        elif isinstance(node.func, ast.Name) and hasattr(node.func, 'id') and node.func.id == 'PAdic':
+            function, arguments = 'PAdic', ", ".join(map(str, [arg.n for arg in node.args]))
+            allowed_func_call = f"{function}({arguments})"
+        elif isinstance(node.func, ast.Name) and hasattr(node.func, 'id') and node.func.id == 'Fraction':
+            function, arguments = 'Fraction', ", ".join(map(str, [arg.n for arg in node.args]))
+            allowed_func_call = f"{function}({arguments})"
         else:
             raise TypeError(node)
         return eval(allowed_func_call, None, locals_)

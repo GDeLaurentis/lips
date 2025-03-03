@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Support for Particles string evaluation containing sqrt (in arbitrary field insteald of only with `mpmath`).
+
 ### Fixed
 
 - Sphinx fails if autodoc fails, instead of quitely raising a warning.

@@ -87,6 +87,13 @@ def test_particles_eval_with_internal_masses(field):
 
 
 @pytest.mark.parametrize("field", [mpc, modp, padic, ])
+def test_particles_eval_with_sqrt(field):
+    oPs = Particles(8, field=field, seed=0)
+    assert abs(oPs('sqrt(Δ_61|23|45)') - oPs.field.sqrt(oPs("Δ_61|23|45"))) <= oPs.field.tollerance
+    assert abs(oPs('1/8s123sqrt(Δ_61|23|45)') - oPs("1/8s123") * oPs.field.sqrt(oPs('Δ_61|23|45'))) <= oPs.field.tollerance
+
+
+@pytest.mark.parametrize("field", [mpc, modp, padic, ])
 def test_particles_eval_mass_as_alias_with_cluster(field):
     oPs = Particles(7, field=field, internal_masses={'mt2'})
     oPs.mh2 = "s_45"
