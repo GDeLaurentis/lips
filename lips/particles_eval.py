@@ -39,8 +39,23 @@ pDijk_non_adjacent = re.compile(r'(?:Δ_(\d+(?:\|\d+)*))')
 # p3B = re.compile(r'(?:\u27e8|\[)(\d+)(?:\|\({0,1})([\d+[\+|-]*]*)(?:\){0,1}\|)(\d+)(?:\u27e9|\])')
 # pNB = re.compile(r'((?:⟨|\[)\d+\|(?:(?:\([\d+\+|-]{1,}\))|(?:[\d+\+|-]{1,}))*\|\d+(?:⟩|\]))')  # this messes up on strings like: '|2⟩⟨1|4+5|3|+|3|4+5|2⟩⟨1|'
 pNB = re.compile(r'((?:⟨|\[)\d+\|(?:(?:(?!\|[\+|-]\|)\([\d+\+|-]{1,}\))|(?:(?!\|[\+|-]\|)[\d+\+|-]))*\|\d+(?:⟩|\]))')
-pNB_open_begin = re.compile(r'(?<!⟨\d)(?<!\[\d)(?<![\+|-]\d\))(?<![\+|-]\d)((?:\|)(?:(?:\([\d+|-]{1,}\))|(?:[\d+|-]{1,}))*(?:\|)\d+(?:⟩|\]))')
-pNB_open_end = re.compile(r'((?:⟨|\[)\d+(?:\|)(?:(?:\([\d+|-]{1,}\))|(?:[\d+\+|-]{1,}))*(?:\|))(?!\d⟩)(?!\d\])(?!\d[\+|-])(?!\(\d[\+|-])')
+pNB_open_begin = re.compile(
+    r'(?<![\(\[⟨<]\d)(?<![\+|-]\d\))(?<![\+|-]\d)'  # negative lookbehind
+    r'(?<!_\d)(?<!_\d\d)(?<!_\d\d\d)(?<!_\d\d\d\d)'  # negative lookbehind for e.g. Δ_
+    r'(\|(?:(?:\([\d]+(?:[\+|-]\d+)*\))|(?:[\d]+(?:[\+|-]\d+)*))+\|'  # capture
+    r'\d+[⟩\]])'  # capture end
+)
+pNB_open_end = re.compile(
+    r'([⟨<\[]\d+'  # capture beginning
+    r'\|(?:(?:\([\d+|-]+(?:[\+|-]\d+)*\))|(?:[\d]+(?:[\+|-]\d+)*))+\|)'  # capture
+    r'(?!\d[⟩>\]])(?!\d[\+|-])(?!\(\d[\+|-])'  # negative lookahead
+)
+pNB_double_open = re.compile(
+    r'(?<![\(\[⟨<]\d)(?<![\+|-]\d\))(?<![\+|-]\d)'  # negative lookbehind
+    r'(?<!_\d)(?<!_\d\d)(?<!_\d\d\d)(?<!_\d\d\d\d)'  # negative lookbehind for e.g. Δ_
+    r'(\|(?:(?:\([\d+|-]+(?:[\+|-]\d+)*\))|(?:[\d]+(?:[\+|-]\d+)*))+\|)'  # capture
+    r'(?!\d[⟩>\]])(?!\d[\+|-])(?!\(\d[\+|-])'  # negative lookahead
+)
 ptr5 = re.compile(r'tr5(_\d+|\([\d\|\+\-]+\))')
 ptr = re.compile(r'(tr\((?:(?:\([\d+\+|-]{1,}\))|(?:[\d+\+|-]{1,})*)\))')
 
@@ -110,6 +125,7 @@ class Particles_Eval:
         string = pNB.sub(r"oPs.compute('\1')", string)
         string = pNB_open_begin.sub(r"oPs.compute('\1')", string)
         string = pNB_open_end.sub(r"oPs.compute('\1')", string)
+        string = pNB_double_open.sub(r"oPs.compute('\1')", string)
         string = string.replace("sqrt", "oPs.field.sqrt")
         string = re.sub(r'(\d)s', r'\1*s', string)
         string = re.sub(r'(\d)o', r'\1*o', string)

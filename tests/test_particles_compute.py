@@ -65,6 +65,13 @@ def test_particles_eval_expr_with_two_open_indices(field):
             -1*(|2⟩⟨2|)*⟨1|5⟩*[2|5]-1*(|2⟩⟨3|)*⟨1|4⟩*[3|4]-1*(|2⟩⟨3|)*⟨1|5⟩*[3|5]-1*(|3⟩⟨1|)*⟨2|4⟩*[3|4]-1*(|3⟩⟨1|)*⟨2|5⟩*[3|5]")) <= field.tollerance)
 
 
+def test_particles_eval_string_with_two_open_indices():
+    oPs = Particles(8, field=Field("finite field", 2 ** 31 - 19, 1), seed=0)
+    oPs._singular_variety(("⟨34⟩+[34]", "⟨34⟩-⟨56⟩", "⟨56⟩+[56]"), (1, 1, 1))
+    oPsClustered = oPs.cluster([[1, ], [2, ], [3, 4], [5, 6], [7, 8]])
+    oPsClustered("+((⟨1|@(|1|2|3|4|3|-|1|3|1|4|3|+|1|3|3|4|1+2|-|3|2|3|4|1+2|)@|2]))/(⟨1|3|2]Δ_12|3|4|5)")
+
+
 @pytest.mark.parametrize("field", [mpc, modp, padic, ])
 def test_particles_eval_trace(field):
     oPs = Particles(7, field=field)
