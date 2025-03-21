@@ -13,6 +13,8 @@ import numpy
 import re
 import mpmath
 import warnings
+import functools
+import operator
 
 from .tools import pSijk, pMi, pMVar, pd5, pDijk, pOijk, pPijk, pA2, pAu, pAd, pS2, pSu, pSd, \
     pNB, pNB_open_begin, pNB_open_end, pNB_double_open, ptr5, ptr, det
@@ -21,6 +23,22 @@ mpmath.mp.dps = 300
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+
+def as_scalar_if_scalar(func):
+    """Turns numpy arrays with zero dimensions into 'real' scalars."""
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        res = func(*args, **kwargs)
+        if not hasattr(res, 'shape'):
+            return res
+        if res.shape == ():
+            return res[()]  # pops the scalar out of array(scalar) or does nothing if array has non-trivial dimensions.
+        elif functools.reduce(operator.mul, res.shape) == 1:
+            return res.flatten()[0]
+        else:
+            return res
+    return wrapper
 
 
 class Particles_Compute:
@@ -55,6 +73,7 @@ class Particles_Compute:
         else:
             return self.ee(j, i)
 
+    @as_scalar_if_scalar
     def compute(self, temp_string):
         """Computes spinor strings.\n
         Available variables: ⟨a|b⟩, [a|b], ⟨a|b+c|d], ⟨a|b+c|d+e|f], ..., s_ijk, Δ_ijk, Ω_ijk, Π_ijk, tr5_ijkl"""
@@ -138,7 +157,7 @@ class Particles_Compute:
 
         if pA2.findall(temp_string) != []:                        # ⟨A|B⟩ -- contraction is up -> down : lambda[A]^alpha.lambda[B]_alpha
             A, B = map(int, pA2.findall(temp_string)[0])
-            return numpy.dot(self[A].r_sp_u, self[B].r_sp_d)[0, 0]
+            return self[A].r_sp_u @ self[B].r_sp_d
 
         if pAu.findall(temp_string) != []:                        # ⟨A|
             A = int(pAu.findall(temp_string)[0])
@@ -150,7 +169,7 @@ class Particles_Compute:
 
         if pS2.findall(temp_string) != []:                        # [A|B] -- contraction is down -> up : lambda_bar[A]_alpha_dot.lambda_bar[B]^alpha_dot
             A, B = map(int, pS2.findall(temp_string)[0])
-            return numpy.dot(self[A].l_sp_d, self[B].l_sp_u)[0, 0]
+            return self[A].l_sp_d @ self[B].l_sp_u
 
         if pSu.findall(temp_string) != []:                        # |A]
             A = int(pSu.findall(temp_string)[0])
@@ -191,10 +210,6 @@ class Particles_Compute:
                 result = result @ self[d].r_sp_d
             else:
                 result = result @ self[d].l_sp_u
-
-            # convert to scalar
-            assert result.shape == (1, 1)
-            result = result[0, 0]
 
             return result
 
