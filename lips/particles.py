@@ -19,7 +19,7 @@ import sympy
 from sympy import NotInvertible
 
 from syngular import Field
-from pyadic import PAdic
+from pyadic import PAdic, ModP
 
 from .tools import MinkowskiMetric, flatten, subs_dict, pNB, myException, indexing_decorator, pAu, pAd, pSu, pSd, pMVar, LeviCivita
 from .particle import Particle
@@ -29,12 +29,14 @@ from .hardcoded_limits.particles_set import Particles_Set
 from .hardcoded_limits.particles_set_pair import Particles_SetPair
 from .algebraic_geometry.particles_singular_variety import Particles_SingularVariety
 from .particles_variety import Particles_Variety
+from .particles_slices import Particles_Slices
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 
-class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetPair, Particles_SingularVariety, Particles_Variety, list):
+class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetPair, Particles_SingularVariety,
+                Particles_Variety, Particles_Slices, list):
     """Describes the kinematics of n particles. Base one list of Particle objects."""
 
     # MAGIC METHODS
@@ -102,7 +104,7 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
 
     @property
     def masses(self):
-        """Masses of all particles in phase space."""
+        """Masses squared of all particles in phase space."""
         return [oParticle.mass for oParticle in self]
 
     @property
@@ -222,6 +224,44 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
             subs_dict.update({la[i]: iParticle.r_sp_d[0, 0], lb[i]: iParticle.r_sp_d[1, 0]})
             subs_dict.update({lc[i]: iParticle.l_sp_d[0, 0], ld[i]: iParticle.l_sp_d[0, 1]})
         return subs_dict
+
+    def subs(self, myDict):
+        """For all rank-1 spinor components, substitutes symbols with values from myDict."""
+        for oP in self:
+            if isinstance(oP.r_sp_d[0, 0], (sympy.Add, sympy.Mul, sympy.Symbol)):
+                oP.r_sp_d[0, 0] = oP.r_sp_d[0, 0].subs(myDict)
+                if isinstance(oP.r_sp_d[0, 0], sympy.Integer) and self.field.name == "finite field":
+                    oP.r_sp_d[0, 0] = ModP(oP.r_sp_d[0, 0], self.field.characteristic)
+                elif isinstance(oP.r_sp_d[0, 0], sympy.Integer) and self.field.name == "padic":
+                    oP.r_sp_d[0, 0] = PAdic(oP.r_sp_d[0, 0], self.field.characteristic, self.field.digits)
+                else:
+                    oP.r_sp_d[0, 0] = sympy.poly(oP.r_sp_d[0, 0], modulus=self.field.characteristic ** self.field.digits).as_expr()
+            if isinstance(oP.r_sp_d[1, 0], (sympy.Add, sympy.Mul, sympy.Symbol)):
+                oP.r_sp_d[1, 0] = oP.r_sp_d[1, 0].subs(myDict)
+                if isinstance(oP.r_sp_d[1, 0], sympy.Integer) and self.field.name == "finite field":
+                    oP.r_sp_d[1, 0] = ModP(oP.r_sp_d[1, 0], self.field.characteristic)
+                elif isinstance(oP.r_sp_d[1, 0], sympy.Integer) and self.field.name == "padic":
+                    oP.r_sp_d[1, 0] = PAdic(oP.r_sp_d[1, 0], self.field.characteristic, self.field.digits)
+                else:
+                    oP.r_sp_d[1, 0] = sympy.poly(oP.r_sp_d[1, 0], modulus=self.field.characteristic ** self.field.digits).as_expr()
+            oP.r_sp_d = oP.r_sp_d  # trigger setter
+            if isinstance(oP.l_sp_d[0, 0], (sympy.Add, sympy.Mul, sympy.Symbol)):
+                oP.l_sp_d[0, 0] = oP.l_sp_d[0, 0].subs(myDict)
+                if isinstance(oP.l_sp_d[0, 0], sympy.Integer) and self.field.name == "finite field":
+                    oP.l_sp_d[0, 0] = ModP(oP.l_sp_d[0, 0], self.field.characteristic)
+                elif isinstance(oP.l_sp_d[0, 0], sympy.Integer) and self.field.name == "padic":
+                    oP.l_sp_d[0, 0] = PAdic(oP.l_sp_d[0, 0], self.field.characteristic, self.field.digits)
+                else:
+                    oP.l_sp_d[0, 0] = sympy.poly(oP.l_sp_d[0, 0], modulus=self.field.characteristic ** self.field.digits).as_expr()
+            if isinstance(oP.l_sp_d[0, 1], (sympy.Add, sympy.Mul, sympy.Symbol)):
+                oP.l_sp_d[0, 1] = oP.l_sp_d[0, 1].subs(myDict)
+                if isinstance(oP.l_sp_d[0, 1], sympy.Integer) and self.field.name == "finite field":
+                    oP.l_sp_d[0, 1] = ModP(oP.l_sp_d[0, 1], self.field.characteristic)
+                elif isinstance(oP.l_sp_d[0, 1], sympy.Integer) and self.field.name == "padic":
+                    oP.l_sp_d[0, 1] = PAdic(oP.l_sp_d[0, 1], self.field.characteristic, self.field.digits)
+                else:
+                    oP.l_sp_d[0, 1] = sympy.poly(oP.l_sp_d[0, 1], modulus=self.field.characteristic ** self.field.digits).as_expr()
+            oP.l_sp_d = oP.l_sp_d  # trigger setter
 
     def fix_mom_cons(self, A=0, B=0, real_momenta=False, axis=1):   # using real momenta changes both |⟩ and |] of A & B
         """Fixes momentum conservation using particles A and B."""

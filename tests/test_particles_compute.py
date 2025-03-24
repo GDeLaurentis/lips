@@ -152,3 +152,9 @@ def test_particles_compute_four_mass_box_gram():
     assert oPs.mt ** 2 == oPs.mt2
     assert oPs("Δ_12|3|4|5") == oPs("(1/4*(s12*(tr(3|3)²-tr(3|4)²)+tr(3|4)*tr(1+2|4)*tr(1+2|3)-1/2*tr(3|3)*(tr(1+2|4)²+tr(1+2|3)²)))")
     assert oPs("Δ_12|3|4|5²") == oPs("(1/4*(s12*(tr(3|3)²-tr(3|4)²)+tr(3|4)*tr(1+2|4)*tr(1+2|3)-1/2*tr(3|3)*(tr(1+2|4)²+tr(1+2|3)²)))²")
+
+
+def test_particles_compute_with_levicivita_and_transpose():
+    oPs = Particles(6, field=Field("finite field", 2 ** 31 - 1, 1), seed=None)
+    assert oPs("[3^|1+2|5_⟩") == oPs("⟨5_|1+2|3^]")
+    assert 'ϵ' in oPs._parse("[3^|1+2|5_⟩") and 'transpose' in oPs._parse("[3^|1+2|5_⟩")
