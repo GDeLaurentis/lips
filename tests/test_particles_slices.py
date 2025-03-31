@@ -34,3 +34,11 @@ def test_slice_with_extra_constraints_generic_algo():
 
     assert isinstance(oPs("[12]"), sympy.Expr)
     assert sympy.expand(oPs("[12]"), modulus=oPs.field.characteristic).as_poly().degree() == 2
+
+
+def test_bivariate_slice_covariant_algo():
+    oPs = Particles(8, field=Field("finite field", 2 ** 31 - 19, 1), seed=None)
+    oPs.univariate_slice()
+
+    assert isinstance(oPs("⟨12⟩"), sympy.Expr)
+    assert isinstance(oPs("[12]"), sympy.Expr)
