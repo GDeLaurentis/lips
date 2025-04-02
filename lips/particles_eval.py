@@ -13,6 +13,7 @@ import operator as op
 
 from fractions import Fraction
 from pyadic import PAdic, ModP, GaussianRational
+from syngular.monomial import non_unicode_powers
 
 from .tools import LeviCivita
 
@@ -74,20 +75,6 @@ pMassiveSAu_SpinIndexd = re.compile(r'(?:⟨|<)(\d+)(_|d)\|')
 pMassiveSAd_SpinIndexd = re.compile(r'\|(\d+)(_|d)(?:⟩|>)')
 pMassiveSBd_SpinIndexu = re.compile(r'\[(\d+)(\^|u)\|')
 pMassiveSBu_SpinIndexu = re.compile(r'\|(\d+)(\^|u)\]')
-
-unicode_powers_dict = {"^0": "⁰", "^1": "¹", "^2": "²", "^3": "³", "^4": "⁴", "^5": "⁵", "^6": "⁶", "^7": "⁷", "^8": "⁸", "^9": "⁹"}
-
-
-def non_unicode_powers(string):
-    for hat_pow, uni_pow in unicode_powers_dict.items():
-        string = string.replace(uni_pow, hat_pow)
-    return string
-
-
-def unicode_powers(string):
-    for hat_pow, uni_pow in unicode_powers_dict.items():
-        string = string.replace(hat_pow, uni_pow)
-    return string
 
 
 def as_scalar_if_scalar(func):
