@@ -116,6 +116,7 @@ class Particles_Eval:
             lambda match: f"(-ϵ@block([[[{int(match.group(1))}|], [[{int(match.group(1)) + 1}|]]))[0:1, :]@|", string)
         string = pMassiveSBu_SpinIndexu.sub(
             lambda match: f"|@(block([|{int(match.group(1))}], |{int(match.group(1)) + 1}]])@ϵ)[:, 0:1]", string)
+        string = string.replace("@|@", "@")
         string = pA2bis.sub(r"⟨\1|\2⟩", string)
         string = pA2.sub(r"oPs('⟨\1|\2⟩')", string)
         string = pAu.sub(r"oPs('⟨\1|')", string)

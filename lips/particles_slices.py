@@ -22,7 +22,7 @@ class Particles_Slices:
         if algorithm == 'covariant':  # ⟨ij⟩ is linear in t
             if indepSets is not None:
                 raise NotImplementedError("IndepSet option not implemented yet with covariant algorithm.")
-            self._singular_variety(extra_constraints, (1, ) * len(extra_constraints))
+            self._singular_variety(extra_constraints, (1, ) * len(extra_constraints), seed=seed)
             oPShift = Particles(1, fix_mom_cons=False, field=self.field, seed=random.randint(1, self.field.characteristic - 1))[1]
 
             xs = sympy.symbols(f'x1:{len(self) + 1}')
@@ -39,9 +39,11 @@ class Particles_Slices:
 
             ring = Ring(self.field.characteristic, xs + ys, 'dp')
             ideal = Ideal(ring, list(map(str, equations)))
-            xSubs = ideal.point_on_variety(self.field)
+            xSubs = ideal.point_on_variety(self.field, seed=seed)
+            counter = 0
             while 0 in xSubs.values():
-                xSubs = ideal.point_on_variety(self.field)
+                counter += 1
+                xSubs = ideal.point_on_variety(self.field, seed=seed + counter)
             self.subs(xSubs)
 
         elif algorithm == 'generic':  # ring-agnostic algorithm, less efficient: ⟨ij⟩ is quadratic in t
@@ -63,7 +65,7 @@ class Particles_Slices:
         if algorithm == 'covariant':  # ⟨ij⟩ is linear in t
             if indepSets is not None:
                 raise NotImplementedError("IndepSet option not implemented yet with covariant algorithm.")
-            self._singular_variety(extra_constraints, (1, ) * len(extra_constraints))
+            self._singular_variety(extra_constraints, (1, ) * len(extra_constraints), seed=seed)
             oPShift1 = Particles(1, fix_mom_cons=False, field=self.field, seed=random.randint(1, self.field.characteristic - 1))[1]
             oPShift2 = Particles(1, fix_mom_cons=False, field=self.field, seed=random.randint(1, self.field.characteristic - 1))[1]
 
@@ -83,9 +85,11 @@ class Particles_Slices:
 
             ring = Ring(self.field.characteristic, xs1 + xs2 + ys1 + ys2, 'dp')
             ideal = Ideal(ring, list(map(str, equations)))
-            xSubs = ideal.point_on_variety(self.field)
+            xSubs = ideal.point_on_variety(self.field, seed=seed)
+            counter = 0
             while 0 in xSubs.values():
-                xSubs = ideal.point_on_variety(self.field)
+                counter += 1
+                xSubs = ideal.point_on_variety(self.field, seed=seed + counter)
             self.subs(xSubs)
 
         elif algorithm == 'generic':
