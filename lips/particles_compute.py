@@ -17,7 +17,7 @@ import functools
 import operator
 
 from .tools import pSijk, pMi, pMVar, pd5, pDijk, pOijk, pPijk, pA2, pAu, pAd, pS2, pSu, pSd, \
-    pNB, pNB_open_begin, pNB_open_end, pNB_double_open, ptr5, ptr, det
+    pNB, pNB_open_begin, pNB_open_end, pNB_double_open, ptr5, ptr, det, rsubs_dict, bold_digits
 
 mpmath.mp.dps = 300
 
@@ -79,6 +79,7 @@ class Particles_Compute:
         Available variables: ⟨a|b⟩, [a|b], ⟨a|b+c|d], ⟨a|b+c|d+e|f], ..., s_ijk, Δ_ijk, Ω_ijk, Π_ijk, tr5_ijkl"""
 
         # Consistency of string check is left to ast parser.
+        temp_string = rsubs_dict(temp_string, bold_digits)
 
         if ptr5.findall(temp_string) != []:                         # tr5_ijkl [i|j|k|l|i⟩ - ⟨i|j|k|l|i]
             abcd = ptr5.findall(temp_string)[0][0 if "_" in temp_string else 1]
