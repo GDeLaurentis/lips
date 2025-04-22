@@ -109,7 +109,7 @@ class Particle(object):
         return self.four_mom[key]
 
     def __hash__(self):
-        if abs(self.mass) <= self.field.tollerance:
+        if abs(self.m2) <= self.field.tollerance:
             return hash(tuple([tuple(self.r_sp_d.flatten()), tuple(self.l_sp_d.flatten())]))
         else:
             return hash(tuple(self.r2_sp.flatten()))
@@ -508,6 +508,9 @@ class Particle(object):
         return lsq
 
     @property
-    def mass(self):
-        # Technically this is the mass squared - might want to rename
+    def m2(self):
         return self.lsq()
+
+    @property
+    def m(self):
+        return self.field.sqrt(self.lsq())

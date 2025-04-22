@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for spinor strings with two open indices, e.g.: `|1+2|3|4|`. The first open index is assumed to be a lower alpha.
 - Raising and lowering of spinor indices does works in the presence of additional spin indices.
 - `Particles.cluster` accepts a new keyword arguement `massive_fermions`, which allows to specify the states of the fermions. E.g. `massive_fermions=((3, 'u', all), (4, 'd', all))` results in tensor output with open indices IJ, or `massive_fermions=((3, 'u', 1), (4, 'd', 1))` picks the scalar I=1, J=1 component.
+- Support for bold numbers representing spinors of massive particles. If a bold number appears where e.g. an integer or rational number should be, the evaluation will fail.
 
 ### Changed
 
@@ -22,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Missleading `Particles.masses` and `Particle.mass` no longer exist (they used to return squared masses). Use `Particles.ms`, `Particles.m2s`, `Particle.m`, `Particle.m2` instead.
 - Sphinx fails if autodoc fails, instead of quitely raising a warning.
 
 ### Deprecated

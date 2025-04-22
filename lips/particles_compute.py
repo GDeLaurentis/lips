@@ -74,12 +74,12 @@ class Particles_Compute:
             return self.ee(j, i)
 
     @as_scalar_if_scalar
-    def compute(self, temp_string):
+    def compute(self, original_temp_string):
         """Computes spinor strings.\n
         Available variables: ⟨a|b⟩, [a|b], ⟨a|b+c|d], ⟨a|b+c|d+e|f], ..., s_ijk, Δ_ijk, Ω_ijk, Π_ijk, tr5_ijkl"""
 
         # Consistency of string check is left to ast parser.
-        temp_string = rsubs_dict(temp_string, bold_digits)
+        temp_string = rsubs_dict(original_temp_string, bold_digits)
 
         if ptr5.findall(temp_string) != []:                         # tr5_ijkl [i|j|k|l|i⟩ - ⟨i|j|k|l|i]
             abcd = ptr5.findall(temp_string)[0][0 if "_" in temp_string else 1]
@@ -273,4 +273,4 @@ class Particles_Compute:
             return res
 
         # if nothing matches, use abstract syntactic tree parser
-        return self._eval(temp_string)
+        return self._eval(original_temp_string)

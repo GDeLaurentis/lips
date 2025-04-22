@@ -115,7 +115,7 @@ def test_particles_compute_Mandelstam():
     oParticles = Particles(9)
     temp_string = "s_1234"
     ijk = list(map(int, pSijk.findall(temp_string)[0]))
-    assert sum([oParticles[_i] for _i in ijk]).mass == oParticles(temp_string)
+    assert sum([oParticles[_i] for _i in ijk]).m2 == oParticles(temp_string)
 
 
 def test_particles_compute_three_mass_gram():
@@ -158,3 +158,15 @@ def test_particles_compute_with_levicivita_and_transpose():
     oPs = Particles(6, field=Field("finite field", 2 ** 31 - 1, 1), seed=None)
     assert oPs("[3^|1+2|5_⟩") == oPs("⟨5_|1+2|3^]")
     assert 'ϵ' in oPs._parse("[3^|1+2|5_⟩") and 'transpose' in oPs._parse("[3^|1+2|5_⟩")
+
+
+def test_particles_compute_bold_numbers():
+    oPs = Particles(8, field=Field("finite field", 2 ** 31 - 19, 1), seed=0)
+    oPs._singular_variety(("⟨34⟩+[34]", "⟨34⟩-⟨56⟩", "⟨56⟩+[56]"), (1, 1, 1))
+    oPs.mt2 = oPs("s_34")
+    oPs.mt = oPs("<34>")
+    oPs = oPs.cluster([[1, ], [2, ], [3, 4], [5, 6], [7, 8]], massive_fermions=((3, 'u', 1), (4, 'd', 1)))
+    assert numpy.all(oPs("4|𝟒]") == 4 * oPs("|𝟒]"))
+    assert numpy.all(oPs("|𝟒|𝟒]") == oPs("|𝟒|") @ oPs("|𝟒]"))
+    with pytest.raises(SyntaxError):
+        oPs("𝟒|𝟒⟩")

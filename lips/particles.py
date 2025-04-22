@@ -103,9 +103,14 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
         return sum([oParticle.r2_sp for oParticle in self])
 
     @property
-    def masses(self):
+    def m2s(self):
         """Masses squared of all particles in phase space."""
-        return [oParticle.mass for oParticle in self]
+        return [oParticle.m2 for oParticle in self]
+
+    @property
+    def ms(self):
+        """Masses of all particles in phase space."""
+        return [oParticle.m for oParticle in self]
 
     @property
     def internal_masses_dict(self):
@@ -295,7 +300,7 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
 
     def onshell_relation_check(self, silent=True):
         """Returns true if all on-shell relations are satisfied."""
-        onshell_violation = max(map(abs, flatten(self.masses)))
+        onshell_violation = max(map(abs, flatten(self.m2s)))
         if silent is False:
             print("The largest on shell violation is {}".format(float(onshell_violation) if type(onshell_violation) is mpmath.mpf else onshell_violation))
         if onshell_violation > self.field.tollerance:
