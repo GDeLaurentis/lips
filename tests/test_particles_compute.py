@@ -34,8 +34,8 @@ def test_particles_compute_lNB(field):
     assert abs(oParticles("⟨1|2+3|4]") - oParticles("⟨1|2⟩[2|4]+⟨1|3⟩[3|4]")) <= field.tollerance
     assert abs(oParticles("⟨1|(2-3)|4]") - oParticles("⟨1|2-3|4]")) <= field.tollerance
     assert abs(oParticles("⟨1|(2+3)|4]") - oParticles("⟨1|2+3|4]")) <= field.tollerance
-    assert abs(oParticles("⟨1|(2)|4]") - oParticles("⟨1|2|4]")) <= field.tollerance
-    assert abs(oParticles("⟨1|(3)|4]") - oParticles("⟨1|3|4]")) <= field.tollerance
+    assert abs(oParticles("2⟨1|(2)|4]") - oParticles("2⟨1|2|4]")) <= field.tollerance
+    assert abs(oParticles("123⟨1|(3)|4]") - oParticles("123⟨1|3|4]")) <= field.tollerance
 
 
 @pytest.mark.parametrize("field", [mpc, modp, padic, ])
@@ -166,11 +166,17 @@ def test_particles_compute_with_levicivita_and_transpose():
 
 def test_particles_compute_bold_numbers():
     oPs = Particles(8, field=Field("finite field", 2 ** 31 - 19, 1), seed=0)
-    oPs._singular_variety(("⟨34⟩+[34]", "⟨34⟩-⟨56⟩", "⟨56⟩+[56]"), (1, 1, 1))
-    oPs.mt2 = oPs("s_34")
-    oPs.mt = oPs("<34>")
     oPs = oPs.cluster([[1, ], [2, ], [3, 4], [5, 6], [7, 8]], massive_fermions=((3, 'u', 1), (4, 'd', 1)))
     assert numpy.all(oPs("4|𝟒]") == 4 * oPs("|𝟒]"))
     assert numpy.all(oPs("|𝟒|𝟒]") == oPs("|𝟒|") @ oPs("|𝟒]"))
     with pytest.raises(SyntaxError):
         oPs("𝟒|𝟒⟩")
+
+
+def test_particles_eval_moderately_complicated_expression():
+    oPs = Particles(8, field=Field("finite field", 2 ** 31 - 19, 1), seed=0)
+    oPs._singular_variety(("⟨34⟩+[34]", "⟨34⟩-⟨56⟩", "⟨56⟩+[56]"), (1, 1, 1))
+    oPs.mt = oPs("<34>")
+    oPs = oPs.cluster([[1, ], [2, ], [3, 4], [5, 6], [7, 8]], massive_fermions=((3, 'u', 1), (4, 'd', 1)))
+    # just check it can be evaluated
+    oPs("+(+1/48mt²(⟨2|(3)|1+2|4|1]-⟨2|4|(1+2)|3|1])tr(1+2|3+4)(s_124-s_3)²s_34(s_34-4s_3)([3|4]-⟨3|4⟩))/(⟨1|2⟩[1|2]Δ_12|3|4|5²)")

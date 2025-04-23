@@ -43,7 +43,7 @@ pDijk_adjacent = re.compile(r'(?:Δ_(\d+)(?![\d\|]))')
 pDijk_non_adjacent = re.compile(r'(?:Δ_(\d+(?:\|\d+)*))')
 # p3B = re.compile(r'(?:\u27e8|\[)(\d+)(?:\|\({0,1})([\d+[\+|-]*]*)(?:\){0,1}\|)(\d+)(?:\u27e9|\])')
 # pNB = re.compile(r'((?:⟨|\[)\d+\|(?:(?:\([\d+\+|-]{1,}\))|(?:[\d+\+|-]{1,}))*\|\d+(?:⟩|\]))')  # this messes up on strings like: '|2⟩⟨1|4+5|3|+|3|4+5|2⟩⟨1|'
-pNB = re.compile(r'((?:<|⟨|\[)\d+\|(?:\(?(?:\d+[\+|-]?)+\)?)+\|\d+(?:⟩|\]|>))')
+pNB = re.compile(r'((?:<|⟨|\[)\d+\|(?:\(?(?:\d+[\+|-]?)+\)?\|?)+\|\d+(?:⟩|\]|>))')
 pNB_open_begin = re.compile(
     r'(?<![\(\[⟨<]\d)(?<![\+|-]\d\))(?<![\+|-]\d)'  # negative lookbehind
     r'(?<!_\d)(?<!_\d\d)(?<!_\d\d\d)(?<!_\d\d\d\d)'  # negative lookbehind for e.g. Δ_
