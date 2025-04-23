@@ -45,29 +45,37 @@ pDijk_non_adjacent = re.compile(r'(?:Δ_(\d+(?:\|\d+)*))')
 # pNB = re.compile(r'((?:⟨|\[)\d+\|(?:(?:\([\d+\+|-]{1,}\))|(?:[\d+\+|-]{1,}))*\|\d+(?:⟩|\]))')  # this messes up on strings like: '|2⟩⟨1|4+5|3|+|3|4+5|2⟩⟨1|'
 pNB = re.compile(r'((?:<|⟨|\[)\d+\|(?:\(?(?:\d+[\+|-]?)+\)?\|?)+\|\d+(?:⟩|\]|>))')
 pNB_open_begin = re.compile(
+    r'(?<!\(\')'  # negative lookbehind for already matched expression
     r'(?<![\(\[⟨<]\d)(?<![\+|-]\d\))(?<![\+|-]\d)'  # negative lookbehind
     r'(?<!_\d)(?<!_\d\d)(?<!_\d\d\d)(?<!_\d\d\d\d)'  # negative lookbehind for e.g. Δ_
     r'(\|(?:(?:\([\d]+(?:[\+|-]\d+)*\))|(?:[\d]+(?:[\+|-]\d+)*))+\|'  # capture
     r'\d+[⟩\]])'  # capture end
+    r'(?!\'\))'  # negative lookahead for already matched expression
 )
 pNB_open_end = re.compile(
+    r'(?<!\(\')'  # negative lookbehind for already matched expression
     r'([⟨<\[]\d+'  # capture beginning
     r'\|(?:(?:\([\d+|-]+(?:[\+|-]\d+)*\))|(?:[\d]+(?:[\+|-]\d+)*))+\|)'  # capture
     r'(?!\d[⟩>\]])(?!\d[\+|-])(?!\(\d[\+|-])'  # negative lookahead
+    r'(?!\'\))'  # negative lookahead for already matched expression
 )
 pNB_double_open = re.compile(
+    r'(?<!\(\')'  # negative lookbehind for already matched expression
     r'(?<!\'\[\d\|\'\)\]\]\)\)\[0:1, :\]@)'  # negative lookbehind to disambiguate open index position
     r'(?<![\(\[⟨<]\d)(?<![\+|-]\d\))(?<![\+|-]\d)'  # negative lookbehind
     r'(?<!_\d)(?<!_\d\d)(?<!_\d\d\d)(?<!_\d\d\d\d)'  # negative lookbehind for e.g. Δ_
     r'(\|(?:(?:\([\d+|-]+(?:[\+|-]\d+)*\))|(?:[\d]+(?:[\+|-]\d+)*))+\|)'  # capture
     r'(?!\d[⟩>\]])(?!\d[\+|-])(?!\(\d[\+|-])'  # negative lookahead
+    r'(?!\'\))'  # negative lookahead for already matched expression
 )
 pNB_double_open_disambiguate_alphadot = re.compile(  # DO NOT MODIFY HERE: COPY FROM ABOVE ONE
+    r'(?<!\(\')'  # negative lookbehind for already matched expression
     r'(?<=\'\[\d\|\'\)\]\]\)\)\[0:1, :\]@)'  # positive lookbehind to disambiguate open index position
     r'(?<![\(\[⟨<]\d)(?<![\+|-]\d\))(?<![\+|-]\d)'  # negative lookbehind
     r'(?<!_\d)(?<!_\d\d)(?<!_\d\d\d)(?<!_\d\d\d\d)'  # negative lookbehind for e.g. Δ_
     r'(\|(?:(?:\([\d+|-]+(?:[\+|-]\d+)*\))|(?:[\d]+(?:[\+|-]\d+)*))+\|)'  # capture
     r'(?!\d[⟩>\]])(?!\d[\+|-])(?!\(\d[\+|-])'  # negative lookahead
+    r'(?!\'\))'  # negative lookahead for already matched expression
 )
 ptr5 = re.compile(r'tr5(_\d+|\([\d\|\+\-]+\))')
 ptr = re.compile(r'(tr\((?:(?:\([\d+\+|-]{1,}\))|(?:[\d+\+|-]{1,})*)\))')
