@@ -10,6 +10,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+### Changed
+
+### Fixed
+
+### Deprecated
+
+
+## [0.5.0] - 2025-04-23
+
+### Added
+
 - Support for arbitrary Gram determinants, e.g. for a box gram: `Δ_12|3|4|5`
 - Support for spinor strings with two open indices, e.g.: `|1+2|3|4|`. The first open index is assumed to be a lower alpha.
 - Raising and lowering of spinor indices does works in the presence of additional spin indices.
@@ -25,8 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Missleading `Particles.masses` and `Particle.mass` no longer exist (they used to return squared masses). Use `Particles.ms`, `Particles.m2s`, `Particle.m`, `Particle.m2` instead.
 - Sphinx fails if autodoc fails, instead of quitely raising a warning.
-
-### Deprecated
+- Fixed some spinor string regex parsing.
 
 
 ## [0.4.5] - 2025-01-31
@@ -78,8 +88,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed issue with `Particles.variety` not correctly recognizing when an hardcoded limit failed with p-adics.
 
-### Deprecated
-
 
 ## [0.4.1] - 2024-01-08
 
@@ -120,6 +128,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fixed issue where manipulations (such as via arithmetic operations) of `Particles` would lose track of the underlying field.
+
+### Deprecated
+
+-  Import of Field from lips is deprecated. Use [syngular](https://github.com/GDeLaurentis/syngular).
 
 
 ## [0.3.1] - 2023-01-16

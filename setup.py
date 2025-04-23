@@ -1,9 +1,12 @@
 from setuptools import setup, find_packages
 from pathlib import Path
-from version import __version__ as version
 
 this_directory = Path(__file__).parent
 long_description = (this_directory / "README.md").read_text()
+
+with (this_directory / "lips" / "version.py").open() as f:
+    version = f.read().split(" = '")[1].split("'\n")[0]
+
 
 setup(
     name='lips',
@@ -37,5 +40,6 @@ setup(
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
         'Programming Language :: Python :: 3.12',
+        'Programming Language :: Python :: 3.13',
     ],
 )

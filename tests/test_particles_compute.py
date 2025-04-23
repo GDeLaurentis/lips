@@ -32,6 +32,10 @@ def test_particles_compute_lNB(field):
     oParticles = Particles(6, field=field)
     assert abs(oParticles("⟨1|2-3|4]") - oParticles("⟨1|2⟩[2|4]-⟨1|3⟩[3|4]")) <= field.tollerance
     assert abs(oParticles("⟨1|2+3|4]") - oParticles("⟨1|2⟩[2|4]+⟨1|3⟩[3|4]")) <= field.tollerance
+    assert abs(oParticles("⟨1|(2-3)|4]") - oParticles("⟨1|2-3|4]")) <= field.tollerance
+    assert abs(oParticles("⟨1|(2+3)|4]") - oParticles("⟨1|2+3|4]")) <= field.tollerance
+    assert abs(oParticles("⟨1|(2)|4]") - oParticles("⟨1|2|4]")) <= field.tollerance
+    assert abs(oParticles("⟨1|(3)|4]") - oParticles("⟨1|3|4]")) <= field.tollerance
 
 
 @pytest.mark.parametrize("field", [mpc, modp, padic, ])
