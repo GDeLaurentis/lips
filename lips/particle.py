@@ -109,7 +109,7 @@ class Particle(object):
         return self.four_mom[key]
 
     def __hash__(self):
-        if abs(self.mass) <= self.field.tollerance:
+        if abs(self.m2) <= self.field.tollerance:
             return hash(tuple([tuple(self.r_sp_d.flatten()), tuple(self.l_sp_d.flatten())]))
         else:
             return hash(tuple(self.r2_sp.flatten()))
@@ -349,9 +349,14 @@ class Particle(object):
     def angles_for_squares(self):
         """Flips left and right spinors."""
         if self.l_sp_d is not None and self.r_sp_d is not None:  # massive scalars do not have these defined
-            l_sp_d_shape, r_sp_d_shape = self.l_sp_d.shape, self.r_sp_d.shape
-            self._l_sp_d, self._r_sp_d = self._r_sp_d, self._l_sp_d
-            self._l_sp_d.shape, self._r_sp_d.shape = l_sp_d_shape, r_sp_d_shape
+            self._l_sp_d, self._r_sp_d = self._r_sp_d.T, self._l_sp_d.T
+            if hasattr(self, 'spin_index'):
+                if self.spin_index == 'u':
+                    self._l_sp_d *= -1
+                elif self.spin_index == 'd':
+                    self._r_sp_d *= -1
+                else:
+                    raise Exception("Spin index not understood.")
             self._sps_d_to_sps_u()
         self._r2_sp = self._r2_sp.T
         self._r2_sp_b = self._r2_sp_b.T
@@ -441,25 +446,19 @@ class Particle(object):
         self._l_sp_d.shape = (1, 2)
         self._r2_sp_b = numpy.dot(self.r_sp_d, self.l_sp_d)
 
-    def _r_sp_d_to_r_sp_u(self):
-        self._r_sp_u = numpy.dot(LeviCivita, self.r_sp_d)
-        self._r_sp_u.shape = (1, 2)    # row vector
+    def _r_sp_d_to_r_sp_u(self):  # λ^α = ϵ^αβ λ_β
+        """⟨a| = λ^α = ϵ^αβ λ_β = ϵ |a⟩ or ⟨a^I| = λ^Iα = ϵ^αβ λ_β^I = ϵ |a^I⟩"""
+        self._r_sp_u = (LeviCivita @ self.r_sp_d).T
 
     def _l_sp_d_to_l_sp_u(self):
-        self._l_sp_d.shape = (2, 1)    # temporary column vector
-        self._l_sp_u = numpy.dot(LeviCivita, self.l_sp_d)
-        self._l_sp_d.shape = (1, 2)    # back to row vector
-        self._l_sp_u.shape = (2, 1)    # column vector
+        """|a] = λ^α˙ = ϵ^α˙β˙ λ_β˙ = λ_β˙ ϵ^β˙α˙ = [a| ϵ or |a^I] = λ^α˙I = ϵ^α˙β˙ λ^I_β˙ = λ^I_β˙ ϵ^β˙α˙ = [a^I|"""
+        self._l_sp_u = (self.l_sp_d @ LeviCivita.T).T
 
     def _r_sp_u_to_r_sp_d(self):
-        self._r_sp_u.shape = (2, 1)    # temporary column vector
-        self._r_sp_d = numpy.dot(numpy.transpose(LeviCivita), self.r_sp_u)
-        self._r_sp_u.shape = (1, 2)    # back to row vector
-        self._r_sp_d.shape = (2, 1)    # column vector
+        self._r_sp_d = (self.r_sp_u @ LeviCivita).T
 
     def _l_sp_u_to_l_sp_d(self):
-        self._l_sp_d = numpy.dot(numpy.transpose(LeviCivita), self.l_sp_u)
-        self._l_sp_d.shape = (1, 2)    # row vector
+        self._l_sp_d = (LeviCivita.T @ self.l_sp_u).T
 
     def _sps_u_to_sps_d(self):
         self._l_sp_u_to_l_sp_d()
@@ -509,6 +508,9 @@ class Particle(object):
         return lsq
 
     @property
-    def mass(self):
-        # Technically this is the mass squared - might want to rename
+    def m2(self):
         return self.lsq()
+
+    @property
+    def m(self):
+        return self.field.sqrt(self.lsq())

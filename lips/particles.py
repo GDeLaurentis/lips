@@ -19,9 +19,9 @@ import sympy
 from sympy import NotInvertible
 
 from syngular import Field
-from pyadic import PAdic
+from pyadic import PAdic, ModP
 
-from .tools import MinkowskiMetric, flatten, subs_dict, pNB, myException, indexing_decorator, pAu, pAd, pSu, pSd, pMVar
+from .tools import MinkowskiMetric, flatten, subs_dict, pNB, myException, indexing_decorator, pAu, pAd, pSu, pSd, pMVar, LeviCivita
 from .particle import Particle
 from .particles_compute import Particles_Compute
 from .particles_eval import Particles_Eval
@@ -29,12 +29,14 @@ from .hardcoded_limits.particles_set import Particles_Set
 from .hardcoded_limits.particles_set_pair import Particles_SetPair
 from .algebraic_geometry.particles_singular_variety import Particles_SingularVariety
 from .particles_variety import Particles_Variety
+from .particles_slices import Particles_Slices
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 
-class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetPair, Particles_SingularVariety, Particles_Variety, list):
+class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetPair, Particles_SingularVariety,
+                Particles_Variety, Particles_Slices, list):
     """Describes the kinematics of n particles. Base one list of Particle objects."""
 
     # MAGIC METHODS
@@ -101,9 +103,14 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
         return sum([oParticle.r2_sp for oParticle in self])
 
     @property
-    def masses(self):
+    def m2s(self):
+        """Masses squared of all particles in phase space."""
+        return [oParticle.m2 for oParticle in self]
+
+    @property
+    def ms(self):
         """Masses of all particles in phase space."""
-        return [oParticle.mass for oParticle in self]
+        return [oParticle.m for oParticle in self]
 
     @property
     def internal_masses_dict(self):
@@ -152,14 +159,35 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
         from .symmetries import identity
         return self.image(identity(len(self)))
 
-    def cluster(self, llIntegers):
-        """Returns clustered particle objects according to lists of lists of integers (e.g. corners of one loop diagram)."""
+    def cluster(self, llIntegers, massive_fermions=None):
+        """Returns clustered particle objects according to lists of lists of integers (e.g. corners of one loop diagram).
+        Massive legs are by default massive scalars.
+        Massive fermions can be specificed as e.g.: massive_fermions=((3, 'u', all), (4, 'd', all)))
+        """
         drule1 = dict(zip(["s" + "".join(map(str, entry)) for entry in llIntegers], [f"s{i}" for i in range(1, len(llIntegers) + 1)]))
         drule2 = dict(zip(["s_" + "".join(map(str, entry)) for entry in llIntegers], [f"s_{i}" for i in range(1, len(llIntegers) + 1)]))
         clustered_internal_masses = {key: (subs_dict(val, drule1 | drule2) if isinstance(val, str) else val)
                                      for key, val in self.internal_masses_dict.items()}
-        return Particles([sum([self[i] for i in corner_as_integers]) for corner_as_integers in llIntegers],
-                         field=self.field, fix_mom_cons=False, internal_masses=clustered_internal_masses)
+        selfClustered = Particles([sum([self[i] for i in corner_as_integers]) for corner_as_integers in llIntegers],
+                                  field=self.field, fix_mom_cons=False, internal_masses=clustered_internal_masses)
+        if massive_fermions is not None:
+            for leg, index_position, index_value in massive_fermions:
+                assert len(llIntegers[leg - 1]) == 2
+                a, b = llIntegers[leg - 1]
+                selfClustered[leg]._r_sp_d = numpy.block([self(f"|{a}⟩"), self(f"|{b}⟩")])  # |bold leg> = |leg^I> = (lambda_leg)_alpha^I
+                selfClustered[leg]._l_sp_d = numpy.block([[self(f"[{a}|")], [self(f"[{b}|")]])  # [bold leg| = [leg_I| = (tilde-lambda_leg)_I_alpha
+                if index_position == "u":
+                    selfClustered[leg]._l_sp_d = -LeviCivita @ selfClustered[leg]._l_sp_d  # [bold leg| = [leg^I||
+                elif index_position == "d":
+                    selfClustered[leg]._r_sp_d = selfClustered[leg]._r_sp_d @ -LeviCivita  # |bold leg> = |leg_I>
+                else:
+                    raise Exception("Massive fermion spin index position must be either 'u' or 'd'.")
+                selfClustered[leg].spin_index = index_position
+                if isinstance(index_value, int):
+                    selfClustered[leg]._r_sp_d = selfClustered[leg]._r_sp_d[:, index_value - 1:index_value]
+                    selfClustered[leg]._l_sp_d = selfClustered[leg]._l_sp_d[index_value - 1:index_value, :]
+                selfClustered[leg]._sps_d_to_sps_u()
+        return selfClustered
 
     def make_analytical_d(self, indepVars=None, symbols=('a', 'b', 'c', 'd')):
         """ """
@@ -202,6 +230,44 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
             subs_dict.update({lc[i]: iParticle.l_sp_d[0, 0], ld[i]: iParticle.l_sp_d[0, 1]})
         return subs_dict
 
+    def subs(self, myDict):
+        """For all rank-1 spinor components, substitutes symbols with values from myDict."""
+        for oP in self:
+            if isinstance(oP.r_sp_d[0, 0], (sympy.Add, sympy.Mul, sympy.Symbol)):
+                oP.r_sp_d[0, 0] = oP.r_sp_d[0, 0].subs(myDict)
+                if isinstance(oP.r_sp_d[0, 0], sympy.Integer) and self.field.name == "finite field":
+                    oP.r_sp_d[0, 0] = ModP(oP.r_sp_d[0, 0], self.field.characteristic)
+                elif isinstance(oP.r_sp_d[0, 0], sympy.Integer) and self.field.name == "padic":
+                    oP.r_sp_d[0, 0] = PAdic(oP.r_sp_d[0, 0], self.field.characteristic, self.field.digits)
+                else:
+                    oP.r_sp_d[0, 0] = sympy.poly(oP.r_sp_d[0, 0], modulus=self.field.characteristic ** self.field.digits).as_expr()
+            if isinstance(oP.r_sp_d[1, 0], (sympy.Add, sympy.Mul, sympy.Symbol)):
+                oP.r_sp_d[1, 0] = oP.r_sp_d[1, 0].subs(myDict)
+                if isinstance(oP.r_sp_d[1, 0], sympy.Integer) and self.field.name == "finite field":
+                    oP.r_sp_d[1, 0] = ModP(oP.r_sp_d[1, 0], self.field.characteristic)
+                elif isinstance(oP.r_sp_d[1, 0], sympy.Integer) and self.field.name == "padic":
+                    oP.r_sp_d[1, 0] = PAdic(oP.r_sp_d[1, 0], self.field.characteristic, self.field.digits)
+                else:
+                    oP.r_sp_d[1, 0] = sympy.poly(oP.r_sp_d[1, 0], modulus=self.field.characteristic ** self.field.digits).as_expr()
+            oP.r_sp_d = oP.r_sp_d  # trigger setter
+            if isinstance(oP.l_sp_d[0, 0], (sympy.Add, sympy.Mul, sympy.Symbol)):
+                oP.l_sp_d[0, 0] = oP.l_sp_d[0, 0].subs(myDict)
+                if isinstance(oP.l_sp_d[0, 0], sympy.Integer) and self.field.name == "finite field":
+                    oP.l_sp_d[0, 0] = ModP(oP.l_sp_d[0, 0], self.field.characteristic)
+                elif isinstance(oP.l_sp_d[0, 0], sympy.Integer) and self.field.name == "padic":
+                    oP.l_sp_d[0, 0] = PAdic(oP.l_sp_d[0, 0], self.field.characteristic, self.field.digits)
+                else:
+                    oP.l_sp_d[0, 0] = sympy.poly(oP.l_sp_d[0, 0], modulus=self.field.characteristic ** self.field.digits).as_expr()
+            if isinstance(oP.l_sp_d[0, 1], (sympy.Add, sympy.Mul, sympy.Symbol)):
+                oP.l_sp_d[0, 1] = oP.l_sp_d[0, 1].subs(myDict)
+                if isinstance(oP.l_sp_d[0, 1], sympy.Integer) and self.field.name == "finite field":
+                    oP.l_sp_d[0, 1] = ModP(oP.l_sp_d[0, 1], self.field.characteristic)
+                elif isinstance(oP.l_sp_d[0, 1], sympy.Integer) and self.field.name == "padic":
+                    oP.l_sp_d[0, 1] = PAdic(oP.l_sp_d[0, 1], self.field.characteristic, self.field.digits)
+                else:
+                    oP.l_sp_d[0, 1] = sympy.poly(oP.l_sp_d[0, 1], modulus=self.field.characteristic ** self.field.digits).as_expr()
+            oP.l_sp_d = oP.l_sp_d  # trigger setter
+
     def fix_mom_cons(self, A=0, B=0, real_momenta=False, axis=1):   # using real momenta changes both |⟩ and |] of A & B
         """Fixes momentum conservation using particles A and B."""
         if A == 0 and B == 0:                                       # defaults to random particles to fix mom cons
@@ -234,7 +300,7 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
 
     def onshell_relation_check(self, silent=True):
         """Returns true if all on-shell relations are satisfied."""
-        onshell_violation = max(map(abs, flatten(self.masses)))
+        onshell_violation = max(map(abs, flatten(self.m2s)))
         if silent is False:
             print("The largest on shell violation is {}".format(float(onshell_violation) if type(onshell_violation) is mpmath.mpf else onshell_violation))
         if onshell_violation > self.field.tollerance:

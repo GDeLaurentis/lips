@@ -10,15 +10,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Support for arbitrary Gram determinants, e.g. for a box gram: `Δ_12|3|4|5`
-
 ### Changed
 
 ### Fixed
 
-- Sphinx fails if autodoc fails, instead of quitely raising a warning.
-
 ### Deprecated
+
+
+## [0.5.0] - 2025-04-24
+
+### Added
+
+- Support for arbitrary Gram determinants, e.g. for a box gram: `Δ_12|3|4|5`
+- Support for spinor strings with two open indices, e.g.: `|1+2|3|4|`. The first open index is assumed to be a lower alpha.
+- Raising and lowering of spinor indices does works in the presence of additional spin indices.
+- `Particles.cluster` accepts a new keyword arguement `massive_fermions`, which allows to specify the states of the fermions. E.g. `massive_fermions=((3, 'u', all), (4, 'd', all))` results in tensor output with open indices IJ, or `massive_fermions=((3, 'u', 1), (4, 'd', 1))` picks the scalar I=1, J=1 component.
+- Support for bold numbers representing spinors of massive particles. If a bold number appears where e.g. an integer or rational number should be, the evaluation will fail.
+
+### Changed
+
+- Support for Particles string evaluation containing sqrt (in arbitrary field insteald of only with `mpmath`).
+- Particles compute and eval may return a tensor if additional spin indices are present.
+
+### Fixed
+
+- Missleading `Particles.masses` and `Particle.mass` no longer exist (they used to return squared masses). Use `Particles.ms`, `Particles.m2s`, `Particle.m`, `Particle.m2` instead.
+- Sphinx fails if autodoc fails, instead of quitely raising a warning.
+- Fixed some spinor string regex parsing.
 
 
 ## [0.4.5] - 2025-01-31
@@ -70,8 +88,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed issue with `Particles.variety` not correctly recognizing when an hardcoded limit failed with p-adics.
 
-### Deprecated
-
 
 ## [0.4.1] - 2024-01-08
 
@@ -113,6 +129,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed issue where manipulations (such as via arithmetic operations) of `Particles` would lose track of the underlying field.
 
+### Deprecated
+
+-  Import of Field from lips is deprecated. Use [syngular](https://github.com/GDeLaurentis/syngular).
+
 
 ## [0.3.1] - 2023-01-16
 
@@ -131,7 +151,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 [unreleased]: https://github.com/GDeLaurentis/lips/compare/v0.4.5...HEAD
-[0.4.4]: https://github.com/GDeLaurentis/lips/compare/v0.4.4...v0.4.5
+[0.4.5]: https://github.com/GDeLaurentis/lips/compare/v0.4.4...v0.4.5
 [0.4.4]: https://github.com/GDeLaurentis/lips/compare/v0.4.3...v0.4.4
 [0.4.3]: https://github.com/GDeLaurentis/lips/compare/v0.4.2...v0.4.3
 [0.4.2]: https://github.com/GDeLaurentis/lips/compare/v0.4.1...v0.4.2

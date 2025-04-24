@@ -57,7 +57,7 @@ class Particles_Variety:
         if mom_cons is False:
             raise myException("Momentum conservation is not satisfied: ", max(map(abs, flatten(self.total_mom))))
         elif on_shell is False:
-            raise myException("On shellness is not satisfied: ", max(map(abs, flatten(self.masses))))
+            raise myException("On shellness is not satisfied: ", max(map(abs, flatten(self.m2s))))
 
         if self.field.characteristic == 0:
             abs_diffs = [min(abs(self(invariant) - valuation), abs(self(invariant) + valuation))

@@ -34,7 +34,7 @@ class Particles_SetPair:
         if mom_cons is False:
             raise myException("Momentum conservation is not satisfied: ", max(map(abs, flatten(self.total_mom))))
         elif on_shell is False:
-            raise myException("On shellness is not satisfied: ", max(map(abs, flatten(self.masses))))
+            raise myException("On shellness is not satisfied: ", max(map(abs, flatten(self.m2s))))
         elif not all([abs_diff1 <= self.field.tollerance, abs_diff2 <= self.field.tollerance]):
             raise myException("Failed to set {} to {} and {} to {}. Instead got {} and {}. Absoute differences: {} and {}.".format(
                 t_s1, abs(t_v1), t_s2, abs(t_v2), abs(self.compute(t_s1)), abs(self.compute(t_s2)), abs_diff1, abs_diff2))

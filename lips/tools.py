@@ -9,6 +9,8 @@ import random
 import re
 import warnings
 
+from syngular import flatten  # noqa
+
 mpmath.mp.dps = 300
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -43,13 +45,15 @@ pS2 = re.compile(r'^(?:\[)(\d+)(?:\|)(\d+)(?:\])$')
 pSd = re.compile(r'^(?:\[)(\d+)(?:\|)$')
 pSu = re.compile(r'^(?:\|)(\d+)(?:\])$')
 p3B = re.compile(r'^(?:⟨|\[)(\d+)(?:\|\({0,1})([\d+[\+-]*]*)(?:\){0,1}\|)(\d+)(?:⟩|\])$')
-pNB = re.compile(r'^(?:⟨|\[)(?P<start>\d+)(?:\|)(?P<middle>(?:(?:\([\d+\+|-]{1,}\))|(?:[\d+\+|-]{1,}))*)(?:\|)(?P<end>\d+)(?:⟩|\])$')
-pNB_open_begin = re.compile(r'^(?:\|)(?P<middle>(?:(?:\([\d+|-]{1,}\))|(?:[\d+|-]{1,}))*)(?:\|)(?P<end>\d+)(?:⟩|\])$')
-pNB_open_end = re.compile(r'^(?:⟨|\[)(?P<start>\d+)(?:\|)(?P<middle>(?:(?:\([\d+|-]{1,}\))|(?:[\d+|-]{1,}))*)(?:\|)$')
+pNB = re.compile(r'^(?:<|⟨|\[)(?P<start>\d+)\|(?P<middle>(?:\(?(?:\d+[\+|-]?)+\)?\|?)+)\|(?P<end>\d+)(?:⟩|\]|>)$')
+pNB_open_begin = re.compile(r'^(?:\|)(?P<middle>(?:(?:\([\d]+(?:[\+|-]\d+)*\))|(?:[\d]+(?:[\+|-]\d+)*))+)(?:\|)(?P<end>\d+)(?:⟩|\])$')
+pNB_open_end = re.compile(r'^(?:⟨|\[)(?P<start>\d+)(?:\|)(?P<middle>(?:(?:\([\d]+(?:[\+|-]\d+)*\))|(?:[\d]+(?:[\+|-]\d+)*))+)(?:\|)$')
+pNB_double_open = re.compile(r'^(?:\|)(?P<middle>(?:(?:\([\d]+(?:[\+|-]\d+)*\))|(?:[\d]+(?:[\+|-]\d+)*))+)(?:\|)$')
 
 # '(⟨a|b|c+d|e|a]-⟨b|f|c+d|e|b])'  -  from two-loop five-point one-mass alphabet
 p5Bdiff = re.compile(r'^\(⟨(?P<a>\d+)\|(?P<b>\d+)\|\({0,1}(?P<cd>[\d+[\+]*]*)\){0,1}\|(?P<e>\d+)\|(?P=a)\]\-⟨(?P=b)\|(?P<f>\d+)\|\({0,1}(?P=cd)\){0,1}\|(?P=e)\|(?P=b)\]\)$')
 
+bold_digits = {'0': '𝟎', '1': '𝟏', '2': '𝟐', '3': '𝟑', '4': '𝟒', '5': '𝟓', '6': '𝟔', '7': '𝟕', '8': '𝟖', '9': '𝟗'}
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
@@ -61,33 +65,28 @@ def rand_frac():
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 
-def flatten(temp_list, recursion_level=0, treat_list_subclasses_as_list=True, treat_tuples_as_lists=False, max_recursion=None):
-    from sympy.matrices.dense import MutableDenseMatrix
-    from numpy import ndarray
-    flat_list = []
-    for entry in temp_list:
-        if type(entry) is list and (max_recursion is None or recursion_level < max_recursion):
-            flat_list += flatten(entry, recursion_level=recursion_level + 1, treat_list_subclasses_as_list=treat_list_subclasses_as_list,
-                                 treat_tuples_as_lists=treat_tuples_as_lists, max_recursion=max_recursion)
-        elif ((issubclass(type(entry), list) or type(entry) in [MutableDenseMatrix, ndarray]) and
-              treat_list_subclasses_as_list is True and (max_recursion is None or recursion_level < max_recursion)):
-            flat_list += flatten(entry, recursion_level=recursion_level + 1, treat_list_subclasses_as_list=treat_list_subclasses_as_list,
-                                 treat_tuples_as_lists=treat_tuples_as_lists, max_recursion=max_recursion)
-        elif (type(entry) is tuple and treat_tuples_as_lists is True and (max_recursion is None or recursion_level < max_recursion)):
-            flat_list += flatten(entry, recursion_level=recursion_level + 1, treat_list_subclasses_as_list=treat_list_subclasses_as_list,
-                                 treat_tuples_as_lists=treat_tuples_as_lists, max_recursion=max_recursion)
-        else:
-            flat_list += [entry]
-    return flat_list
+def subs_dict(text, substitutions, escape=True):
+    if escape:
+        pattern = re.compile("|".join(re.escape(k) for k in substitutions))
+        return pattern.sub(lambda m: substitutions[m.group(0)], text)
+    else:
+        # Build a list of (compiled_pattern, replacement)
+        patterns = [(re.compile(k), v) for k, v in substitutions.items()]
+        for pat, repl in patterns:
+            text = pat.sub(repl, text)
+        return text
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
-
-
-def subs_dict(text, substitutions):
-    pattern = re.compile("|".join(map(re.escape, substitutions.keys())))
-    result = pattern.sub(lambda match: substitutions[match.group(0)], text)
-    return result
+def rsubs_dict(text, substitutions, escape=True):
+    reverse_subs = {v: k for k, v in substitutions.items()}
+    if escape:
+        pattern = re.compile("|".join(re.escape(k) for k in reverse_subs))
+        return pattern.sub(lambda m: reverse_subs[m.group(0)], text)
+    else:
+        patterns = [(re.compile(k), v) for k, v in reverse_subs.items()]
+        for pat, repl in patterns:
+            text = pat.sub(repl, text)
+        return text
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #

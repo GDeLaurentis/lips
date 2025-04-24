@@ -76,3 +76,29 @@ def test_equality_after_pickle():
     oPs3 = oPs.image(('132456', False))
     assert oPs2 == oPs3
     assert pickle.dumps(oPs2) == pickle.dumps(oPs3)
+
+
+def test_particles_cluster_with_massive_fermions():
+    oPs = Particles(8, field=Field("finite field", 2 ** 31 - 19, 1), seed=0)
+    oPs._singular_variety(("⟨34⟩+[34]", "⟨34⟩-⟨56⟩", "⟨56⟩+[56]"), (1, 1, 1))
+    oPs.mt2 = oPs("s_34")
+    oPs.mt = - oPs("⟨34⟩")
+    oPsClusteredTensor = oPs.cluster([[1, ], [2, ], [3, 4], [5, 6], [7, 8]], massive_fermions=((3, 'u', all), (4, 'd', all)))
+    oPsClusteredTensor11 = oPs.cluster([[1, ], [2, ], [3, 4], [5, 6], [7, 8]], massive_fermions=((3, 'u', 1), (4, 'd', 1)))
+    oPsClusteredTensor12 = oPs.cluster([[1, ], [2, ], [3, 4], [5, 6], [7, 8]], massive_fermions=((3, 'u', 1), (4, 'd', 2)))
+    oPsClusteredTensor21 = oPs.cluster([[1, ], [2, ], [3, 4], [5, 6], [7, 8]], massive_fermions=((3, 'u', 2), (4, 'd', 1)))
+    oPsClusteredTensor22 = oPs.cluster([[1, ], [2, ], [3, 4], [5, 6], [7, 8]], massive_fermions=((3, 'u', 2), (4, 'd', 2)))
+    assert (oPsClusteredTensor("⟨3|5|4]") == numpy.array([[oPsClusteredTensor11("⟨3|5|4]"), oPsClusteredTensor12("⟨3|5|4]")],
+                                                          [oPsClusteredTensor21("⟨3|5|4]"), oPsClusteredTensor22("⟨3|5|4]")]])).all()
+
+
+def test_Dirac_equation():
+    oPs = Particles(6, field=Field("finite field", 2 ** 31 - 1, 1), seed=None)
+    oPsClustered = oPs.cluster([[1, ], [2, ], [3, 4], [5, 6], ], massive_fermions=((3, 'u', 1), (4, 'd', 1)))
+    oPsClustered.m = - oPs("⟨3|4⟩")
+    oPsClustered.mb = oPs("[3|4]")
+    assert oPsClustered("s_3") == oPsClustered.m * oPsClustered.mb
+    assert (oPsClustered("|3|3⟩") == - oPsClustered("m|3]")).all()
+    assert (oPsClustered("|3|3]") == - oPsClustered("mb|3⟩")).all()
+    assert (oPsClustered("⟨3|3|") == oPsClustered("m[3|")).all()
+    assert (oPsClustered("[3|3|") == oPsClustered("mb⟨3|")).all()
