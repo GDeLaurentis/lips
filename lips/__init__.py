@@ -18,6 +18,7 @@ Particles objects allow to:\n
 
 from syngular import Field                       # noqa
 
+from .version import __version__                 # noqa
 from .particle import Particle                   # noqa
 from .particles import Particles                 # noqa
 from .tools import myException, ldot, flatten    # noqa
