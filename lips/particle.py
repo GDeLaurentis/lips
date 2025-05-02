@@ -471,24 +471,12 @@ class Particle(object):
     # TWISTOR METHODS
 
     def randomise_twist(self):
-        self._twist_z = numpy.array([rand_frac(), rand_frac(), rand_frac(), rand_frac()])
-        self._r_sp_d = numpy.array([self._twist_z[0], self._twist_z[1]])
-        self._mu = numpy.array([self._twist_z[2], self._twist_z[3]])
+        self._twist_z = numpy.array([[self.field.random()], [self.field.random()], [self.field.random()], [self.field.random()]])
+        self.r_sp_d, self._mu = self._twist_z[:2, :], self._twist_z[2:, :]
 
     def comp_twist_x(self, other):
-        x21n = self._r_sp_d[0] * other._mu[0] - self._mu[0] * other._r_sp_d[0]
-        x21d = (self._r_sp_d[0] * other._r_sp_d[1] -
-                other._r_sp_d[0] * self._r_sp_d[1])
-        x21 = x21n / x21d
-        x11 = (self._mu[0] - self._r_sp_d[1] * x21) / self._r_sp_d[0]
-
-        x22n = self._r_sp_d[0] * other._mu[1] - self._mu[1] * other._r_sp_d[0]
-        x22d = (self._r_sp_d[0] * other._r_sp_d[1] -
-                other._r_sp_d[0] * self._r_sp_d[1])
-        x22 = x22n / x22d
-        x12 = (self._mu[1] - self._r_sp_d[1] * x22) / self._r_sp_d[0]
-
-        self._twist_x = numpy.array([[x11, x12], [x21, x22]])
+        """x^{˙αα} = (μⱼ^{˙α} λᵢ^α - μᵢ^{˙α} λⱼ^α ) / ⟨ij⟩"""
+        self._twist_x = (self._mu @ other.r_sp_u - other._mu @ self.r_sp_u) / (other.r_sp_u @ self.r_sp_d)[0, 0]
 
     def twist_x_to_mom(self, other):
         r_two_spinor = self._twist_x - other._twist_x
