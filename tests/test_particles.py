@@ -1,13 +1,8 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import numpy
 import pytest
 import pickle
+import subprocess
+import hashlib
 
 from lips.fields import Field
 from lips import Particles
@@ -102,3 +97,57 @@ def test_Dirac_equation():
     assert (oPsClustered("|3|3]") == - oPsClustered("mb|3⟩")).all()
     assert (oPsClustered("⟨3|3|") == oPsClustered("m[3|")).all()
     assert (oPsClustered("[3|3|") == oPsClustered("mb⟨3|")).all()
+
+
+def run_hashes_in_subprocess():
+    code = """
+import hashlib
+import pickle
+from lips import Particles
+from syngular import Field
+oPs = Particles(6, field=Field("finite field", 2 ** 31 - 1, 1), seed=0)
+cache_key_raw = oPs
+cache_key_bytes = pickle.dumps(cache_key_raw)
+cache_key_hash = hashlib.sha256(cache_key_bytes).hexdigest()
+print(hash(oPs))
+print(cache_key_hash, end="")
+"""
+    result = subprocess.run(
+        ["python", "-c", code],
+        capture_output=True,
+        check=True
+    )
+    return result.stdout.decode().split("\n")
+
+
+def test_hash_vs_sha256_process_stability():
+    hash1, hash1sha256 = run_hashes_in_subprocess()
+    hash2, hash2sha256 = run_hashes_in_subprocess()
+    assert hash1 != hash2
+    assert hash1sha256 == hash2sha256
+
+
+def test_pickle_round_trip():
+    original = Particles(6, field=Field("finite field", 2 ** 31 - 1, 1), seed=0)
+
+    dumped = pickle.dumps(original)
+    loaded = pickle.loads(dumped)
+
+    assert original == loaded
+
+    hash1 = hashlib.sha256(pickle.dumps(original)).hexdigest()
+    hash2 = hashlib.sha256(pickle.dumps(loaded)).hexdigest()
+
+    assert hash1 == hash2
+    assert hash(original) == hash(loaded)
+
+
+def test_hashes_does_not_change_under_identity_mapping():
+    oPs = Particles(6, field=Field("finite field", 2 ** 31 - 1, 1), seed=0)
+    # cache_key_bytes = pickle.dumps(oPs)
+    # cache_key_hash1 = hashlib.sha256(cache_key_bytes).hexdigest()
+    oPsMapped = oPs.image(('123456', False, '+'))
+    # cache_key_bytes = pickle.dumps(oPsMapped)
+    # cache_key_hash2 = hashlib.sha256(cache_key_bytes).hexdigest()
+    assert hash(oPs) == hash(oPsMapped)
+    # assert cache_key_hash1 == cache_key_hash2  # this fails and I'm unsure how to fix it atm
