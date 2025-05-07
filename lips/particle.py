@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 #   ___          _   _    _
 #  | _ \__ _ _ _| |_(_)__| |___
 #  |  _/ _` | '_|  _| / _| / -_)
@@ -9,7 +7,6 @@
 
 import numpy
 import sympy
-import random
 import lips
 
 from copy import copy
@@ -17,9 +14,7 @@ from sympy import NotInvertible
 
 from syngular import Field
 
-from pyadic import PAdic, ModP
 from pyadic.field_extension import FieldExtension
-from pyadic.gaussian_rationals import GaussianRational, rand_rat_frac
 
 from .tools import MinkowskiMetric, LeviCivita, rand_frac, Pauli, Pauli_bar, flatten
 
@@ -43,7 +38,7 @@ class Particle(object):
         """
         # Should check the field is consistent with the kinematics info, or even compute it from there.
         self.field = field
-        if kinematics is None and field.name in ("mpc", "gaussian rational", "finite field", "padic"):
+        if kinematics is None and field.name in ("mpc", "gaussian rational", "rational", "finite field", "padic"):
             self.randomise(real_momentum=real_momentum)
         elif isinstance(kinematics, numpy.ndarray) and kinematics.shape == (4, ):
             self.four_mom = kinematics
@@ -303,12 +298,8 @@ class Particle(object):
     def randomise(self, real_momentum=False):
         if self.field.name == "mpc":
             self.randomise_mpc(real_momentum=real_momentum)
-        elif self.field.name == "gaussian rational":
-            self.randomise_rational()
-        elif self.field.name == "finite field":
-            self.randomise_finite_field()
-        elif self.field.name == "padic":
-            self.randomise_padic()
+        elif self.field.name in ["rational", "gaussian rational", "finite field", "padic"]:
+            self.randomise_spinors_in_field()
 
     def randomise_mpc(self, real_momentum=False):
         """Randomises its momentum."""
@@ -323,28 +314,12 @@ class Particle(object):
         p_zero = self.field.sqrt(p2)
         self.four_mom = numpy.array([p_zero] + p)
 
-    def randomise_rational(self):
-        self._r_sp_d = numpy.array([GaussianRational(rand_rat_frac(), rand_rat_frac()), GaussianRational(rand_rat_frac(), rand_rat_frac())])
+    def randomise_spinors_in_field(self):
+        self._r_sp_d = numpy.array([self.field.random(), self.field.random()])
         self._r_sp_d.shape = (2, 1)
         self._r_sp_d_to_r_sp_u()
         self._four_mom = numpy.array([None, None, None, None])
-        self.l_sp_d = numpy.array([GaussianRational(rand_rat_frac(), rand_rat_frac()), GaussianRational(rand_rat_frac(), rand_rat_frac())])
-
-    def randomise_finite_field(self):
-        p = self.field.characteristic
-        self._r_sp_d = numpy.array([ModP(random.randrange(0, p), p), ModP(random.randrange(0, p), p)], dtype=object)
-        self._r_sp_d.shape = (2, 1)
-        self._r_sp_d_to_r_sp_u()
-        self._four_mom = numpy.array([None, None, None, None])
-        self.l_sp_d = numpy.array([ModP(random.randrange(0, p), p), ModP(random.randrange(0, p), p)], dtype=object)
-
-    def randomise_padic(self):
-        p, k = self.field.characteristic, self.field.digits
-        self._r_sp_d = numpy.array([PAdic(random.randrange(0, p ** k - 1), p, k), PAdic(random.randrange(0, p ** k - 1), p, k)], dtype=object)
-        self._r_sp_d.shape = (2, 1)
-        self._r_sp_d_to_r_sp_u()
-        self._four_mom = numpy.array([None, None, None, None])
-        self.l_sp_d = numpy.array([PAdic(random.randrange(0, p ** k - 1), p, k), PAdic(random.randrange(0, p ** k - 1), p, k)], dtype=object)
+        self.l_sp_d = numpy.array([self.field.random(), self.field.random()])
 
     def angles_for_squares(self):
         """Flips left and right spinors."""
