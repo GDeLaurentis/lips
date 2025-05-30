@@ -264,6 +264,15 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
                 else:
                     oP.l_sp_d[0, 1] = sympy.poly(oP.l_sp_d[0, 1], modulus=self.field.characteristic ** self.field.digits).as_expr()
             oP.l_sp_d = oP.l_sp_d  # trigger setter
+        for mass in self.internal_masses:
+            if isinstance(getattr(self, mass), (sympy.Add, sympy.Mul, sympy.Symbol)):
+                setattr(self, mass, getattr(self, mass).subs(myDict))
+            if isinstance(getattr(self, mass), sympy.Integer) and self.field.name == "finite field":
+                setattr(self, mass, ModP(getattr(self, mass), self.field.characteristic))
+            elif isinstance(getattr(self, mass), sympy.Integer) and self.field.name == "padic":
+                setattr(self, mass, PAdic(getattr(self, mass), self.field.characteristic, self.field.digits))
+            else:
+                setattr(self, mass, sympy.poly(getattr(self, mass), modulus=self.field.characteristic ** self.field.digits).as_expr())
 
     def fix_mom_cons(self, A=0, B=0, real_momenta=False, axis=1):   # using real momenta changes both |⟩ and |] of A & B
         """Fixes momentum conservation using particles A and B."""

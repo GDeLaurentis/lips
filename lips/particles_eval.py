@@ -64,6 +64,7 @@ pNB_double_open = re.compile(
     r'(?<!\'\[\d\|\'\)\]\]\)\)\[0:1, :\]@)'  # negative lookbehind to disambiguate open index position
     r'(?<![\(\[⟨<]\d)(?<![\+|-]\d\))(?<![\+|-]\d)'  # negative lookbehind
     r'(?<!_\d)(?<!_\d\d)(?<!_\d\d\d)(?<!_\d\d\d\d)'  # negative lookbehind for e.g. Δ_
+    r'(?<!\|\d)(?<!\|\d\d)(?<!\|\d\d\d)(?<!\|\d\d\d\d)'  # negative lookbehind for e.g. Δ_12|
     r'(\|(?:(?:\([\d+|-]+(?:[\+|-]\d+)*\))|(?:[\d]+(?:[\+|-]\d+)*))+\|)'  # capture
     r'(?!\d[⟩>\]])(?!\d[\+|-])(?!\(\d[\+|-])'  # negative lookahead
     r'(?!\'\))'  # negative lookahead for already matched expression
@@ -73,6 +74,7 @@ pNB_double_open_disambiguate_alphadot = re.compile(  # DO NOT MODIFY HERE: COPY 
     r'(?<=\'\[\d\|\'\)\]\]\)\)\[0:1, :\]@)'  # positive lookbehind to disambiguate open index position
     r'(?<![\(\[⟨<]\d)(?<![\+|-]\d\))(?<![\+|-]\d)'  # negative lookbehind
     r'(?<!_\d)(?<!_\d\d)(?<!_\d\d\d)(?<!_\d\d\d\d)'  # negative lookbehind for e.g. Δ_
+    r'(?<!\|\d)(?<!\|\d\d)(?<!\|\d\d\d)(?<!\|\d\d\d\d)'  # negative lookbehind for e.g. Δ_12|
     r'(\|(?:(?:\([\d+|-]+(?:[\+|-]\d+)*\))|(?:[\d]+(?:[\+|-]\d+)*))+\|)'  # capture
     r'(?!\d[⟩>\]])(?!\d[\+|-])(?!\(\d[\+|-])'  # negative lookahead
     r'(?!\'\))'  # negative lookahead for already matched expression
