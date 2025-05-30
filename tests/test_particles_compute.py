@@ -98,6 +98,12 @@ def test_particles_eval_with_internal_masses(field):
 
 
 @pytest.mark.parametrize("field", [mpc, modp, padic, ])
+def test_particles_eval_with_four_mass_box_gram(field):
+    oParticles = Particles(8, field=field, internal_masses={'mt'})
+    oParticles('(mt^2)/(Δ_12|34|56|78)')
+
+
+@pytest.mark.parametrize("field", [mpc, modp, padic, ])
 def test_particles_eval_with_sqrt(field):
     oPs = Particles(8, field=field, seed=0)
     assert abs(oPs('sqrt(Δ_61|23|45)') - oPs.field.sqrt(oPs("Δ_61|23|45"))) <= oPs.field.tollerance

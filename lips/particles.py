@@ -46,7 +46,6 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
         """Initialisation. Requires either multiplicity of phace space or list of Particle objects."""
         super().__init__()
         self.field = field
-        self.seed = seed  # This should be removed
         random.seed(seed) if seed is not None else random.seed()
         # External Kinematics
         if isinstance(number_of_particles_or_particles, int):
@@ -92,8 +91,6 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
     def __hash__(self):
         """Hash function: hash string of concatenated momenta."""
         return hash(tuple([hash(oP) for oP in self]))
-        # this breaks when only little group changes
-        # return hash(" ".join(flatten([list(map(str, flatten(oParticle.r2_sp))) for oParticle in self])))
 
     # PUBLIC METHODS
 
@@ -146,7 +143,7 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
                 raise ValueError(f"Permutation to map phase space points should be a string of integers, got: {permutation_or_rule}.")
             oResParticles = copy.deepcopy(Particles(sorted(self, key=lambda x: permutation_or_rule[self.index(x)]),
                                                     field=self.field, fix_mom_cons=False, internal_masses=self.internal_masses_dict))
-            oResParticles.oRefVec = copy.deepcopy(self.oRefVec)
+            oResParticles.__dict__ = copy.deepcopy(self.__dict__)
             return oResParticles
         else:
             assert type(permutation_or_rule[0]) is str and type(permutation_or_rule[1]) is bool
@@ -267,6 +264,15 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
                 else:
                     oP.l_sp_d[0, 1] = sympy.poly(oP.l_sp_d[0, 1], modulus=self.field.characteristic ** self.field.digits).as_expr()
             oP.l_sp_d = oP.l_sp_d  # trigger setter
+        for mass in self.internal_masses:
+            if isinstance(getattr(self, mass), (sympy.Add, sympy.Mul, sympy.Symbol)):
+                setattr(self, mass, getattr(self, mass).subs(myDict))
+            if isinstance(getattr(self, mass), sympy.Integer) and self.field.name == "finite field":
+                setattr(self, mass, ModP(getattr(self, mass), self.field.characteristic))
+            elif isinstance(getattr(self, mass), sympy.Integer) and self.field.name == "padic":
+                setattr(self, mass, PAdic(getattr(self, mass), self.field.characteristic, self.field.digits))
+            else:
+                setattr(self, mass, sympy.poly(getattr(self, mass), modulus=self.field.characteristic ** self.field.digits).as_expr())
 
     def fix_mom_cons(self, A=0, B=0, real_momenta=False, axis=1):   # using real momenta changes both |⟩ and |] of A & B
         """Fixes momentum conservation using particles A and B."""

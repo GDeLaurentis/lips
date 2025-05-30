@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `seed` is no longer saved as a `Particles` attribute. WARNING: invalidates hash-tables.
+
 ### Fixed
 
 ### Deprecated
