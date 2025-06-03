@@ -29,3 +29,7 @@ def inverse(permutation_or_symmetry):
 
 def identity(n):
     return (''.join(str(i) for i in range(1, n + 1)), False)
+
+
+def all_symmetries(multiplicity):
+    return phase_weights_compatible_symmetries([0] * multiplicity)

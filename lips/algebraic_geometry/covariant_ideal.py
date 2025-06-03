@@ -1,6 +1,9 @@
 import re
 import numpy
 import sympy
+import functools
+
+from collections import defaultdict
 
 from lips.tools import flatten
 from lips.algebraic_geometry.tools import lips_covariant_symbols, lips_invariant_symbols, conversionIdeal
@@ -75,6 +78,16 @@ class LipsIdeal(Ideal):
         newIdeal = LipsIdeal(self.ring, [covariant_poly_image(poly, rule) for poly in self.generators])
         newIdeal.rule = rule
         return newIdeal
+
+    @functools.cached_property
+    def equivalenceClass(self):
+        from ..symmetries import all_symmetries
+        all_perms_self = {symmetry: self(*symmetry) for symmetry in all_symmetries(self.multiplicity)}
+        value_to_keys = defaultdict(list)
+        for k, v in all_perms_self.items():
+            value_to_keys[v].append(k)
+        distinct_perms_self = {keys[0]: val for val, keys in value_to_keys.items()}
+        return distinct_perms_self
 
     def to_mom_cons_qring(self):
         oZeroIdeal = LipsIdeal(self.multiplicity, ())
