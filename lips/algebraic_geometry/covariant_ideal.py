@@ -33,7 +33,7 @@ class LipsIdeal(Ideal):
             oParticles.make_analytical_d()
             generators = []
             for covariant in generators_or_covariants:
-                poly_or_polys = 4 * oParticles(covariant)
+                poly_or_polys = 4 * oParticles(covariant)  # TODO: remove 4 * when https://github.com/sympy/sympy/pull/28139 is accepted
                 if hasattr(poly_or_polys, 'shape'):
                     polys = flatten(poly_or_polys)
                     for poly in polys:
@@ -60,7 +60,7 @@ class LipsIdeal(Ideal):
         oParticles = Particles(self.multiplicity)
         oParticles.make_analytical_d()
         try:
-            poly_or_polys = 4 * oParticles(covariant)
+            poly_or_polys = 4 * oParticles(covariant)  # TODO: remove 4 * when https://github.com/sympy/sympy/pull/28139 is accepted
         except TypeError:
             poly_or_polys = covariant
         if isinstance(poly_or_polys, numpy.ndarray):
