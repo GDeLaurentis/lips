@@ -73,6 +73,11 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
         else:
             raise Exception(f"Internal masses not understood, received {internal_masses} of type {type(internal_masses)}.")
 
+    def to_field(self, field):
+        for oP in self:
+            oP.to_field(field)
+        self.field = field
+
     def __setattr__(self, name, value):
         if pMVar.match(name):
             self.internal_masses.add(name)

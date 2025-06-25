@@ -151,3 +151,13 @@ def test_hashes_does_not_change_under_identity_mapping():
     # cache_key_hash2 = hashlib.sha256(cache_key_bytes).hexdigest()
     assert hash(oPs) == hash(oPsMapped)
     # assert cache_key_hash1 == cache_key_hash2  # this fails and I'm unsure how to fix it atm
+
+
+def test_field_change():
+    Fp = Field("finite field", 2 ** 31 - 1, 1)
+    oPsFp = Particles(6, field=Field("rational", 0, 0), seed=0)
+    oPsFp.to_field(Fp)
+    Qp = Field("padic", 2 ** 31 - 1, 4)
+    oPsQp = Particles(6, field=Field("rational", 0, 0), seed=0)
+    oPsQp.to_field(Qp)
+    assert oPsFp("⟨1|2⟩") == oPsQp("⟨1|2⟩").as_tuple[0]

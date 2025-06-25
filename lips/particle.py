@@ -51,6 +51,12 @@ class Particle(object):
         else:
             raise Exception('Bad Particle Constructor')
 
+    def to_field(self, field):
+        self._r_sp_d = numpy.vectorize(field)(self.r_sp_d)
+        self._r_sp_d_to_r_sp_u()
+        self.l_sp_d = numpy.vectorize(field)(self.l_sp_d)
+        self.field = field
+
     def __eq__(self, other):
         """Equality: checks equality of four momenta."""
         if isinstance(other, Particle):
