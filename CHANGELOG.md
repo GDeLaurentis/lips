@@ -12,11 +12,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- `seed` is no longer saved as a `Particles` attribute. WARNING: invalidates hash-tables.
-
 ### Fixed
 
 ### Deprecated
+
+
+## [0.5.1] - 2025-07-22
+
+### Added
+
+- `LipsIdeal.equivalence_class` generates equivalent ideals under permutations. Returns a dictionary associating permutations to permuted ideals.
+- Explicit support for rational kinematics, `Field('rational', 0, 0)`.
+- `to_field` function for `Particles` and `Particle` to change fields, e.g. Q->Fp.
+- Tests for hash stability across processes.
+
+### Changed
+
+- `seed` is no longer saved as a `Particles` attribute. WARNING: invalidates hash-tables.
+- `Particles.randomise` drasticaly simplified by using `field.random()` instead of handling all cases separately.
+- `spin_index` now saves both the position ('u' or 'd') and the value (1, 2, or all). If this was used explicitly it will require a simple fix to restore compatibility.
+- twistor functions, `randomise_twist` and `comp_twist_x` are not implemented in a covariant formulation.
+
+### Fixed
+
+- Fixed issue where `Δ_12|3|...` could be matched by an open-index spinor string pattern.
 
 
 ## [0.5.0] - 2025-04-24
@@ -152,7 +171,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Numerical computation of Lorentz invariant spinor strings.
 
 
-[unreleased]: https://github.com/GDeLaurentis/lips/compare/v0.4.5...HEAD
+[unreleased]: https://github.com/GDeLaurentis/lips/compare/v0.5.1...HEAD
+[0.5.1]: https://github.com/GDeLaurentis/lips/compare/v0.5.0...v0.5.1
+[0.5.0]: https://github.com/GDeLaurentis/lips/compare/v0.4.5...v0.5.0
 [0.4.5]: https://github.com/GDeLaurentis/lips/compare/v0.4.4...v0.4.5
 [0.4.4]: https://github.com/GDeLaurentis/lips/compare/v0.4.3...v0.4.4
 [0.4.3]: https://github.com/GDeLaurentis/lips/compare/v0.4.2...v0.4.3
