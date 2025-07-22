@@ -184,7 +184,7 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
                     selfClustered[leg]._r_sp_d = selfClustered[leg]._r_sp_d @ -LeviCivita  # |bold leg> = |leg_I>
                 else:
                     raise Exception("Massive fermion spin index position must be either 'u' or 'd'.")
-                selfClustered[leg].spin_index = index_position
+                selfClustered[leg].spin_index = (index_position, index_value)
                 if isinstance(index_value, int):
                     selfClustered[leg]._r_sp_d = selfClustered[leg]._r_sp_d[:, index_value - 1:index_value]
                     selfClustered[leg]._l_sp_d = selfClustered[leg]._l_sp_d[index_value - 1:index_value, :]
@@ -272,11 +272,11 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
         for mass in self.internal_masses:
             if isinstance(getattr(self, mass), (sympy.Add, sympy.Mul, sympy.Symbol)):
                 setattr(self, mass, getattr(self, mass).subs(myDict))
-            if isinstance(getattr(self, mass), sympy.Integer) and self.field.name == "finite field":
+            if isinstance(getattr(self, mass), (sympy.Integer, ModP)) and self.field.name == "finite field":
                 setattr(self, mass, ModP(getattr(self, mass), self.field.characteristic))
-            elif isinstance(getattr(self, mass), sympy.Integer) and self.field.name == "padic":
+            elif isinstance(getattr(self, mass), (sympy.Integer, PAdic)) and self.field.name == "padic":
                 setattr(self, mass, PAdic(getattr(self, mass), self.field.characteristic, self.field.digits))
-            else:
+            elif not isinstance(getattr(self, mass), str):
                 setattr(self, mass, sympy.poly(getattr(self, mass), modulus=self.field.characteristic ** self.field.digits).as_expr())
 
     def fix_mom_cons(self, A=0, B=0, real_momenta=False, axis=1):   # using real momenta changes both |⟩ and |] of A & B

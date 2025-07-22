@@ -332,9 +332,9 @@ class Particle(object):
         if self.l_sp_d is not None and self.r_sp_d is not None:  # massive scalars do not have these defined
             self._l_sp_d, self._r_sp_d = self._r_sp_d.T, self._l_sp_d.T
             if hasattr(self, 'spin_index'):
-                if self.spin_index == 'u':
+                if self.spin_index[0] == 'u':
                     self._l_sp_d *= -1
-                elif self.spin_index == 'd':
+                elif self.spin_index[0] == 'd':
                     self._r_sp_d *= -1
                 else:
                     raise Exception("Spin index not understood.")
