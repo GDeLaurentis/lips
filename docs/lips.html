@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>lips.particle &mdash; lips 0.5.0 documentation</title>
+  <title>lips.particle &mdash; lips 0.5.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=1dd76d02"></script>
+      <script src="_static/documentation_options.js?v=b9afe91b"></script>
       <script src="_static/doctools.js?v=9a2dae69"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -60,12 +60,11 @@
 <li class="toctree-l4"><a class="reference internal" href="#lips.particle.Particle.r_sp_d"><code class="docutils literal notranslate"><span class="pre">Particle.r_sp_d</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#lips.particle.Particle.r_sp_u"><code class="docutils literal notranslate"><span class="pre">Particle.r_sp_u</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#lips.particle.Particle.randomise"><code class="docutils literal notranslate"><span class="pre">Particle.randomise()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#lips.particle.Particle.randomise_finite_field"><code class="docutils literal notranslate"><span class="pre">Particle.randomise_finite_field()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#lips.particle.Particle.randomise_mpc"><code class="docutils literal notranslate"><span class="pre">Particle.randomise_mpc()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#lips.particle.Particle.randomise_padic"><code class="docutils literal notranslate"><span class="pre">Particle.randomise_padic()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#lips.particle.Particle.randomise_rational"><code class="docutils literal notranslate"><span class="pre">Particle.randomise_rational()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.particle.Particle.randomise_spinors_in_field"><code class="docutils literal notranslate"><span class="pre">Particle.randomise_spinors_in_field()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#lips.particle.Particle.randomise_twist"><code class="docutils literal notranslate"><span class="pre">Particle.randomise_twist()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#lips.particle.Particle.spinors_are_in_field_extension"><code class="docutils literal notranslate"><span class="pre">Particle.spinors_are_in_field_extension</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.particle.Particle.to_field"><code class="docutils literal notranslate"><span class="pre">Particle.to_field()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#lips.particle.Particle.twist_x_to_mom"><code class="docutils literal notranslate"><span class="pre">Particle.twist_x_to_mom()</span></code></a></li>
 </ul>
 </li>
@@ -97,6 +96,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#lips.particles.Particles.save_phase_space_point"><code class="docutils literal notranslate"><span class="pre">Particles.save_phase_space_point()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#lips.particles.Particles.spinors_are_in_field_extension"><code class="docutils literal notranslate"><span class="pre">Particles.spinors_are_in_field_extension</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#lips.particles.Particles.subs"><code class="docutils literal notranslate"><span class="pre">Particles.subs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.particles.Particles.to_field"><code class="docutils literal notranslate"><span class="pre">Particles.to_field()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#lips.particles.Particles.total_mom"><code class="docutils literal notranslate"><span class="pre">Particles.total_mom</span></code></a></li>
 </ul>
 </li>
@@ -164,7 +164,8 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="lips.particle.Particle.comp_twist_x">
 <span class="sig-name descname"><span class="pre">comp_twist_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lips.particle.Particle.comp_twist_x" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>x^{˙αα} = (μⱼ^{˙α} λᵢ^α - μᵢ^{˙α} λⱼ^α ) / ⟨ij⟩</p>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="lips.particle.Particle.four_mom">
@@ -236,24 +237,14 @@
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="lips.particle.Particle.randomise_finite_field">
-<span class="sig-name descname"><span class="pre">randomise_finite_field</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lips.particle.Particle.randomise_finite_field" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="lips.particle.Particle.randomise_mpc">
 <span class="sig-name descname"><span class="pre">randomise_mpc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">real_momentum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lips.particle.Particle.randomise_mpc" title="Link to this definition"></a></dt>
 <dd><p>Randomises its momentum.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="lips.particle.Particle.randomise_padic">
-<span class="sig-name descname"><span class="pre">randomise_padic</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lips.particle.Particle.randomise_padic" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="lips.particle.Particle.randomise_rational">
-<span class="sig-name descname"><span class="pre">randomise_rational</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lips.particle.Particle.randomise_rational" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="lips.particle.Particle.randomise_spinors_in_field">
+<span class="sig-name descname"><span class="pre">randomise_spinors_in_field</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lips.particle.Particle.randomise_spinors_in_field" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -264,6 +255,11 @@
 <dl class="py property">
 <dt class="sig sig-object py" id="lips.particle.Particle.spinors_are_in_field_extension">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">spinors_are_in_field_extension</span></span><a class="headerlink" href="#lips.particle.Particle.spinors_are_in_field_extension" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lips.particle.Particle.to_field">
+<span class="sig-name descname"><span class="pre">to_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lips.particle.Particle.to_field" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -415,6 +411,11 @@ Massive fermions can be specificed as e.g.: massive_fermions=((3, ‘u’, all),
 <dd><p>For all rank-1 spinor components, substitutes symbols with values from myDict.</p>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="lips.particles.Particles.to_field">
+<span class="sig-name descname"><span class="pre">to_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lips.particles.Particles.to_field" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="lips.particles.Particles.total_mom">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">total_mom</span></span><a class="headerlink" href="#lips.particles.Particles.total_mom" title="Link to this definition"></a></dt>
@@ -448,7 +449,7 @@ Massive fermions can be specificed as e.g.: massive_fermions=((3, ‘u’, all),
 <dl class="py method">
 <dt class="sig sig-object py" id="lips.particles_compute.Particles_Compute.ldot">
 <span class="sig-name descname"><span class="pre">ldot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">B</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lips.particles_compute.Particles_Compute.ldot" title="Link to this definition"></a></dt>
-<dd><p>Lorentz dot product: 2 trace(P^{α̇α}P̅̅_{αα̇}) = P_A^μ * η_μν * P_B^ν.</p>
+<dd><p>Lorentz dot product: 1/2 trace(P^{α̇α}P̅̅_{αα̇}) = P_A^μ * η_μν * P_B^ν.</p>
 </dd></dl>
 
 <dl class="py method">
