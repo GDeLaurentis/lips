@@ -84,13 +84,7 @@ class Particles_Compute:
         if ptr5.findall(temp_string) != []:                         # tr5_ijkl [i|j|k|l|i⟩ - ⟨i|j|k|l|i]
             abcd = ptr5.findall(temp_string)[0][0 if "_" in temp_string else 1]
             a, b, c, d = abcd.split("|") if "|" in abcd else abcd
-            for _ in range(4):
-                if len(a) == 1:
-                    break
-                a, b, c, d = b, c, d, a
-            else:
-                raise NotImplementedError("tr5 implementation requires at least 1 massless particle.")
-            return self.compute(f"[{a}|{b}|{c}|{d}|{a}⟩") - self.compute(f"⟨{a}|{b}|{c}|{d}|{a}]")
+            return self.compute(f"tr({a}|{b}|{c}|{d})-tr({b}|{c}|{d}|{a})")
 
         if ptr.findall(temp_string) != []:                          # e.g.: tr(i+j|k-l|...)
             abcd = ptr.search(temp_string)
