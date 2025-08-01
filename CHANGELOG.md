@@ -31,7 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `seed` is no longer saved as a `Particles` attribute. WARNING: invalidates hash-tables.
 - `Particles.randomise` drasticaly simplified by using `field.random()` instead of handling all cases separately.
 - `spin_index` now saves both the position ('u' or 'd') and the value (1, 2, or all). If this was used explicitly it will require a simple fix to restore compatibility.
-- twistor functions, `randomise_twist` and `comp_twist_x` are not implemented in a covariant formulation.
+- twistor functions, `randomise_twist` and `comp_twist_x` are now implemented in a covariant formulation.
 
 ### Fixed
 
