@@ -110,7 +110,7 @@ class Particle(object):
         return self.four_mom[key]
 
     def __hash__(self):
-        if abs(self.m2) <= self.field.tollerance:
+        if self.is_massless:
             return hash(tuple([tuple(self.r_sp_d.flatten()), tuple(self.l_sp_d.flatten())]))
         else:
             return hash(tuple(self.r2_sp.flatten()))
@@ -483,3 +483,9 @@ class Particle(object):
     @property
     def m(self):
         return self.field.sqrt(self.lsq())
+
+    @property
+    def is_massless(self):
+        return (self.m2 in self.field and abs(self.m2) <= self.field.tollerance) or (self.m2 == 0)
+
+    is_lightlike = is_massless
