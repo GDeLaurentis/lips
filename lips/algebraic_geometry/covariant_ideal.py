@@ -8,7 +8,7 @@ from collections import defaultdict
 from lips.tools import flatten
 from lips.algebraic_geometry.tools import lips_covariant_symbols, lips_invariant_symbols, conversionIdeal
 from lips.algebraic_geometry.invariant_ideal import SpinorIdeal
-from syngular import Ideal, Ring
+from syngular import Ideal, Ring, Polynomial, Q
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -19,40 +19,48 @@ class LipsIdeal(Ideal):
 
     def __init__(self, ring_or_multiplicity, generators_or_covariants, momentum_conservation=None):
         """Initialises a fully analytical Ideal, either from a tuple of covariants, or from a list of generators."""
+        from lips import Particles
 
         if isinstance(ring_or_multiplicity, int):
             self.multiplicity = ring_or_multiplicity
+            ring = Ring('0', lips_covariant_symbols(self.multiplicity), 'dp')
         elif isinstance(ring_or_multiplicity, Ring):
             self.multiplicity = len(ring_or_multiplicity.variables) // 2 // 2
+            ring = ring_or_multiplicity
         else:
             raise Exception("Invalid LipsIdeal intialisation.")
 
-        if type(generators_or_covariants) is tuple:
-            from lips import Particles
+        if isinstance(generators_or_covariants, (tuple, list)):
+            generators_or_covariants = list(generators_or_covariants)
+
             oParticles = Particles(self.multiplicity)
             oParticles.make_analytical_d()
-            generators = []
-            for covariant in generators_or_covariants:
-                poly_or_polys = 4 * oParticles(covariant)  # TODO: remove 4 * when https://github.com/sympy/sympy/pull/28139 is accepted
-                if hasattr(poly_or_polys, 'shape'):
-                    polys = flatten(poly_or_polys)
-                    for poly in polys:
-                        generators += [str(sympy.Poly(sympy.expand(poly))).replace("Poly(", "").split(", ")[0]]
-                else:
-                    generators += [str(sympy.Poly(sympy.expand(poly_or_polys))).replace("Poly(", "").split(", ")[0]]
+
+            def already_parsed(entry):
+                try:
+                    return Polynomial(entry, Q).variables.issubset(map(str, ring.variables))
+                except AssertionError:
+                    return False
+
+            if all([already_parsed(entry) for entry in generators_or_covariants]):
+                generators = generators_or_covariants
+            else:
+                generators = []
+                for covariant in generators_or_covariants:
+                    # TODO: remove 4 * when https://github.com/sympy/sympy/pull/28139 is accepted
+                    poly_or_polys = 4 * oParticles(covariant)
+                    if hasattr(poly_or_polys, 'shape'):
+                        polys = flatten(poly_or_polys)
+                        for poly in polys:
+                            generators += [str(sympy.Poly(sympy.expand(poly))).replace("Poly(", "").split(", ")[0]]
+                    else:
+                        generators += [str(sympy.Poly(sympy.expand(poly_or_polys))).replace("Poly(", "").split(", ")[0]]
             if momentum_conservation is True or momentum_conservation is None:
                 generators += [str(sympy.Poly(entry)).replace("Poly(", "").split(", ")[0] for entry in flatten(oParticles.total_mom)]
-
-        elif type(generators_or_covariants) is list:
-            generators = generators_or_covariants
-
         else:
             raise Exception("Invalid LipsIdeal intialisation.")
 
-        if isinstance(ring_or_multiplicity, int):
-            super().__init__(Ring('0', lips_covariant_symbols(self.multiplicity), 'dp'), generators)
-        elif isinstance(ring_or_multiplicity, Ring):
-            super().__init__(ring_or_multiplicity, generators)
+        super().__init__(ring, generators)
 
     def __contains__(self, covariant):
         """Extends ideal membership to Lorentz covariant expressions computable with lips."""
