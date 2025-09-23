@@ -8,7 +8,7 @@ from collections import defaultdict
 from lips.tools import flatten
 from lips.algebraic_geometry.tools import lips_covariant_symbols, lips_invariant_symbols, conversionIdeal
 from lips.algebraic_geometry.invariant_ideal import SpinorIdeal
-from syngular import Ideal, Ring, Polynomial, Q
+from syngular import Ideal, Ring
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -17,8 +17,8 @@ from syngular import Ideal, Ring, Polynomial, Q
 class LipsIdeal(Ideal):
     """Lorentz Covariant Ideal - based on spinor components."""
 
-    def __init__(self, ring_or_multiplicity, generators_or_covariants, momentum_conservation=None):
-        """Initialises a fully analytical Ideal, either from a tuple of covariants, or from a list of generators."""
+    def __init__(self, ring_or_multiplicity, generators_or_covariants, momentum_conservation=None, verbose=False):
+        """Initialises a fully analytical Ideal, generators_or_covariants can be either already parsed in term spinor components or not."""
         from lips import Particles
 
         if isinstance(ring_or_multiplicity, int):
@@ -30,37 +30,35 @@ class LipsIdeal(Ideal):
         else:
             raise Exception("Invalid LipsIdeal intialisation.")
 
-        if isinstance(generators_or_covariants, (tuple, list)):
-            generators_or_covariants = list(generators_or_covariants)
-
+        try:
+            if (isinstance(generators_or_covariants, (list, tuple)) and len(generators_or_covariants) == 0 and
+               (momentum_conservation is True or momentum_conservation is None)):
+                raise Exception("Add momentum conservation.")
+            if (isinstance(generators_or_covariants, (list, tuple)) and len(generators_or_covariants) > 0 and
+               any([symbol in eq for symbol in ['[', ']', '|', '<', '>', '⟨', '⟩', ] for eq in generators_or_covariants])):
+                raise Exception("Needs parsing.")
+            # already in the ring variables
+            super().__init__(ring, generators_or_covariants)
+        except Exception:
+            # parse first the spinor expressions
             oParticles = Particles(self.multiplicity)
             oParticles.make_analytical_d()
-
-            def already_parsed(entry):
-                try:
-                    return Polynomial(entry, Q).variables.issubset(map(str, ring.variables))
-                except AssertionError:
-                    return False
-
-            if all([already_parsed(entry) for entry in generators_or_covariants]):
-                generators = generators_or_covariants
-            else:
-                generators = []
-                for covariant in generators_or_covariants:
-                    # TODO: remove 4 * when https://github.com/sympy/sympy/pull/28139 is accepted
-                    poly_or_polys = 4 * oParticles(covariant)
-                    if hasattr(poly_or_polys, 'shape'):
-                        polys = flatten(poly_or_polys)
-                        for poly in polys:
-                            generators += [str(sympy.Poly(sympy.expand(poly))).replace("Poly(", "").split(", ")[0]]
-                    else:
-                        generators += [str(sympy.Poly(sympy.expand(poly_or_polys))).replace("Poly(", "").split(", ")[0]]
+            generators = []
+            for covariant in generators_or_covariants:
+                # TODO: remove 4 * when https://github.com/sympy/sympy/pull/28139 is accepted
+                poly_or_polys = 4 * oParticles(covariant)
+                if hasattr(poly_or_polys, 'shape'):
+                    polys = flatten(poly_or_polys)
+                    for poly in polys:
+                        generators += [str(sympy.Poly(sympy.expand(poly))).replace("Poly(", "").split(", ")[0]]
+                else:
+                    generators += [str(sympy.Poly(sympy.expand(poly_or_polys))).replace("Poly(", "").split(", ")[0]]
             if momentum_conservation is True or momentum_conservation is None:
                 generators += [str(sympy.Poly(entry)).replace("Poly(", "").split(", ")[0] for entry in flatten(oParticles.total_mom)]
-        else:
-            raise Exception("Invalid LipsIdeal intialisation.")
+            super().__init__(ring, generators)
 
-        super().__init__(ring, generators)
+        if verbose:
+            print("Initialized Lips Ideal:\n", repr(self))
 
     def __contains__(self, covariant):
         """Extends ideal membership to Lorentz covariant expressions computable with lips."""
