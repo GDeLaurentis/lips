@@ -18,7 +18,7 @@ class Particles_Slices:
     # PUBLIC METHODS
 
     def univariate_slice(self, extra_constraints=(), seed=None, indepSets=None, algorithm=('covariant', 'generic')[0],
-                         kind=('generic', 'minimal')[0], minimal_non_zero=None, verbose=False):
+                         kind=('generic', 'minimal')[0], minimal_non_zero=None, codim_upper_bound=None, verbose=False):
         from .particles import Particles
         random.seed(seed)
         t = sympy.symbols('t')
@@ -44,6 +44,8 @@ class Particles_Slices:
             ring = Ring(self.field.characteristic, xs + ys, 'dp')
             ideal = Ideal(ring, list(map(str, equations)))
             if kind == 'generic':
+                if codim_upper_bound is not None:
+                    ideal.codim_upper_bound = codim_upper_bound
                 xSubs = ideal.point_on_variety(self.field, seed=seed, verbose=verbose)
                 counter = 0
                 while 0 in xSubs.values():
