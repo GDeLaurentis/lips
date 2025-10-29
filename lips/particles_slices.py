@@ -17,7 +17,7 @@ class Particles_Slices:
 
     # PUBLIC METHODS
 
-    def univariate_slice(self, extra_constraints=(), extra_exact_constraints=(), extra_approximate_constraints=(), seed=None, indepSets=None, 
+    def univariate_slice(self, extra_constraints=(), extra_exact_constraints=(), extra_approximate_constraints=(), seed=None, indepSets=None,
                          algorithm=('covariant', 'generic')[0], kind=('generic', 'minimal')[0],
                          minimal_non_zero=None, codim_upper_bound=None, verbose=False):
         from .particles import Particles
@@ -30,8 +30,8 @@ class Particles_Slices:
             if indepSets is not None:
                 raise NotImplementedError("IndepSet option not implemented yet with covariant algorithm.")
             self._singular_variety(extra_exact_constraints + extra_approximate_constraints,
-                                (self.field.digits, ) * len(extra_exact_constraints) + (1, ) * len(extra_approximate_constraints),
-                                seed=seed)
+                                   (self.field.digits, ) * len(extra_exact_constraints) + (1, ) * len(extra_approximate_constraints),
+                                   seed=seed)
             oPShift = Particles(1, fix_mom_cons=False, field=self.field, seed=random.randint(1, self.field.characteristic - 1))[1]
 
             xs = sympy.symbols(f'x1:{len(self) + 1}')
@@ -48,7 +48,8 @@ class Particles_Slices:
 
             ring = Ring(self.field.characteristic, xs + ys, 'dp')
             if verbose:
-                print(f"Slicing in {len(ring.variables)} variables subject to {len(equations)} exact constraints and {len(equations_approximate)} approximate constraints, with a codim upper bound of {codim_upper_bound}.")
+                print(f"Slicing in {len(ring.variables)} variables subject to {len(equations)} exact constraints and", end="")
+                print(f"{len(equations_approximate)} approximate constraints, with a codim upper bound of {codim_upper_bound}.")
             ideal = Ideal(ring, list(map(str, equations)) + list(map(str, equations_approximate)))
             if kind == 'generic':
                 if codim_upper_bound is not None:
@@ -57,7 +58,7 @@ class Particles_Slices:
                 counter = 0
                 while 0 in xSubs.values():
                     if verbose:
-                        print(f"One of the parameters was set to exactly zero, retrying")
+                        print("One of the parameters was set to exactly zero, retrying")
                     counter += 1
                     xSubs = ideal.point_on_variety(self.field, directions=list(map(str, equations)), seed=seed + counter, verbose=verbose)
             elif kind == 'minimal':  # WIP
