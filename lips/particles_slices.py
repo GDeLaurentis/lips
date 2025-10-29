@@ -17,16 +17,21 @@ class Particles_Slices:
 
     # PUBLIC METHODS
 
-    def univariate_slice(self, extra_constraints=(), seed=None, indepSets=None, algorithm=('covariant', 'generic')[0],
-                         kind=('generic', 'minimal')[0], minimal_non_zero=None, codim_upper_bound=None, verbose=False):
+    def univariate_slice(self, extra_constraints=(), extra_exact_constraints=(), extra_approximate_constraints=(), seed=None, indepSets=None, 
+                         algorithm=('covariant', 'generic')[0], kind=('generic', 'minimal')[0],
+                         minimal_non_zero=None, codim_upper_bound=None, verbose=False):
         from .particles import Particles
         random.seed(seed)
         t = sympy.symbols('t')
 
+        extra_exact_constraints = extra_constraints + extra_exact_constraints
+
         if algorithm == 'covariant':  # ⟨ij⟩ is linear in t
             if indepSets is not None:
                 raise NotImplementedError("IndepSet option not implemented yet with covariant algorithm.")
-            self._singular_variety(extra_constraints, (self.field.digits, ) * len(extra_constraints), seed=seed)
+            self._singular_variety(extra_exact_constraints + extra_approximate_constraints,
+                                (self.field.digits, ) * len(extra_exact_constraints) + (1, ) * len(extra_approximate_constraints),
+                                seed=seed)
             oPShift = Particles(1, fix_mom_cons=False, field=self.field, seed=random.randint(1, self.field.characteristic - 1))[1]
 
             xs = sympy.symbols(f'x1:{len(self) + 1}')
@@ -36,21 +41,25 @@ class Particles_Slices:
                 oP.l_sp_d = oP.l_sp_d + t * ys[i] * oPShift.l_sp_d
 
             equations = [sympy.poly(entry.expand(), modulus=self.field.characteristic ** self.field.digits) for entry in self.total_mom.flatten().tolist()]
-            equations += [sympy.poly(self(constraint).expand(), modulus=self.field.characteristic ** self.field.digits) for constraint in extra_constraints]
+            equations += [sympy.poly(self(constraint).expand(), modulus=self.field.characteristic ** self.field.digits) for constraint in extra_exact_constraints]
             equations = [entry for entry in flatten([sympy.poly(eq, t).all_coeffs() for eq in equations]) if entry != 0]
-            if verbose:
-                print(f"Slicing subject to {len(equations)} constraints: {equations}")
+            equations_approximate = [sympy.poly(self(constraint).expand(), modulus=self.field.characteristic ** self.field.digits) for constraint in extra_approximate_constraints]
+            equations_approximate = [entry for entry in flatten([sympy.poly(eq, t).all_coeffs() for eq in equations_approximate]) if entry != 0]
 
             ring = Ring(self.field.characteristic, xs + ys, 'dp')
-            ideal = Ideal(ring, list(map(str, equations)))
+            if verbose:
+                print(f"Slicing in {len(ring.variables)} variables subject to {len(equations)} exact constraints and {len(equations_approximate)} approximate constraints, with a codim upper bound of {codim_upper_bound}.")
+            ideal = Ideal(ring, list(map(str, equations)) + list(map(str, equations_approximate)))
             if kind == 'generic':
                 if codim_upper_bound is not None:
                     ideal.codim_upper_bound = codim_upper_bound
-                xSubs = ideal.point_on_variety(self.field, seed=seed, verbose=verbose)
+                xSubs = ideal.point_on_variety(self.field, directions=list(map(str, equations)), seed=seed, verbose=verbose)
                 counter = 0
                 while 0 in xSubs.values():
+                    if verbose:
+                        print(f"One of the parameters was set to exactly zero, retrying")
                     counter += 1
-                    xSubs = ideal.point_on_variety(self.field, seed=seed + counter, verbose=verbose)
+                    xSubs = ideal.point_on_variety(self.field, directions=list(map(str, equations)), seed=seed + counter, verbose=verbose)
             elif kind == 'minimal':  # WIP
                 # Tries to find a minimal slice - i.e. tries to keep as many variables un-shifted by t
                 found = False
