@@ -196,3 +196,8 @@ def test_particles_eval_with_traces():
     assert oParticles("numpy.trace(|1|2|)") == oParticles("tr(|1|2|)") == oParticles("tr(1|2)")
     assert (numpy.trace(oParticles("|1+2|3|𝟒|𝟓|𝟔|-|𝟔|𝟓|𝟒|3|1+2|") @ (ϵ @ oParticles("|1+2+3|𝟒|𝟓|-|𝟓|𝟒|1+2+3|") @ ϵ.T).T) ==
             oParticles("tr((|1+2|3|𝟒|𝟓|𝟔|-|𝟔|𝟓|𝟒|3|1+2|)@(ϵ @ (|1+2+3|𝟒|𝟓|-|𝟓|𝟒|1+2+3|) @ ϵ.T).T)"))
+
+
+def test_partial_le_ge_aliases_for_angle_bracket():
+    oPs = Particles(6, field=Field("finite field", 2 ** 31 - 19, 1), seed=0)
+    assert oPs("<3|1+2|4]") == oPs("⟨3|1+2|4]")

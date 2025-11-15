@@ -181,16 +181,16 @@ class Particles_Compute:
             d = int(abcd.group('end'))
 
             # Check the contraction is valid
-            if len(bc) % 2 == 0 and temp_string[0] == "⟨" and temp_string[-1] != "⟩":
+            if len(bc) % 2 == 0 and temp_string[0] in ("⟨", "<") and temp_string[-1] not in ("⟩", ">"):
                 raise SyntaxError(f"Expected closing \'⟩\', instead found \'{temp_string[-1]}\'.")
-            elif len(bc) % 2 == 1 and temp_string[0] == "⟨" and temp_string[-1] != "]":
+            elif len(bc) % 2 == 1 and temp_string[0] in ("⟨", "<") and temp_string[-1] != "]":
                 raise SyntaxError(f"Expected closing \']\', instead found \'{temp_string[-1]}\'.")
             elif len(bc) % 2 == 0 and temp_string[0] == "[" and temp_string[-1] != "]":
                 raise SyntaxError(f"Expected closing \']\', instead found \'{temp_string[-1]}\'.")
-            elif len(bc) % 2 == 1 and temp_string[0] == "[" and temp_string[-1] != "⟩":
+            elif len(bc) % 2 == 1 and temp_string[0] == "[" and temp_string[-1] not in ("⟩", ">"):
                 raise SyntaxError(f"Expected closing \']\', instead found \'{temp_string[-1]}\'.")
 
-            if temp_string[0] == "⟨":
+            if temp_string[0] in ("⟨", "<"):
                 middle = ["(" + re.sub(r'(\d+)', r'self[\1].r2_sp_b', entry) + ")" if i % 2 == 0 else
                           "(" + re.sub(r'(\d+)', r'self[\1].r2_sp', entry) + ")" for i, entry in enumerate(bc)]
                 middle = " @ ".join(middle)
@@ -201,7 +201,7 @@ class Particles_Compute:
                 middle = " @ ".join(middle)
                 result = self[a].l_sp_d @ eval(middle)
 
-            if temp_string[-1] == "⟩":
+            if temp_string[-1] in ("⟩", ">"):
                 result = result @ self[d].r_sp_d
             else:
                 result = result @ self[d].l_sp_u
