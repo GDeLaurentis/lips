@@ -260,7 +260,22 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
                 oP.r2_sp[0, 1] = _reduce(oP.r2_sp[0, 1])
                 oP.r2_sp[1, 0] = _reduce(oP.r2_sp[1, 0])
                 oP.r2_sp[1, 1] = _reduce(oP.r2_sp[1, 1])
-                oP.r2_sp = oP.r2_sp  # trigger setter
+                oP._r2_sp_to_r2_sp_b()
+                if oP.four_mom is not None:
+                    try:
+                        oP._r2_sp_to_four_momentum()
+                        oP._four_mom_to_four_mom_d()
+                    except:  # noqa
+                        oP._four_mom = oP._four_mom_d = None
+                if oP.r_sp_d is not None:
+                    oP.r_sp_d[0, 0] = _reduce(oP.r_sp_d[0, 0])
+                    oP.r_sp_d[1, 0] = _reduce(oP.r_sp_d[1, 0])
+                    oP._r_sp_d_to_r_sp_u()
+                if oP.l_sp_d is not None:
+                    oP.l_sp_d[0, 0] = _reduce(oP.l_sp_d[0, 0])
+                    oP.l_sp_d[0, 1] = _reduce(oP.l_sp_d[0, 1])
+                    oP._l_sp_d_to_l_sp_u()
+                # oP.r2_sp = oP.r2_sp  # trigger setter  <- do NOT use the setter here, it messed up the massive states
 
         for mass in self.internal_masses:
             setattr(self, mass, _reduce(getattr(self, mass)))
