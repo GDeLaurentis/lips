@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import itertools
 import mpmath
 import numpy
@@ -8,11 +6,11 @@ import sympy
 
 from sympy.functions.special.tensor_functions import LeviCivita
 from fractions import Fraction as Q
+from syngular import Field
 
 from lips import Particles
 from lips.tools import pSijk, pDijk
 from lips.tools import LeviCivita as ϵ
-from lips.fields.field import Field
 
 mpc = Field('mpc', 0, 300)
 modp = Field('finite field', 2 ** 31 - 1, 1)

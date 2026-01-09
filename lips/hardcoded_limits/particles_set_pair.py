@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 #   ___          _   _    _          ___      _   ___      _
 #  | _ \__ _ _ _| |_(_)__| |___ ___ / __| ___| |_| _ \__ _(_)_ _
 #  |  _/ _` | '_|  _| / _| / -_|_-<_\__ \/ -_)  _|  _/ _` | | '_|
@@ -10,7 +8,8 @@
 import numpy
 import mpmath
 
-from ..tools import flatten, pSijk, pDijk, pA2, pS2, p3B, pNB, myException
+from pycoretools import flatten
+from ..tools import pSijk, pDijk, pA2, pS2, p3B, pNB, myException
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #

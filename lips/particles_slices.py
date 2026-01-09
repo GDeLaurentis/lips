@@ -3,8 +3,9 @@ import sympy
 
 from itertools import combinations
 from copy import deepcopy
+from pycoretools import flatten, TemporarySetting
 
-from syngular import Ring, Ideal, flatten, Polynomial, TemporarySetting
+from syngular import Ring, Ideal, Polynomial
 
 from .algebraic_geometry.covariant_ideal import LipsIdeal
 from .algebraic_geometry.particles_singular_variety import update_particles

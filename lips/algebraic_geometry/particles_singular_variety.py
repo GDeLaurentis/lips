@@ -1,8 +1,7 @@
 import numpy
 
+from pycoretools import flatten
 from pyadic import ModP, PAdic
-
-from ..tools import flatten
 
 from .covariant_ideal import LipsIdeal
 

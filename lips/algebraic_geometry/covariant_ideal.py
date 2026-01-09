@@ -5,7 +5,7 @@ import functools
 
 from collections import defaultdict
 
-from lips.tools import flatten
+from pycoretools import flatten
 from lips.algebraic_geometry.tools import lips_covariant_symbols, lips_invariant_symbols, conversionIdeal
 from lips.algebraic_geometry.invariant_ideal import SpinorIdeal
 from syngular import Ideal, Ring

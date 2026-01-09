@@ -18,10 +18,11 @@ import sympy
 
 from sympy import NotInvertible
 
+from pycoretools import flatten
 from syngular import Field
 from pyadic import PAdic, ModP
 
-from .tools import MinkowskiMetric, flatten, subs_dict, pNB, myException, indexing_decorator, pAu, pAd, pSu, pSd, pMVar, LeviCivita
+from .tools import MinkowskiMetric, subs_dict, pNB, myException, indexing_decorator, pAu, pAd, pSu, pSd, pMVar, LeviCivita
 from .particle import Particle
 from .particles_compute import Particles_Compute
 from .particles_eval import Particles_Eval

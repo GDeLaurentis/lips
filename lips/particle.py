@@ -12,11 +12,11 @@ import lips
 from copy import copy
 from sympy import NotInvertible
 
+from pycoretools import flatten
 from syngular import Field
-
 from pyadic.field_extension import FieldExtension
 
-from .tools import MinkowskiMetric, LeviCivita, rand_frac, Pauli, Pauli_bar, flatten
+from .tools import MinkowskiMetric, LeviCivita, rand_frac, Pauli, Pauli_bar
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
