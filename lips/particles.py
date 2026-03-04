@@ -15,6 +15,7 @@ import copy
 import itertools
 import mpmath
 import sympy
+# import lips
 
 from sympy import NotInvertible
 
@@ -156,40 +157,77 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
             oResParticles = self.image(permutation_or_rule[0])
             if permutation_or_rule[1] is True:
                 oResParticles.angles_for_squares()
+                # realign the spin indices?
+                # if lips.conjugation_acts_on_spin_indices:
+                #     oResParticles.swap_spin_indices_positions()
             return oResParticles
+
+    def swap_spin_indices_positions(self):
+        for i, oP in enumerate(self):
+            if hasattr(oP, 'left_spin_index'):
+                if oP.left_spin_index[1] is all:
+                    if oP.left_spin_index[0] == 'd':
+                        oP._l_sp_d = -LeviCivita @ oP._l_sp_d  # raise it
+                        oP.left_spin_index = ('u', all)
+                    elif oP.left_spin_index[0] == 'u':
+                        oP._l_sp_d = LeviCivita @ oP._l_sp_d  # lower it
+                        oP.left_spin_index = ('d', all)
+                    else:
+                        raise ValueError(f"Left spin index not understood, {oP.left_spin_index}.")
+            if hasattr(oP, 'right_spin_index'):
+                if oP.right_spin_index[1] is all:
+                    if oP.right_spin_index[0] == 'd':
+                        oP._r_sp_d = oP._r_sp_d @ LeviCivita  # raise it
+                        oP.right_spin_index = ('u', all)
+                    elif oP.right_spin_index[0] == 'u':
+                        oP._r_sp_d = oP._r_sp_d @ -LeviCivita  # lower it
+                        oP.right_spin_index = ('d', all)
+                    else:
+                        raise ValueError(f"Right spin index not understood, was: {oP.right_spin_index}.")
+            oP._sps_d_to_sps_u()
 
     def copy(self):
         from .symmetries import identity
         return self.image(identity(len(self)))
 
-    def cluster(self, llIntegers, massive_fermions=None):
+    def cluster(self, llIntegers, massive_fermions=None, massive_spins=()):
         """Returns clustered particle objects according to lists of lists of integers (e.g. corners of one loop diagram).
+        Also useful to build phase space configurations with external massive legs.
         Massive legs are by default massive scalars.
         Massive fermions can be specificed as e.g.: massive_fermions=((3, 'u', all), (4, 'd', all)))
+        More generally, massive spin can be specified as: massive_spins=((index, (left position, left value), (right position, right value)), )
         """
+        if massive_fermions is not None:
+            for leg, index_position, index_value in massive_fermions:
+                massive_spins += ((leg, (index_position, index_value), (index_position, index_value)), )
         drule1 = dict(zip(["s" + "".join(map(str, entry)) for entry in llIntegers], [f"s{i}" for i in range(1, len(llIntegers) + 1)]))
         drule2 = dict(zip(["s_" + "".join(map(str, entry)) for entry in llIntegers], [f"s_{i}" for i in range(1, len(llIntegers) + 1)]))
         clustered_internal_masses = {key: (subs_dict(val, drule1 | drule2) if isinstance(val, str) else val)
                                      for key, val in self.internal_masses_dict.items()}
         selfClustered = Particles([sum([self[i] for i in corner_as_integers]) for corner_as_integers in llIntegers],
                                   field=self.field, fix_mom_cons=False, internal_masses=clustered_internal_masses)
-        if massive_fermions is not None:
-            for leg, index_position, index_value in massive_fermions:
-                assert len(llIntegers[leg - 1]) == 2
-                a, b = llIntegers[leg - 1]
-                selfClustered[leg]._r_sp_d = numpy.block([self(f"|{a}⟩"), self(f"|{b}⟩")])  # |bold leg> = |leg^I> = (lambda_leg)_alpha^I
-                selfClustered[leg]._l_sp_d = numpy.block([[self(f"[{a}|")], [self(f"[{b}|")]])  # [bold leg| = [leg_I| = (tilde-lambda_leg)_I_alpha
-                if index_position == "u":
-                    selfClustered[leg]._l_sp_d = -LeviCivita @ selfClustered[leg]._l_sp_d  # [bold leg| = [leg^I||
-                elif index_position == "d":
-                    selfClustered[leg]._r_sp_d = selfClustered[leg]._r_sp_d @ -LeviCivita  # |bold leg> = |leg_I>
-                else:
-                    raise Exception("Massive fermion spin index position must be either 'u' or 'd'.")
-                selfClustered[leg].spin_index = (index_position, index_value)
-                if isinstance(index_value, int):
-                    selfClustered[leg]._r_sp_d = selfClustered[leg]._r_sp_d[:, index_value - 1:index_value]
-                    selfClustered[leg]._l_sp_d = selfClustered[leg]._l_sp_d[index_value - 1:index_value, :]
-                selfClustered[leg]._sps_d_to_sps_u()
+        for (leg, (left_index_position, left_index_value), (right_index_position, right_index_value)) in massive_spins:
+            assert len(llIntegers[leg - 1]) == 2
+            a, b = llIntegers[leg - 1]
+            selfClustered[leg]._r_sp_d = numpy.block([self(f"|{a}⟩"), self(f"|{b}⟩")])  # |bold leg> = |leg^I> = (lambda_leg)_alpha^I
+            selfClustered[leg]._l_sp_d = numpy.block([[self(f"[{a}|")], [self(f"[{b}|")]])  # [bold leg| = [leg_I| = (tilde-lambda_leg)_I_alpha
+            if right_index_position == "d":
+                selfClustered[leg]._r_sp_d = selfClustered[leg]._r_sp_d @ -LeviCivita  # |bold leg> = |leg_I>
+            elif right_index_position != "u":
+                raise Exception("Massive spin right index position must be either 'u' or 'd'.")
+            if left_index_position == "u":
+                selfClustered[leg]._l_sp_d = -LeviCivita @ selfClustered[leg]._l_sp_d  # [bold leg| = [leg^I||
+            elif left_index_position != "d":
+                raise Exception("Massive spin left index position must be either 'u' or 'd'.")
+            selfClustered[leg].right_spin_index = (right_index_position, right_index_value)
+            selfClustered[leg].left_spin_index = (left_index_position, left_index_value)
+            if isinstance(right_index_value, int):
+                selfClustered[leg]._r_sp_d_all = selfClustered[leg]._r_sp_d.copy()
+                selfClustered[leg]._r_sp_d = selfClustered[leg]._r_sp_d[:, right_index_value - 1:right_index_value]
+            if isinstance(left_index_value, int):
+                selfClustered[leg]._l_sp_d_all = selfClustered[leg]._l_sp_d.copy()
+                selfClustered[leg]._l_sp_d = selfClustered[leg]._l_sp_d[left_index_value - 1:left_index_value, :]
+            selfClustered[leg]._sps_d_to_sps_u()
         return selfClustered
 
     def make_analytical_d(self, indepVars=None, symbols=('a', 'b', 'c', 'd')):

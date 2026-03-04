@@ -23,6 +23,7 @@ from .tools import myException, ldot
 from .invariants import Invariants
 
 spinor_convention = 'symmetric'  # or 'asymmetric'
+conjugation_acts_on_spin_indices = False
 
 __all__ = [
     "__version__",
