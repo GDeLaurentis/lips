@@ -1,17 +1,10 @@
-# -*- coding: utf-8 -*-
-
 # Author: Giuseppe
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-
 from copy import deepcopy
-
+from pycoretools import flatten
 from pyadic.padic import PAdic, full_range_random_padic_filling
 
-from .tools import flatten, myException
+from .tools import myException
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #

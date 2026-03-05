@@ -17,6 +17,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Deprecated
 
 
+## [0.6.0] - 2026-03-06
+
+### Added
+
+- `Particle.is_massless` and `.is_lightlike` properties
+- introducing `minimal` shift type, as opposed to `generic`
+- `codim_upper_bound` optional parameter for `Particles.univariate_slice`
+- Tentative implementation of slices with approximate (p-adic) constraints
+- Tentative option `conjugation_acts_on_spin_indices` (boolean, package level) - unclear if it's correct to have two togglable behaviours 
+- `massive_spins` in `Particles.cluster` allows setting left and right spin indices separately
+- tests for massive spin 1 polarizations
+
+### Changed
+
+- `Particles.subs` updated to support massive particles
+- `tr5` computation uses difference of traces `tr` rather than spinor strings to support arbitrary sequences of massless/massive legs
+- Allowing custom traces (`tr`) to be taken in lips ast evaluator
+- Improved `LipsIdeal` init, removed list vs tuple logic in favour of check of what variables appear in the polynomials (unparsed spinors, or parsed spinor components)
+- Migration of basic tools to pycoretools (e.g. `flatten`); cleanup of old python2.x remnants
+- `spin_index` split into `left_spin_index` and `right_spin_index`
+
+### Fixed
+
+- Fixed issue where p-adic slice would have constraints applied only at leading digit
+- Fixed issue where `all_symmetries` would not return conjugation permutation when all little group weights were zero.
+- Fixed issue where `Particles.compute` did not recognized `<` and `>` symbols as alternatives for unicode angle brackets in spinor chains.
+
+### Deprecated
+
+- `flatten` should be imported from pycoretools
+- `Field` should be imported from syngular
+
+
 ## [0.5.1] - 2025-07-22
 
 ### Added
@@ -31,7 +64,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `seed` is no longer saved as a `Particles` attribute. WARNING: invalidates hash-tables.
 - `Particles.randomise` drasticaly simplified by using `field.random()` instead of handling all cases separately.
 - `spin_index` now saves both the position ('u' or 'd') and the value (1, 2, or all). If this was used explicitly it will require a simple fix to restore compatibility.
-- twistor functions, `randomise_twist` and `comp_twist_x` are not implemented in a covariant formulation.
+- twistor functions, `randomise_twist` and `comp_twist_x` are now implemented in a covariant formulation.
 
 ### Fixed
 
@@ -171,7 +204,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Numerical computation of Lorentz invariant spinor strings.
 
 
-[unreleased]: https://github.com/GDeLaurentis/lips/compare/v0.5.1...HEAD
+[unreleased]: https://github.com/GDeLaurentis/lips/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/GDeLaurentis/lips/compare/v0.5.1...v0.6.0
 [0.5.1]: https://github.com/GDeLaurentis/lips/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/GDeLaurentis/lips/compare/v0.4.5...v0.5.0
 [0.4.5]: https://github.com/GDeLaurentis/lips/compare/v0.4.4...v0.4.5

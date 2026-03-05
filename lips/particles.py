@@ -15,13 +15,15 @@ import copy
 import itertools
 import mpmath
 import sympy
+# import lips
 
 from sympy import NotInvertible
 
+from pycoretools import flatten
 from syngular import Field
 from pyadic import PAdic, ModP
 
-from .tools import MinkowskiMetric, flatten, subs_dict, pNB, myException, indexing_decorator, pAu, pAd, pSu, pSd, pMVar, LeviCivita
+from .tools import MinkowskiMetric, subs_dict, pNB, myException, indexing_decorator, pAu, pAd, pSu, pSd, pMVar, LeviCivita
 from .particle import Particle
 from .particles_compute import Particles_Compute
 from .particles_eval import Particles_Eval
@@ -155,40 +157,77 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
             oResParticles = self.image(permutation_or_rule[0])
             if permutation_or_rule[1] is True:
                 oResParticles.angles_for_squares()
+                # realign the spin indices?
+                # if lips.conjugation_acts_on_spin_indices:
+                #     oResParticles.swap_spin_indices_positions()
             return oResParticles
+
+    def swap_spin_indices_positions(self):
+        for i, oP in enumerate(self):
+            if hasattr(oP, 'left_spin_index'):
+                if oP.left_spin_index[1] is all:
+                    if oP.left_spin_index[0] == 'd':
+                        oP._l_sp_d = -LeviCivita @ oP._l_sp_d  # raise it
+                        oP.left_spin_index = ('u', all)
+                    elif oP.left_spin_index[0] == 'u':
+                        oP._l_sp_d = LeviCivita @ oP._l_sp_d  # lower it
+                        oP.left_spin_index = ('d', all)
+                    else:
+                        raise ValueError(f"Left spin index not understood, {oP.left_spin_index}.")
+            if hasattr(oP, 'right_spin_index'):
+                if oP.right_spin_index[1] is all:
+                    if oP.right_spin_index[0] == 'd':
+                        oP._r_sp_d = oP._r_sp_d @ LeviCivita  # raise it
+                        oP.right_spin_index = ('u', all)
+                    elif oP.right_spin_index[0] == 'u':
+                        oP._r_sp_d = oP._r_sp_d @ -LeviCivita  # lower it
+                        oP.right_spin_index = ('d', all)
+                    else:
+                        raise ValueError(f"Right spin index not understood, was: {oP.right_spin_index}.")
+            oP._sps_d_to_sps_u()
 
     def copy(self):
         from .symmetries import identity
         return self.image(identity(len(self)))
 
-    def cluster(self, llIntegers, massive_fermions=None):
+    def cluster(self, llIntegers, massive_fermions=None, massive_spins=()):
         """Returns clustered particle objects according to lists of lists of integers (e.g. corners of one loop diagram).
+        Also useful to build phase space configurations with external massive legs.
         Massive legs are by default massive scalars.
         Massive fermions can be specificed as e.g.: massive_fermions=((3, 'u', all), (4, 'd', all)))
+        More generally, massive spin can be specified as: massive_spins=((index, (left position, left value), (right position, right value)), )
         """
+        if massive_fermions is not None:
+            for leg, index_position, index_value in massive_fermions:
+                massive_spins += ((leg, (index_position, index_value), (index_position, index_value)), )
         drule1 = dict(zip(["s" + "".join(map(str, entry)) for entry in llIntegers], [f"s{i}" for i in range(1, len(llIntegers) + 1)]))
         drule2 = dict(zip(["s_" + "".join(map(str, entry)) for entry in llIntegers], [f"s_{i}" for i in range(1, len(llIntegers) + 1)]))
         clustered_internal_masses = {key: (subs_dict(val, drule1 | drule2) if isinstance(val, str) else val)
                                      for key, val in self.internal_masses_dict.items()}
         selfClustered = Particles([sum([self[i] for i in corner_as_integers]) for corner_as_integers in llIntegers],
                                   field=self.field, fix_mom_cons=False, internal_masses=clustered_internal_masses)
-        if massive_fermions is not None:
-            for leg, index_position, index_value in massive_fermions:
-                assert len(llIntegers[leg - 1]) == 2
-                a, b = llIntegers[leg - 1]
-                selfClustered[leg]._r_sp_d = numpy.block([self(f"|{a}⟩"), self(f"|{b}⟩")])  # |bold leg> = |leg^I> = (lambda_leg)_alpha^I
-                selfClustered[leg]._l_sp_d = numpy.block([[self(f"[{a}|")], [self(f"[{b}|")]])  # [bold leg| = [leg_I| = (tilde-lambda_leg)_I_alpha
-                if index_position == "u":
-                    selfClustered[leg]._l_sp_d = -LeviCivita @ selfClustered[leg]._l_sp_d  # [bold leg| = [leg^I||
-                elif index_position == "d":
-                    selfClustered[leg]._r_sp_d = selfClustered[leg]._r_sp_d @ -LeviCivita  # |bold leg> = |leg_I>
-                else:
-                    raise Exception("Massive fermion spin index position must be either 'u' or 'd'.")
-                selfClustered[leg].spin_index = (index_position, index_value)
-                if isinstance(index_value, int):
-                    selfClustered[leg]._r_sp_d = selfClustered[leg]._r_sp_d[:, index_value - 1:index_value]
-                    selfClustered[leg]._l_sp_d = selfClustered[leg]._l_sp_d[index_value - 1:index_value, :]
-                selfClustered[leg]._sps_d_to_sps_u()
+        for (leg, (left_index_position, left_index_value), (right_index_position, right_index_value)) in massive_spins:
+            assert len(llIntegers[leg - 1]) == 2
+            a, b = llIntegers[leg - 1]
+            selfClustered[leg]._r_sp_d = numpy.block([self(f"|{a}⟩"), self(f"|{b}⟩")])  # |bold leg> = |leg^I> = (lambda_leg)_alpha^I
+            selfClustered[leg]._l_sp_d = numpy.block([[self(f"[{a}|")], [self(f"[{b}|")]])  # [bold leg| = [leg_I| = (tilde-lambda_leg)_I_alpha
+            if right_index_position == "d":
+                selfClustered[leg]._r_sp_d = selfClustered[leg]._r_sp_d @ -LeviCivita  # |bold leg> = |leg_I>
+            elif right_index_position != "u":
+                raise Exception("Massive spin right index position must be either 'u' or 'd'.")
+            if left_index_position == "u":
+                selfClustered[leg]._l_sp_d = -LeviCivita @ selfClustered[leg]._l_sp_d  # [bold leg| = [leg^I||
+            elif left_index_position != "d":
+                raise Exception("Massive spin left index position must be either 'u' or 'd'.")
+            selfClustered[leg].right_spin_index = (right_index_position, right_index_value)
+            selfClustered[leg].left_spin_index = (left_index_position, left_index_value)
+            if isinstance(right_index_value, int):
+                selfClustered[leg]._r_sp_d_all = selfClustered[leg]._r_sp_d.copy()
+                selfClustered[leg]._r_sp_d = selfClustered[leg]._r_sp_d[:, right_index_value - 1:right_index_value]
+            if isinstance(left_index_value, int):
+                selfClustered[leg]._l_sp_d_all = selfClustered[leg]._l_sp_d.copy()
+                selfClustered[leg]._l_sp_d = selfClustered[leg]._l_sp_d[left_index_value - 1:left_index_value, :]
+            selfClustered[leg]._sps_d_to_sps_u()
         return selfClustered
 
     def make_analytical_d(self, indepVars=None, symbols=('a', 'b', 'c', 'd')):
@@ -233,51 +272,52 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
         return subs_dict
 
     def subs(self, myDict):
-        """For all rank-1 spinor components, substitutes symbols with values from myDict."""
+        """Substitutes symbols with values from myDict, acts depending on whether the particle is massless or not."""
+
+        def _reduce(expr):
+            if not isinstance(expr, (sympy.Add, sympy.Mul, sympy.Symbol)):
+                return expr
+            expr = expr.subs(myDict)
+            if isinstance(expr, sympy.Integer) and self.field.name == "finite field":
+                return ModP(expr, self.field.characteristic)
+            elif isinstance(expr, sympy.Integer) and self.field.name == "padic":
+                return PAdic(expr, self.field.characteristic, self.field.digits)
+            else:
+                modulus = self.field.characteristic ** self.field.digits
+                return sympy.poly(expr, modulus=modulus).as_expr()
+
         for oP in self:
-            if isinstance(oP.r_sp_d[0, 0], (sympy.Add, sympy.Mul, sympy.Symbol)):
-                oP.r_sp_d[0, 0] = oP.r_sp_d[0, 0].subs(myDict)
-                if isinstance(oP.r_sp_d[0, 0], sympy.Integer) and self.field.name == "finite field":
-                    oP.r_sp_d[0, 0] = ModP(oP.r_sp_d[0, 0], self.field.characteristic)
-                elif isinstance(oP.r_sp_d[0, 0], sympy.Integer) and self.field.name == "padic":
-                    oP.r_sp_d[0, 0] = PAdic(oP.r_sp_d[0, 0], self.field.characteristic, self.field.digits)
-                else:
-                    oP.r_sp_d[0, 0] = sympy.poly(oP.r_sp_d[0, 0], modulus=self.field.characteristic ** self.field.digits).as_expr()
-            if isinstance(oP.r_sp_d[1, 0], (sympy.Add, sympy.Mul, sympy.Symbol)):
-                oP.r_sp_d[1, 0] = oP.r_sp_d[1, 0].subs(myDict)
-                if isinstance(oP.r_sp_d[1, 0], sympy.Integer) and self.field.name == "finite field":
-                    oP.r_sp_d[1, 0] = ModP(oP.r_sp_d[1, 0], self.field.characteristic)
-                elif isinstance(oP.r_sp_d[1, 0], sympy.Integer) and self.field.name == "padic":
-                    oP.r_sp_d[1, 0] = PAdic(oP.r_sp_d[1, 0], self.field.characteristic, self.field.digits)
-                else:
-                    oP.r_sp_d[1, 0] = sympy.poly(oP.r_sp_d[1, 0], modulus=self.field.characteristic ** self.field.digits).as_expr()
-            oP.r_sp_d = oP.r_sp_d  # trigger setter
-            if isinstance(oP.l_sp_d[0, 0], (sympy.Add, sympy.Mul, sympy.Symbol)):
-                oP.l_sp_d[0, 0] = oP.l_sp_d[0, 0].subs(myDict)
-                if isinstance(oP.l_sp_d[0, 0], sympy.Integer) and self.field.name == "finite field":
-                    oP.l_sp_d[0, 0] = ModP(oP.l_sp_d[0, 0], self.field.characteristic)
-                elif isinstance(oP.l_sp_d[0, 0], sympy.Integer) and self.field.name == "padic":
-                    oP.l_sp_d[0, 0] = PAdic(oP.l_sp_d[0, 0], self.field.characteristic, self.field.digits)
-                else:
-                    oP.l_sp_d[0, 0] = sympy.poly(oP.l_sp_d[0, 0], modulus=self.field.characteristic ** self.field.digits).as_expr()
-            if isinstance(oP.l_sp_d[0, 1], (sympy.Add, sympy.Mul, sympy.Symbol)):
-                oP.l_sp_d[0, 1] = oP.l_sp_d[0, 1].subs(myDict)
-                if isinstance(oP.l_sp_d[0, 1], sympy.Integer) and self.field.name == "finite field":
-                    oP.l_sp_d[0, 1] = ModP(oP.l_sp_d[0, 1], self.field.characteristic)
-                elif isinstance(oP.l_sp_d[0, 1], sympy.Integer) and self.field.name == "padic":
-                    oP.l_sp_d[0, 1] = PAdic(oP.l_sp_d[0, 1], self.field.characteristic, self.field.digits)
-                else:
-                    oP.l_sp_d[0, 1] = sympy.poly(oP.l_sp_d[0, 1], modulus=self.field.characteristic ** self.field.digits).as_expr()
-            oP.l_sp_d = oP.l_sp_d  # trigger setter
+            if oP.is_massless:
+                oP.r_sp_d[0, 0] = _reduce(oP.r_sp_d[0, 0])
+                oP.r_sp_d[1, 0] = _reduce(oP.r_sp_d[1, 0])
+                oP._r_sp_d_to_r_sp_u()
+                oP.l_sp_d[0, 0] = _reduce(oP.l_sp_d[0, 0])
+                oP.l_sp_d[0, 1] = _reduce(oP.l_sp_d[0, 1])
+                oP.l_sp_d = oP.l_sp_d  # trigger setter
+            else:
+                oP.r2_sp[0, 0] = _reduce(oP.r2_sp[0, 0])
+                oP.r2_sp[0, 1] = _reduce(oP.r2_sp[0, 1])
+                oP.r2_sp[1, 0] = _reduce(oP.r2_sp[1, 0])
+                oP.r2_sp[1, 1] = _reduce(oP.r2_sp[1, 1])
+                oP._r2_sp_to_r2_sp_b()
+                if oP.four_mom is not None:
+                    try:
+                        oP._r2_sp_to_four_momentum()
+                        oP._four_mom_to_four_mom_d()
+                    except:  # noqa
+                        oP._four_mom = oP._four_mom_d = None
+                if oP.r_sp_d is not None:
+                    oP.r_sp_d[0, 0] = _reduce(oP.r_sp_d[0, 0])
+                    oP.r_sp_d[1, 0] = _reduce(oP.r_sp_d[1, 0])
+                    oP._r_sp_d_to_r_sp_u()
+                if oP.l_sp_d is not None:
+                    oP.l_sp_d[0, 0] = _reduce(oP.l_sp_d[0, 0])
+                    oP.l_sp_d[0, 1] = _reduce(oP.l_sp_d[0, 1])
+                    oP._l_sp_d_to_l_sp_u()
+                # oP.r2_sp = oP.r2_sp  # trigger setter  <- do NOT use the setter here, it messed up the massive states
+
         for mass in self.internal_masses:
-            if isinstance(getattr(self, mass), (sympy.Add, sympy.Mul, sympy.Symbol)):
-                setattr(self, mass, getattr(self, mass).subs(myDict))
-            if isinstance(getattr(self, mass), (sympy.Integer, ModP)) and self.field.name == "finite field":
-                setattr(self, mass, ModP(getattr(self, mass), self.field.characteristic))
-            elif isinstance(getattr(self, mass), (sympy.Integer, PAdic)) and self.field.name == "padic":
-                setattr(self, mass, PAdic(getattr(self, mass), self.field.characteristic, self.field.digits))
-            elif not isinstance(getattr(self, mass), str):
-                setattr(self, mass, sympy.poly(getattr(self, mass), modulus=self.field.characteristic ** self.field.digits).as_expr())
+            setattr(self, mass, _reduce(getattr(self, mass)))
 
     def fix_mom_cons(self, A=0, B=0, real_momenta=False, axis=1):   # using real momenta changes both |⟩ and |] of A & B
         """Fixes momentum conservation using particles A and B."""

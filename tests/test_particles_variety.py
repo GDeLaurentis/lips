@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import numpy
 import pytest
 
@@ -89,3 +87,13 @@ def test_variety_dynamic_function_unsuccessful(field, invariants, valuations):
     oPs = Particles(7, field=field)
     with pytest.raises(myException):
         oPs.variety(invariants, valuations, try_singular_variety_solver=False)
+
+
+def test_codim_two_variety_with_three_generators():
+    seed = 0
+    field = Field("padic", 2 ** 31 - 19, 20)
+    oParticles = Particles(9, field=field, seed=None)
+    oParticles._singular_variety(("s_45-s_67", "s_67-s_89", "⟨3|6+7+8+9|4+5|3⟩", "⟨3|6+7|8+9|1+2|4+5|3⟩", ),
+                                 (field.digits, field.digits, 1, 1, ),
+                                 generators=("s_45-s_67", "s_67-s_89", "⟨3|6+7+8+9|4+5|3⟩", "⟨3|6+7|8+9|1+2|4+5|3⟩", "⟨3|4+5+6+7|8+9|3⟩"),
+                                 seed=seed, verbose=True, indepSet='force guess')

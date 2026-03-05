@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import itertools
 import mpmath
 import numpy
@@ -8,10 +6,11 @@ import sympy
 
 from sympy.functions.special.tensor_functions import LeviCivita
 from fractions import Fraction as Q
+from syngular import Field
 
 from lips import Particles
 from lips.tools import pSijk, pDijk
-from lips.fields.field import Field
+from lips.tools import LeviCivita as ϵ
 
 mpc = Field('mpc', 0, 300)
 modp = Field('finite field', 2 ** 31 - 1, 1)
@@ -186,3 +185,17 @@ def test_particles_eval_moderately_complicated_expression():
     oPs = oPs.cluster([[1, ], [2, ], [3, 4], [5, 6], [7, 8]], massive_fermions=((3, 'u', 1), (4, 'd', 1)))
     # just check it can be evaluated
     oPs("+(+1/48mt²(⟨2|(3)|1+2|4|1]-⟨2|4|(1+2)|3|1])tr(1+2|3+4)(s_124-s_3)²s_34(s_34-4s_3)([3|4]-⟨3|4⟩))/(⟨1|2⟩[1|2]Δ_12|3|4|5²)")
+
+
+def test_particles_eval_with_traces():
+    field = Field("padic", 2 ** 31 - 19, 20)
+    oParticles = Particles(9, field=field, seed=None)
+    oParticles = oParticles.cluster([[1, ], [2, ], [3, ], [4, 5], [6, 7], [8, 9]])
+    assert oParticles("numpy.trace(|1|2|)") == oParticles("tr(|1|2|)") == oParticles("tr(1|2)")
+    assert (numpy.trace(oParticles("|1+2|3|𝟒|𝟓|𝟔|-|𝟔|𝟓|𝟒|3|1+2|") @ (ϵ @ oParticles("|1+2+3|𝟒|𝟓|-|𝟓|𝟒|1+2+3|") @ ϵ.T).T) ==
+            oParticles("tr((|1+2|3|𝟒|𝟓|𝟔|-|𝟔|𝟓|𝟒|3|1+2|)@(ϵ @ (|1+2+3|𝟒|𝟓|-|𝟓|𝟒|1+2+3|) @ ϵ.T).T)"))
+
+
+def test_partial_le_ge_aliases_for_angle_bracket():
+    oPs = Particles(6, field=Field("finite field", 2 ** 31 - 19, 1), seed=0)
+    assert oPs("<3|1+2|4]") == oPs("⟨3|1+2|4]")

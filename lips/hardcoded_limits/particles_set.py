@@ -10,7 +10,8 @@
 import numpy
 import re
 
-from ..tools import flatten, pSijk, pDijk, pOijk, pPijk, pA2, pS2, pNB, ptr5, p5Bdiff, myException
+from pycoretools import flatten
+from ..tools import pSijk, pDijk, pOijk, pPijk, pA2, pS2, pNB, ptr5, p5Bdiff, myException
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #

@@ -1,29 +1,31 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-# Author: Giuseppe
-
 import mpmath
 import numpy
 import random
 import re
 import warnings
 
-from syngular import flatten  # noqa
-
 mpmath.mp.dps = 300
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 
-LeviCivita = numpy.array([[0, 1], [-1, 0]])
-MinkowskiMetric = numpy.diag([1, -1, -1, -1])
-Pauli_zero = numpy.diag([1, 1])
-Pauli_x = numpy.array([[0, 1], [1, 0]])
-Pauli_y = numpy.array([[0, -1j], [1j, 0]])
-Pauli_z = numpy.array([[1, 0], [0, -1]])
-Pauli = numpy.array([Pauli_zero, Pauli_x, Pauli_y, Pauli_z])
-Pauli_bar = numpy.array([Pauli_zero, -Pauli_x, -Pauli_y, -Pauli_z])
+LeviCivita = ϵ = numpy.array([[0, 1], [-1, 0]])
+MinkowskiMetric = η = numpy.diag([1, -1, -1, -1])
+Pauli_zero = σ0 = numpy.diag([1, 1])
+Pauli_x = σx = numpy.array([[0, 1], [1, 0]])
+Pauli_y = σy = numpy.array([[0, -1j], [1j, 0]])
+Pauli_z = σz = numpy.array([[1, 0], [0, -1]])
+Pauli = σ = numpy.array([Pauli_zero, Pauli_x, Pauli_y, Pauli_z])
+Pauli_bar = σb = numpy.array([Pauli_zero, -Pauli_x, -Pauli_y, -Pauli_z])
+
+zero2x2 = numpy.zeros((2, 2), dtype=int)
+zero4x2x2 = numpy.zeros((4, 2, 2), dtype=int)
+one2x2 = numpy.diag([1, 1])
+
+Gamma5 = γ5 = numpy.block([[one2x2, zero2x2], [zero2x2, -one2x2]])
+Gamma = γ = numpy.block([[zero4x2x2, σb], [σ, zero4x2x2]])
+Gamma_lower_index = γ_μ = numpy.einsum('mn,nab->mab', MinkowskiMetric, Gamma)
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -34,7 +36,7 @@ pMi = re.compile(r'^(?:m|M)(?:_){0,1}(\d)$')
 pMVar = re.compile(r'^((?:m|M|μ)(?:_){0,1}[a-zA-Z]*[\d]*)$')
 pd5 = re.compile(r'^δ5$')
 ptr5 = re.compile(r'^tr5_(\d+)$|^tr5\(([\d\|\+\-]+)\)$')
-ptr = re.compile(r'^tr\((?P<middle>(?:(?:\([\d+\+|-]{1,}\))|(?:[\d+\+|-]{1,}))*)\)$')   # the 'middle' pattern should be like in pNB
+ptr = re.compile(r'^tr\((?!\|)(?P<middle>(?:(?:\([\d+\+|-]{1,}\))|(?:[\d+\+|-]{1,}))*)\)$')   # the 'middle' pattern should be like in pNB
 pDijk = re.compile(r'^Δ_(\d+(?:\|\d+)*)$')
 pOijk = re.compile(r'^(?:Ω_)(\d+)$')
 pPijk = re.compile(r'^(?:Π_)(\d+)$')

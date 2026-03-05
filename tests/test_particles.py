@@ -6,6 +6,7 @@ import hashlib
 
 from lips.fields import Field
 from lips import Particles
+from lips.tools import MinkowskiMetric, Pauli_bar
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -161,3 +162,75 @@ def test_field_change():
     oPsQp = Particles(6, field=Field("rational", 0, 0), seed=0)
     oPsQp.to_field(Qp)
     assert oPsFp("⟨1|2⟩") == oPsQp("⟨1|2⟩").as_tuple[0]
+
+
+@pytest.mark.parametrize(
+    "field", (Field("finite field", 2 ** 31 - 19, 1), Field("mpc", 0, 300))
+)
+def test_massive_vector_polarization(field):
+    # pseudo random phase space point at this seed
+    seed = 0
+
+    # six-point massless phase space al la BDK 9708239
+    oPs6pt = Particles(6, field=field, seed=seed, real_momenta=False, fix_mom_cons=(1, 2))
+
+    # set the values of the masses
+    # oPs6pt._singular_variety(("⟨56⟩+[56]", ), (0, ), seed=seed)  # this forces chiral and anti-chiral masses to be the same
+    oPs6pt.m2 = oPs6pt("s_56")
+    m2 = oPs6pt.m2
+    # m = field.sqrt(m2) - if you want it fro mthe sqrt
+    m = oPs6pt("⟨65⟩")
+    mbar = oPs6pt("[56]")
+
+    # sanity check on the massses
+    assert abs(m2 - m * mbar) <= field.tollerance
+
+    # re-interpret the random massless six-point phase space in terms of five-point one-mass phase space
+    # the massless spinors 5 and 6 become the components of the bold spinor 𝟓
+    oPs5pt_u = oPs6pt.cluster([[1, ], [2, ], [3, ], [4, ], [5, 6]], massive_fermions=((5, 'u', all), ))  # up index   5^I keeping all values for I = {1, 2}
+    oPs5pt_d = oPs6pt.cluster([[1, ], [2, ], [3, ], [4, ], [5, 6]], massive_fermions=((5, 'd', all), ))  # down index 5_I keeping all values for I = {1, 2}
+    oPs5pt_AuSd = oPs6pt.cluster([[1, ], [2, ], [3, ], [4, ], [5, 6]], massive_spins=((5, ('d', all), ('u', all), ), ))
+    oPs5pt = oPs5pt_u
+
+    # check the p-slash is related to the out products of the spinors, explicitly:
+    assert (abs(oPs5pt[5].r2_sp_b - (numpy.outer(oPs5pt_u("|𝟓⟩")[:, 0], oPs5pt_d("[𝟓|")[0, :]) +
+                                     numpy.outer(oPs5pt_u("|𝟓⟩")[:, 1], oPs5pt_d("[𝟓|")[1, :]))) <= field.tollerance).all()
+
+    # check the p-slash is related to the out products of the spinors, explicitly:
+    assert (abs(oPs5pt[5].r2_sp_b - (numpy.outer(oPs5pt_AuSd("|𝟓⟩")[:, 0], oPs5pt_AuSd("[𝟓|")[0, :]) +
+                                     numpy.outer(oPs5pt_AuSd("|𝟓⟩")[:, 1], oPs5pt_AuSd("[𝟓|")[1, :]))) <= field.tollerance).all()
+
+    εm = ε11 = - numpy.einsum("i,mij,j->m", oPs5pt("⟨𝟓|")[0, :], Pauli_bar, oPs5pt("|𝟓]")[:, 0]) / (field.sqrt(2) * mbar)  # noqa
+
+    ε22 = - numpy.einsum("i,mij,j->m", oPs5pt("⟨𝟓|")[1, :], Pauli_bar, oPs5pt("|𝟓]")[:, 1]) / (field.sqrt(2) * m)
+    εp = - ε22
+
+    ε0 = (numpy.einsum("i,mij,j->m", oPs5pt("⟨𝟓|")[0, :], Pauli_bar, oPs5pt("|𝟓]")[:, 1]) +
+          numpy.einsum("i,mij,j->m", oPs5pt("⟨𝟓|")[1, :], Pauli_bar, oPs5pt("|𝟓]")[:, 0])) / (field.sqrt(2) * m) / field.sqrt(2)
+    ε0c = ε0 * m / mbar
+
+    assert numpy.all(
+        abs((oPs6pt[5].four_mom - oPs6pt[6].four_mom) - (
+            numpy.einsum("i,mij,j->m", oPs5pt_AuSd("⟨𝟓|")[0, :], Pauli_bar, oPs5pt_AuSd("|𝟓]")[:, 0]) -
+            numpy.einsum("i,mij,j->m", oPs5pt_AuSd("⟨𝟓|")[1, :], Pauli_bar, oPs5pt_AuSd("|𝟓]")[:, 1])) / 2) <= field.tollerance
+    )
+
+    # Normalisation: $\epsilon_\lambda \cdot \epsilon_{\lambda'} = - \delta_{\lambda\lambda'}$
+
+    assert abs(εp @ MinkowskiMetric @ εp) <= field.tollerance
+    assert abs(εp @ MinkowskiMetric @ εm + 1) <= field.tollerance
+    assert abs(εp @ MinkowskiMetric @ ε0) <= field.tollerance
+    assert abs(εm @ MinkowskiMetric @ εm) <= field.tollerance
+    assert abs(εm @ MinkowskiMetric @ ε0) <= field.tollerance
+    assert abs(ε0 @ MinkowskiMetric @ ε0c + 1) <= field.tollerance
+
+    # On-shell transversality: $p \cdot \epsilon = 0$
+
+    assert abs(oPs5pt[5].four_mom_d @ εp) <= field.tollerance
+    assert abs(oPs5pt[5].four_mom_d @ εm) <= field.tollerance
+    assert abs(oPs5pt[5].four_mom_d @ ε0) <= field.tollerance
+
+    # Completeness $\sum_\lambda \epsilon^\mu_\lambda \cdot \epsilon^\nu_{\lambda} = - \eta^{\mu\nu} + p^\mu p^\nu / m^2$
+
+    assert (abs((numpy.outer(εp, εm) + numpy.outer(εm, εp) + numpy.outer(ε0, ε0c)) -
+                (- MinkowskiMetric + numpy.outer(oPs5pt[5].four_mom, oPs5pt[5].four_mom) / (m * mbar))) <= field.tollerance).all()

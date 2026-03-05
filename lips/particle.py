@@ -12,11 +12,11 @@ import lips
 from copy import copy
 from sympy import NotInvertible
 
+from pycoretools import flatten
 from syngular import Field
-
 from pyadic.field_extension import FieldExtension
 
-from .tools import MinkowskiMetric, LeviCivita, rand_frac, Pauli, Pauli_bar, flatten
+from .tools import MinkowskiMetric, LeviCivita, rand_frac, Pauli, Pauli_bar
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -110,10 +110,10 @@ class Particle(object):
         return self.four_mom[key]
 
     def __hash__(self):
-        if abs(self.m2) <= self.field.tollerance:
+        if self.is_massless:
             return hash(tuple([tuple(self.r_sp_d.flatten()), tuple(self.l_sp_d.flatten())]))
         else:
-            return hash(tuple(self.r2_sp.flatten()))
+            return hash(tuple([tuple(self.r2_sp.flatten()), tuple(self.r_sp_d.flatten()), tuple(self.l_sp_d.flatten())]))
 
     # GETTERS and SETTERS
 
@@ -299,6 +299,14 @@ class Particle(object):
             self._l_sp_u = None
             self._l_sp_d = None
 
+    @property
+    def spin_index(self):
+        raise Exception("Spin index is set only - access left_spin_index and right_spin_index separately.")
+
+    @spin_index.setter
+    def spin_index(self, value):
+        self.left_spin_index = self.right_spin_index = value
+
     # PUBLIC METHODS
 
     def randomise(self, real_momentum=False):
@@ -331,13 +339,28 @@ class Particle(object):
         """Flips left and right spinors."""
         if self.l_sp_d is not None and self.r_sp_d is not None:  # massive scalars do not have these defined
             self._l_sp_d, self._r_sp_d = self._r_sp_d.T, self._l_sp_d.T
-            if hasattr(self, 'spin_index'):
-                if self.spin_index[0] == 'u':
+            if hasattr(self, '_l_sp_d_all') and hasattr(self, '_r_sp_d_all'):
+                self._l_sp_d_all, self._r_sp_d_all = self._r_sp_d_all.T, self._l_sp_d_all.T
+            if lips.conjugation_acts_on_spin_indices and hasattr(self, 'right_spin_index') and hasattr(self, 'left_spin_index'):
+                # see arXiv:2309.03323 - A.28 and A.29
+                if self.left_spin_index[0] == 'u':  # [i|
+                    self.left_spin_index = ('d',) + self.left_spin_index[1:]
                     self._l_sp_d *= -1
-                elif self.spin_index[0] == 'd':
-                    self._r_sp_d *= -1
+                    if hasattr(self, '_l_sp_d_all'):
+                        self._l_sp_d_all *= -1
+                elif self.left_spin_index[0] == 'd':
+                    self.left_spin_index = ('u',) + self.left_spin_index[1:]
                 else:
-                    raise Exception("Spin index not understood.")
+                    raise Exception(f"Left spin index not understood: {self.left_spin_index[0]}")
+                if self.right_spin_index[0] == 'd':  # |i⟩
+                    self.right_spin_index = ('u',) + self.right_spin_index[1:]
+                    self._r_sp_d *= -1
+                    if hasattr(self, '_r_sp_d_all'):
+                        self._r_sp_d_all *= -1
+                elif self.right_spin_index[0] == 'u':
+                    self.right_spin_index = ('d',) + self.right_spin_index[1:]
+                else:
+                    raise Exception(f"Right spin index not understood: {self.right_spin_index[0]}")
             self._sps_d_to_sps_u()
         self._r2_sp = self._r2_sp.T
         self._r2_sp_b = self._r2_sp_b.T
@@ -483,3 +506,9 @@ class Particle(object):
     @property
     def m(self):
         return self.field.sqrt(self.lsq())
+
+    @property
+    def is_massless(self):
+        return (self.m2 in self.field and abs(self.m2) <= self.field.tollerance) or (self.m2 == 0)
+
+    is_lightlike = is_massless

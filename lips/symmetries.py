@@ -8,8 +8,11 @@ def phase_weights_compatible_symmetries(phase_weights):
     base = list(range(1, len(phase_weights) + 1))
     permutations = list(itertools.permutations(base))
     phase_weights_compatible_symmetries = list(filter(None, [
-        (''.join(map(str, permutation)), False, ) if all([phase_weights[i - 1] for i in permutation] == phase_weights) else
-        (''.join(map(str, permutation)), True, ) if all([phase_weights[i - 1] for i in permutation] == - phase_weights) else None for permutation in permutations]))
+        (''.join(map(str, permutation)), False, ) if all([phase_weights[i - 1] for i in permutation] == phase_weights) else None
+        for permutation in permutations]))
+    phase_weights_compatible_symmetries += list(filter(None, [
+        (''.join(map(str, permutation)), True, ) if all([phase_weights[i - 1] for i in permutation] == - phase_weights) else None
+        for permutation in permutations]))
     return phase_weights_compatible_symmetries[:]
 
 

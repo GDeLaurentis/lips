@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 # Author: Giuseppe
 
 import sys
@@ -80,7 +77,7 @@ pNB_double_open_disambiguate_alphadot = re.compile(  # DO NOT MODIFY HERE: COPY 
     r'(?!\'\))'  # negative lookahead for already matched expression
 )
 ptr5 = re.compile(r'tr5(_\d+|\([\d\|\+\-]+\))')
-ptr = re.compile(r'(tr\((?:(?:\([\d+\+|-]{1,}\))|(?:[\d+\+|-]{1,})*)\))')
+ptr = re.compile(r'(tr\((?!\|)(?:(?:\([\d+\+|-]{1,}\))|(?:[\d+\+|-]{1,})*)\))')
 pMassiveSAu_SpinIndexd = re.compile(r'(?:⟨|<)(\d+)(_|d)\|')
 pMassiveSAd_SpinIndexd = re.compile(r'\|(\d+)(_|d)(?:⟩|>)')
 pMassiveSBd_SpinIndexu = re.compile(r'\[(\d+)(\^|u)\|')
@@ -185,6 +182,12 @@ def _eval_node(node, locals_={}):
     elif isinstance(node, ast.UnaryOp):
         return operators[type(node.op)](_eval_node(node.operand, locals_))
 
+    elif isinstance(node, ast.Attribute):
+        if node.attr == "T":
+            obj = _eval_node(node.value, locals_)
+            return obj.T
+        raise TypeError("Attribute not understood:", node, ast.dump(node))
+
     elif isinstance(node, (ast.List, ast.Tuple)):
         return [_eval_node(el, locals_) for el in node.elts]
 
@@ -216,8 +219,11 @@ def _eval_node(node, locals_={}):
         elif isinstance(node.func, ast.Name) and hasattr(node.func, 'id') and node.func.id == 'Fraction':
             function, arguments = 'Fraction', ", ".join(map(str, [arg.n for arg in node.args]))
             allowed_func_call = f"{function}({arguments})"
+        elif isinstance(node.func, ast.Name) and hasattr(node.func, 'id') and node.func.id == 'tr':
+            args = [_eval_node(arg, locals_) for arg in node.args]
+            return numpy.trace(*args)
         else:
-            raise TypeError(node, ast.dump(node))
+            raise TypeError("Function call not understood", node, ast.dump(node))
         return eval(allowed_func_call, None, locals_)
 
     elif isinstance(node, ast.Name):
@@ -248,4 +254,4 @@ def _eval_node(node, locals_={}):
         return value[index]  # Perform the actual indexing/slicing
 
     else:
-        raise TypeError(node, ast.dump(node))
+        raise TypeError("Node not understood:", node, ast.dump(node))

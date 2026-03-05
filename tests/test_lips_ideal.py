@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import pytest
 
 from lips.algebraic_geometry.covariant_ideal import LipsIdeal
@@ -50,3 +43,12 @@ def test_symmetry_image_commutes_with_invariant_slice():
     iP1 = P1.invariant_slice()
     iP1permuted2 = iP1('126345', False)
     assert iP1permuted1 == iP1permuted2
+
+
+def test_primality_test():
+    I = LipsIdeal(6, ('⟨1|2⟩',
+                      '-1⟨2|3⟩⟨2|4⟩[1|4][2|3]-1⟨2|4⟩²[1|4][2|4]+1⟨2|3⟩⟨3|4⟩[1|3][3|4]',
+                      '-1⟨1|3⟩⟨2|4⟩[1|4][2|3]-1⟨1|4⟩⟨2|4⟩[1|4][2|4]+1⟨1|3⟩⟨3|4⟩[1|3][3|4]'))
+    I.ring.variables = I.ring.variables[::-1]
+    I.test_primality(verbose=True, seminumerical_dim_computation=True, astuple=False, timeout_fpoly=5, nbr_points=0,
+                     projection_number=(1, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1))

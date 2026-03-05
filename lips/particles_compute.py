@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 #   ___          _   _    _          ___                     _
 #  | _ \__ _ _ _| |_(_)__| |___ ___ / __|___ _ __  _ __ _  _| |_ ___
 #  |  _/ _` | '_|  _| / _| / -_|_-<| (__/ _ \ '  \| '_ \ || |  _/ -_)
@@ -84,13 +81,7 @@ class Particles_Compute:
         if ptr5.findall(temp_string) != []:                         # tr5_ijkl [i|j|k|l|i⟩ - ⟨i|j|k|l|i]
             abcd = ptr5.findall(temp_string)[0][0 if "_" in temp_string else 1]
             a, b, c, d = abcd.split("|") if "|" in abcd else abcd
-            for _ in range(4):
-                if len(a) == 1:
-                    break
-                a, b, c, d = b, c, d, a
-            else:
-                raise NotImplementedError("tr5 implementation requires at least 1 massless particle.")
-            return self.compute(f"[{a}|{b}|{c}|{d}|{a}⟩") - self.compute(f"⟨{a}|{b}|{c}|{d}|{a}]")
+            return self.compute(f"tr({a}|{b}|{c}|{d})-tr({b}|{c}|{d}|{a})")
 
         if ptr.findall(temp_string) != []:                          # e.g.: tr(i+j|k-l|...)
             abcd = ptr.search(temp_string)
@@ -187,16 +178,16 @@ class Particles_Compute:
             d = int(abcd.group('end'))
 
             # Check the contraction is valid
-            if len(bc) % 2 == 0 and temp_string[0] == "⟨" and temp_string[-1] != "⟩":
+            if len(bc) % 2 == 0 and temp_string[0] in ("⟨", "<") and temp_string[-1] not in ("⟩", ">"):
                 raise SyntaxError(f"Expected closing \'⟩\', instead found \'{temp_string[-1]}\'.")
-            elif len(bc) % 2 == 1 and temp_string[0] == "⟨" and temp_string[-1] != "]":
+            elif len(bc) % 2 == 1 and temp_string[0] in ("⟨", "<") and temp_string[-1] != "]":
                 raise SyntaxError(f"Expected closing \']\', instead found \'{temp_string[-1]}\'.")
             elif len(bc) % 2 == 0 and temp_string[0] == "[" and temp_string[-1] != "]":
                 raise SyntaxError(f"Expected closing \']\', instead found \'{temp_string[-1]}\'.")
-            elif len(bc) % 2 == 1 and temp_string[0] == "[" and temp_string[-1] != "⟩":
+            elif len(bc) % 2 == 1 and temp_string[0] == "[" and temp_string[-1] not in ("⟩", ">"):
                 raise SyntaxError(f"Expected closing \']\', instead found \'{temp_string[-1]}\'.")
 
-            if temp_string[0] == "⟨":
+            if temp_string[0] in ("⟨", "<"):
                 middle = ["(" + re.sub(r'(\d+)', r'self[\1].r2_sp_b', entry) + ")" if i % 2 == 0 else
                           "(" + re.sub(r'(\d+)', r'self[\1].r2_sp', entry) + ")" for i, entry in enumerate(bc)]
                 middle = " @ ".join(middle)
@@ -207,7 +198,7 @@ class Particles_Compute:
                 middle = " @ ".join(middle)
                 result = self[a].l_sp_d @ eval(middle)
 
-            if temp_string[-1] == "⟩":
+            if temp_string[-1] in ("⟩", ">"):
                 result = result @ self[d].r_sp_d
             else:
                 result = result @ self[d].l_sp_u

@@ -1,18 +1,12 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import pytest
 import mpmath
+
+from pycoretools import mapThreads, retry
 
 from lips import Particles
 from lips.tools import myException
 from lips.invariants import Invariants
 
-from tools import mapThreads, retry
 
 mpmath.mp.dps = 300
 UseParallelisation = True
