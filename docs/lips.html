@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>lips.particle &mdash; lips 0.5.1 documentation</title>
+  <title>lips.particle &mdash; lips 0.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=b9afe91b"></script>
+      <script src="_static/documentation_options.js?v=8fa8b3e9"></script>
       <script src="_static/doctools.js?v=9a2dae69"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -50,6 +50,8 @@
 <li class="toctree-l4"><a class="reference internal" href="#lips.particle.Particle.comp_twist_x"><code class="docutils literal notranslate"><span class="pre">Particle.comp_twist_x()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#lips.particle.Particle.four_mom"><code class="docutils literal notranslate"><span class="pre">Particle.four_mom</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#lips.particle.Particle.four_mom_d"><code class="docutils literal notranslate"><span class="pre">Particle.four_mom_d</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.particle.Particle.is_lightlike"><code class="docutils literal notranslate"><span class="pre">Particle.is_lightlike</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.particle.Particle.is_massless"><code class="docutils literal notranslate"><span class="pre">Particle.is_massless</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#lips.particle.Particle.l_sp_d"><code class="docutils literal notranslate"><span class="pre">Particle.l_sp_d</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#lips.particle.Particle.l_sp_u"><code class="docutils literal notranslate"><span class="pre">Particle.l_sp_u</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#lips.particle.Particle.lsq"><code class="docutils literal notranslate"><span class="pre">Particle.lsq()</span></code></a></li>
@@ -63,6 +65,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#lips.particle.Particle.randomise_mpc"><code class="docutils literal notranslate"><span class="pre">Particle.randomise_mpc()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#lips.particle.Particle.randomise_spinors_in_field"><code class="docutils literal notranslate"><span class="pre">Particle.randomise_spinors_in_field()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#lips.particle.Particle.randomise_twist"><code class="docutils literal notranslate"><span class="pre">Particle.randomise_twist()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.particle.Particle.spin_index"><code class="docutils literal notranslate"><span class="pre">Particle.spin_index</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#lips.particle.Particle.spinors_are_in_field_extension"><code class="docutils literal notranslate"><span class="pre">Particle.spinors_are_in_field_extension</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#lips.particle.Particle.to_field"><code class="docutils literal notranslate"><span class="pre">Particle.to_field()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#lips.particle.Particle.twist_x_to_mom"><code class="docutils literal notranslate"><span class="pre">Particle.twist_x_to_mom()</span></code></a></li>
@@ -96,6 +99,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#lips.particles.Particles.save_phase_space_point"><code class="docutils literal notranslate"><span class="pre">Particles.save_phase_space_point()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#lips.particles.Particles.spinors_are_in_field_extension"><code class="docutils literal notranslate"><span class="pre">Particles.spinors_are_in_field_extension</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#lips.particles.Particles.subs"><code class="docutils literal notranslate"><span class="pre">Particles.subs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.particles.Particles.swap_spin_indices_positions"><code class="docutils literal notranslate"><span class="pre">Particles.swap_spin_indices_positions()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#lips.particles.Particles.to_field"><code class="docutils literal notranslate"><span class="pre">Particles.to_field()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#lips.particles.Particles.total_mom"><code class="docutils literal notranslate"><span class="pre">Particles.total_mom</span></code></a></li>
 </ul>
@@ -119,7 +123,76 @@
 <li class="toctree-l3"><a class="reference internal" href="#lips.hardcoded_limits.particles_set_pair.Particles_SetPair"><code class="docutils literal notranslate"><span class="pre">Particles_SetPair</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#module-lips">Module contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-lips">Module contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#lips.Invariants"><code class="docutils literal notranslate"><span class="pre">Invariants</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Invariants.GenerateFromScratch"><code class="docutils literal notranslate"><span class="pre">Invariants.GenerateFromScratch()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Invariants.full"><code class="docutils literal notranslate"><span class="pre">Invariants.full</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Invariants.full_minus_4_brackets"><code class="docutils literal notranslate"><span class="pre">Invariants.full_minus_4_brackets</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Invariants.invs_N"><code class="docutils literal notranslate"><span class="pre">Invariants.invs_N</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Invariants.pw_cache"><code class="docutils literal notranslate"><span class="pre">Invariants.pw_cache</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Invariants.pw_invariants"><code class="docutils literal notranslate"><span class="pre">Invariants.pw_invariants</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#lips.Particle"><code class="docutils literal notranslate"><span class="pre">Particle</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particle.angles_for_squares"><code class="docutils literal notranslate"><span class="pre">Particle.angles_for_squares()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particle.comp_twist_x"><code class="docutils literal notranslate"><span class="pre">Particle.comp_twist_x()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particle.four_mom"><code class="docutils literal notranslate"><span class="pre">Particle.four_mom</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particle.four_mom_d"><code class="docutils literal notranslate"><span class="pre">Particle.four_mom_d</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particle.is_lightlike"><code class="docutils literal notranslate"><span class="pre">Particle.is_lightlike</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particle.is_massless"><code class="docutils literal notranslate"><span class="pre">Particle.is_massless</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particle.l_sp_d"><code class="docutils literal notranslate"><span class="pre">Particle.l_sp_d</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particle.l_sp_u"><code class="docutils literal notranslate"><span class="pre">Particle.l_sp_u</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particle.lsq"><code class="docutils literal notranslate"><span class="pre">Particle.lsq()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particle.m"><code class="docutils literal notranslate"><span class="pre">Particle.m</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particle.m2"><code class="docutils literal notranslate"><span class="pre">Particle.m2</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particle.r2_sp"><code class="docutils literal notranslate"><span class="pre">Particle.r2_sp</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particle.r2_sp_b"><code class="docutils literal notranslate"><span class="pre">Particle.r2_sp_b</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particle.r_sp_d"><code class="docutils literal notranslate"><span class="pre">Particle.r_sp_d</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particle.r_sp_u"><code class="docutils literal notranslate"><span class="pre">Particle.r_sp_u</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particle.randomise"><code class="docutils literal notranslate"><span class="pre">Particle.randomise()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particle.randomise_mpc"><code class="docutils literal notranslate"><span class="pre">Particle.randomise_mpc()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particle.randomise_spinors_in_field"><code class="docutils literal notranslate"><span class="pre">Particle.randomise_spinors_in_field()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particle.randomise_twist"><code class="docutils literal notranslate"><span class="pre">Particle.randomise_twist()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particle.spin_index"><code class="docutils literal notranslate"><span class="pre">Particle.spin_index</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particle.spinors_are_in_field_extension"><code class="docutils literal notranslate"><span class="pre">Particle.spinors_are_in_field_extension</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particle.to_field"><code class="docutils literal notranslate"><span class="pre">Particle.to_field()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particle.twist_x_to_mom"><code class="docutils literal notranslate"><span class="pre">Particle.twist_x_to_mom()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#lips.Particles"><code class="docutils literal notranslate"><span class="pre">Particles</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particles.analytical_subs_d"><code class="docutils literal notranslate"><span class="pre">Particles.analytical_subs_d()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particles.angles_for_squares"><code class="docutils literal notranslate"><span class="pre">Particles.angles_for_squares()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particles.check_consistency"><code class="docutils literal notranslate"><span class="pre">Particles.check_consistency()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particles.cluster"><code class="docutils literal notranslate"><span class="pre">Particles.cluster()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particles.copy"><code class="docutils literal notranslate"><span class="pre">Particles.copy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particles.fix_mom_cons"><code class="docutils literal notranslate"><span class="pre">Particles.fix_mom_cons()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particles.four_momenta_for_mathematica"><code class="docutils literal notranslate"><span class="pre">Particles.four_momenta_for_mathematica()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particles.ijk_to_3Ks"><code class="docutils literal notranslate"><span class="pre">Particles.ijk_to_3Ks()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particles.ijk_to_3NonOverlappingLists"><code class="docutils literal notranslate"><span class="pre">Particles.ijk_to_3NonOverlappingLists()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particles.image"><code class="docutils literal notranslate"><span class="pre">Particles.image()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particles.insert"><code class="docutils literal notranslate"><span class="pre">Particles.insert()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particles.internal_masses_dict"><code class="docutils literal notranslate"><span class="pre">Particles.internal_masses_dict</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particles.m2s"><code class="docutils literal notranslate"><span class="pre">Particles.m2s</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particles.make_analytical_d"><code class="docutils literal notranslate"><span class="pre">Particles.make_analytical_d()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particles.momentum_conservation_check"><code class="docutils literal notranslate"><span class="pre">Particles.momentum_conservation_check()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particles.ms"><code class="docutils literal notranslate"><span class="pre">Particles.ms</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particles.multiplicity"><code class="docutils literal notranslate"><span class="pre">Particles.multiplicity</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particles.onshell_relation_check"><code class="docutils literal notranslate"><span class="pre">Particles.onshell_relation_check()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particles.phasespace_consistency_check"><code class="docutils literal notranslate"><span class="pre">Particles.phasespace_consistency_check()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particles.randomise_all"><code class="docutils literal notranslate"><span class="pre">Particles.randomise_all()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particles.randomise_twistor"><code class="docutils literal notranslate"><span class="pre">Particles.randomise_twistor()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particles.save_phase_space_point"><code class="docutils literal notranslate"><span class="pre">Particles.save_phase_space_point()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particles.spinors_are_in_field_extension"><code class="docutils literal notranslate"><span class="pre">Particles.spinors_are_in_field_extension</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particles.subs"><code class="docutils literal notranslate"><span class="pre">Particles.subs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particles.swap_spin_indices_positions"><code class="docutils literal notranslate"><span class="pre">Particles.swap_spin_indices_positions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particles.to_field"><code class="docutils literal notranslate"><span class="pre">Particles.to_field()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lips.Particles.total_mom"><code class="docutils literal notranslate"><span class="pre">Particles.total_mom</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#lips.ldot"><code class="docutils literal notranslate"><span class="pre">ldot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#lips.myException"><code class="docutils literal notranslate"><span class="pre">myException</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -178,6 +251,16 @@
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">four_mom_d</span></span><a class="headerlink" href="#lips.particle.Particle.four_mom_d" title="Link to this definition"></a></dt>
 <dd><p>Four Momentum with lower index: P_μ</p>
 </dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="lips.particle.Particle.is_lightlike">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_lightlike</span></span><a class="headerlink" href="#lips.particle.Particle.is_lightlike" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="lips.particle.Particle.is_massless">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_massless</span></span><a class="headerlink" href="#lips.particle.Particle.is_massless" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="lips.particle.Particle.l_sp_d">
@@ -253,6 +336,11 @@
 <dd></dd></dl>
 
 <dl class="py property">
+<dt class="sig sig-object py" id="lips.particle.Particle.spin_index">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">spin_index</span></span><a class="headerlink" href="#lips.particle.Particle.spin_index" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
 <dt class="sig sig-object py" id="lips.particle.Particle.spinors_are_in_field_extension">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">spinors_are_in_field_extension</span></span><a class="headerlink" href="#lips.particle.Particle.spinors_are_in_field_extension" title="Link to this definition"></a></dt>
 <dd></dd></dl>
@@ -294,10 +382,12 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="lips.particles.Particles.cluster">
-<span class="sig-name descname"><span class="pre">cluster</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">llIntegers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">massive_fermions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lips.particles.Particles.cluster" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">cluster</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">llIntegers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">massive_fermions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">massive_spins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lips.particles.Particles.cluster" title="Link to this definition"></a></dt>
 <dd><p>Returns clustered particle objects according to lists of lists of integers (e.g. corners of one loop diagram).
+Also useful to build phase space configurations with external massive legs.
 Massive legs are by default massive scalars.
-Massive fermions can be specificed as e.g.: massive_fermions=((3, ‘u’, all), (4, ‘d’, all)))</p>
+Massive fermions can be specificed as e.g.: massive_fermions=((3, ‘u’, all), (4, ‘d’, all)))
+More generally, massive spin can be specified as: massive_spins=((index, (left position, left value), (right position, right value)), )</p>
 </dd></dl>
 
 <dl class="py method">
@@ -408,8 +498,13 @@ Massive fermions can be specificed as e.g.: massive_fermions=((3, ‘u’, all),
 <dl class="py method">
 <dt class="sig sig-object py" id="lips.particles.Particles.subs">
 <span class="sig-name descname"><span class="pre">subs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">myDict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lips.particles.Particles.subs" title="Link to this definition"></a></dt>
-<dd><p>For all rank-1 spinor components, substitutes symbols with values from myDict.</p>
+<dd><p>Substitutes symbols with values from myDict, acts depending on whether the particle is massless or not.</p>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lips.particles.Particles.swap_spin_indices_positions">
+<span class="sig-name descname"><span class="pre">swap_spin_indices_positions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lips.particles.Particles.swap_spin_indices_positions" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="lips.particles.Particles.to_field">
@@ -501,6 +596,343 @@ Particles objects are base one lists of Particle objects.</p>
 <span class="linenos">6</span><span class="n">oParticles</span><span class="o">.</span><span class="n">set_pair</span><span class="p">(</span><span class="n">spinor_string_1</span><span class="p">,</span> <span class="n">small_value_1</span><span class="p">,</span> <span class="n">spinor_string_2</span><span class="p">,</span> <span class="n">small_value_2</span><span class="p">)</span>
 </pre></div>
 </div>
+<dl class="py class">
+<dt class="sig sig-object py" id="lips.Invariants">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">lips.</span></span><span class="sig-name descname"><span class="pre">Invariants</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_cached</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_hard_coded_ones</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Restrict3Brackets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Restrict4Brackets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">FurtherRestrict4Brackets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lips.Invariants" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="lips.Invariants.GenerateFromScratch">
+<span class="sig-name descname"><span class="pre">GenerateFromScratch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_hard_coded_ones</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Restrict3Brackets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Restrict4Brackets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">FurtherRestrict4Brackets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lips.Invariants.GenerateFromScratch" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="lips.Invariants.full">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">full</span></span><a class="headerlink" href="#lips.Invariants.full" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="lips.Invariants.full_minus_4_brackets">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">full_minus_4_brackets</span></span><a class="headerlink" href="#lips.Invariants.full_minus_4_brackets" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="lips.Invariants.invs_N">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">invs_N</span></span><a class="headerlink" href="#lips.Invariants.invs_N" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="lips.Invariants.pw_cache">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pw_cache</span></span><a class="headerlink" href="#lips.Invariants.pw_cache" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="lips.Invariants.pw_invariants">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pw_invariants</span></span><a class="headerlink" href="#lips.Invariants.pw_invariants" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="lips.Particle">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">lips.</span></span><span class="sig-name descname"><span class="pre">Particle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kinematics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">real_momentum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Field('mpc',</span> <span class="pre">0,</span> <span class="pre">300)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lips.Particle" title="Link to this definition"></a></dt>
+<dd><p>Describes the kinematics of a single particle.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="lips.Particle.angles_for_squares">
+<span class="sig-name descname"><span class="pre">angles_for_squares</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lips.Particle.angles_for_squares" title="Link to this definition"></a></dt>
+<dd><p>Flips left and right spinors.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lips.Particle.comp_twist_x">
+<span class="sig-name descname"><span class="pre">comp_twist_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lips.Particle.comp_twist_x" title="Link to this definition"></a></dt>
+<dd><p>x^{˙αα} = (μⱼ^{˙α} λᵢ^α - μᵢ^{˙α} λⱼ^α ) / ⟨ij⟩</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="lips.Particle.four_mom">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">four_mom</span></span><a class="headerlink" href="#lips.Particle.four_mom" title="Link to this definition"></a></dt>
+<dd><p>Four Momentum with upper index: P^μ</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="lips.Particle.four_mom_d">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">four_mom_d</span></span><a class="headerlink" href="#lips.Particle.four_mom_d" title="Link to this definition"></a></dt>
+<dd><p>Four Momentum with lower index: P_μ</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="lips.Particle.is_lightlike">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_lightlike</span></span><a class="headerlink" href="#lips.Particle.is_lightlike" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="lips.Particle.is_massless">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_massless</span></span><a class="headerlink" href="#lips.Particle.is_massless" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="lips.Particle.l_sp_d">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">l_sp_d</span></span><a class="headerlink" href="#lips.Particle.l_sp_d" title="Link to this definition"></a></dt>
+<dd><p>Left spinor with index down: λ̅_α̇ (row vector).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="lips.Particle.l_sp_u">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">l_sp_u</span></span><a class="headerlink" href="#lips.Particle.l_sp_u" title="Link to this definition"></a></dt>
+<dd><p>Left spinor with index up: λ̅^α̇ (column vector).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lips.Particle.lsq">
+<span class="sig-name descname"><span class="pre">lsq</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lips.Particle.lsq" title="Link to this definition"></a></dt>
+<dd><p>Lorentz dot product with itself: 2 trace(P^{α̇α}P̅̅_{αα̇}) = P^μ * η_μν * P^ν.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="lips.Particle.m">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">m</span></span><a class="headerlink" href="#lips.Particle.m" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="lips.Particle.m2">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">m2</span></span><a class="headerlink" href="#lips.Particle.m2" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="lips.Particle.r2_sp">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">r2_sp</span></span><a class="headerlink" href="#lips.Particle.r2_sp" title="Link to this definition"></a></dt>
+<dd><p>Four Momentum Slashed with upper indices: P^{α̇α}</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="lips.Particle.r2_sp_b">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">r2_sp_b</span></span><a class="headerlink" href="#lips.Particle.r2_sp_b" title="Link to this definition"></a></dt>
+<dd><p>Four Momentum Slashed with lower indices: P̅̅_{αα̇}</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="lips.Particle.r_sp_d">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">r_sp_d</span></span><a class="headerlink" href="#lips.Particle.r_sp_d" title="Link to this definition"></a></dt>
+<dd><p>Right spinor with index down: λ_α (column vector).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="lips.Particle.r_sp_u">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">r_sp_u</span></span><a class="headerlink" href="#lips.Particle.r_sp_u" title="Link to this definition"></a></dt>
+<dd><p>Right spinor with index up: λ^α (row vector).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lips.Particle.randomise">
+<span class="sig-name descname"><span class="pre">randomise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">real_momentum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lips.Particle.randomise" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lips.Particle.randomise_mpc">
+<span class="sig-name descname"><span class="pre">randomise_mpc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">real_momentum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lips.Particle.randomise_mpc" title="Link to this definition"></a></dt>
+<dd><p>Randomises its momentum.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lips.Particle.randomise_spinors_in_field">
+<span class="sig-name descname"><span class="pre">randomise_spinors_in_field</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lips.Particle.randomise_spinors_in_field" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lips.Particle.randomise_twist">
+<span class="sig-name descname"><span class="pre">randomise_twist</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lips.Particle.randomise_twist" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="lips.Particle.spin_index">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">spin_index</span></span><a class="headerlink" href="#lips.Particle.spin_index" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="lips.Particle.spinors_are_in_field_extension">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">spinors_are_in_field_extension</span></span><a class="headerlink" href="#lips.Particle.spinors_are_in_field_extension" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lips.Particle.to_field">
+<span class="sig-name descname"><span class="pre">to_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lips.Particle.to_field" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lips.Particle.twist_x_to_mom">
+<span class="sig-name descname"><span class="pre">twist_x_to_mom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lips.Particle.twist_x_to_mom" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="lips.Particles">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">lips.</span></span><span class="sig-name descname"><span class="pre">Particles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number_of_particles_or_particles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">real_momenta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Field('mpc',</span> <span class="pre">0,</span> <span class="pre">300)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fix_mom_cons</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">internal_masses</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lips.Particles" title="Link to this definition"></a></dt>
+<dd><p>Describes the kinematics of n particles. Base one list of Particle objects.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="lips.Particles.analytical_subs_d">
+<span class="sig-name descname"><span class="pre">analytical_subs_d</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lips.Particles.analytical_subs_d" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lips.Particles.angles_for_squares">
+<span class="sig-name descname"><span class="pre">angles_for_squares</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lips.Particles.angles_for_squares" title="Link to this definition"></a></dt>
+<dd><p>Switches all angle brackets for square brackets and viceversa.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lips.Particles.check_consistency">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">check_consistency</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temp_string</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lips.Particles.check_consistency" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lips.Particles.cluster">
+<span class="sig-name descname"><span class="pre">cluster</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">llIntegers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">massive_fermions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">massive_spins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lips.Particles.cluster" title="Link to this definition"></a></dt>
+<dd><p>Returns clustered particle objects according to lists of lists of integers (e.g. corners of one loop diagram).
+Also useful to build phase space configurations with external massive legs.
+Massive legs are by default massive scalars.
+Massive fermions can be specificed as e.g.: massive_fermions=((3, ‘u’, all), (4, ‘d’, all)))
+More generally, massive spin can be specified as: massive_spins=((index, (left position, left value), (right position, right value)), )</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lips.Particles.copy">
+<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lips.Particles.copy" title="Link to this definition"></a></dt>
+<dd><p>Return a shallow copy of the list.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lips.Particles.fix_mom_cons">
+<span class="sig-name descname"><span class="pre">fix_mom_cons</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">B</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">real_momenta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lips.Particles.fix_mom_cons" title="Link to this definition"></a></dt>
+<dd><p>Fixes momentum conservation using particles A and B.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lips.Particles.four_momenta_for_mathematica">
+<span class="sig-name descname"><span class="pre">four_momenta_for_mathematica</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">as_spinors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lips.Particles.four_momenta_for_mathematica" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lips.Particles.ijk_to_3Ks">
+<span class="sig-name descname"><span class="pre">ijk_to_3Ks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ijk</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lips.Particles.ijk_to_3Ks" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lips.Particles.ijk_to_3NonOverlappingLists">
+<span class="sig-name descname"><span class="pre">ijk_to_3NonOverlappingLists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ijk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lips.Particles.ijk_to_3NonOverlappingLists" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lips.Particles.image">
+<span class="sig-name descname"><span class="pre">image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">permutation_or_rule</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lips.Particles.image" title="Link to this definition"></a></dt>
+<dd><p>Returns the image of self under a given permutation or rule. Remember, this is a passive transformation.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lips.Particles.insert">
+<span class="sig-name descname"><span class="pre">insert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lips.Particles.insert" title="Link to this definition"></a></dt>
+<dd><p>Insert object before index.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="lips.Particles.internal_masses_dict">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">internal_masses_dict</span></span><a class="headerlink" href="#lips.Particles.internal_masses_dict" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="lips.Particles.m2s">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">m2s</span></span><a class="headerlink" href="#lips.Particles.m2s" title="Link to this definition"></a></dt>
+<dd><p>Masses squared of all particles in phase space.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lips.Particles.make_analytical_d">
+<span class="sig-name descname"><span class="pre">make_analytical_d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indepVars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('a',</span> <span class="pre">'b',</span> <span class="pre">'c',</span> <span class="pre">'d')</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lips.Particles.make_analytical_d" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lips.Particles.momentum_conservation_check">
+<span class="sig-name descname"><span class="pre">momentum_conservation_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lips.Particles.momentum_conservation_check" title="Link to this definition"></a></dt>
+<dd><p>Returns true if momentum is conserved.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="lips.Particles.ms">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ms</span></span><a class="headerlink" href="#lips.Particles.ms" title="Link to this definition"></a></dt>
+<dd><p>Masses of all particles in phase space.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="lips.Particles.multiplicity">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">multiplicity</span></span><a class="headerlink" href="#lips.Particles.multiplicity" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lips.Particles.onshell_relation_check">
+<span class="sig-name descname"><span class="pre">onshell_relation_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lips.Particles.onshell_relation_check" title="Link to this definition"></a></dt>
+<dd><p>Returns true if all on-shell relations are satisfied.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lips.Particles.phasespace_consistency_check">
+<span class="sig-name descname"><span class="pre">phasespace_consistency_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">invariants</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lips.Particles.phasespace_consistency_check" title="Link to this definition"></a></dt>
+<dd><p>Runs momentum and onshell checks. Looks for outliers in phase space. Returns: mom_cons, on_shell, big_outliers, small_outliers.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lips.Particles.randomise_all">
+<span class="sig-name descname"><span class="pre">randomise_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">real_momenta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lips.Particles.randomise_all" title="Link to this definition"></a></dt>
+<dd><p>Randomises all particles. Breaks momentum conservation.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lips.Particles.randomise_twistor">
+<span class="sig-name descname"><span class="pre">randomise_twistor</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lips.Particles.randomise_twistor" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lips.Particles.save_phase_space_point">
+<span class="sig-name descname"><span class="pre">save_phase_space_point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">invariant</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lips.Particles.save_phase_space_point" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="lips.Particles.spinors_are_in_field_extension">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">spinors_are_in_field_extension</span></span><a class="headerlink" href="#lips.Particles.spinors_are_in_field_extension" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lips.Particles.subs">
+<span class="sig-name descname"><span class="pre">subs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">myDict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lips.Particles.subs" title="Link to this definition"></a></dt>
+<dd><p>Substitutes symbols with values from myDict, acts depending on whether the particle is massless or not.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lips.Particles.swap_spin_indices_positions">
+<span class="sig-name descname"><span class="pre">swap_spin_indices_positions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lips.Particles.swap_spin_indices_positions" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lips.Particles.to_field">
+<span class="sig-name descname"><span class="pre">to_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lips.Particles.to_field" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="lips.Particles.total_mom">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">total_mom</span></span><a class="headerlink" href="#lips.Particles.total_mom" title="Link to this definition"></a></dt>
+<dd><p>Total momentum of the given phase space as a rank two spinor.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lips.ldot">
+<span class="sig-prename descclassname"><span class="pre">lips.</span></span><span class="sig-name descname"><span class="pre">ldot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">oP1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">oP2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lips.ldot" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="lips.myException">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">lips.</span></span><span class="sig-name descname"><span class="pre">myException</span></span><a class="headerlink" href="#lips.myException" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </section>
 
 

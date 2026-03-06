@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>lips &mdash; lips 0.5.1 documentation</title>
+  <title>lips &mdash; lips 0.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=b9afe91b"></script>
+      <script src="_static/documentation_options.js?v=8fa8b3e9"></script>
       <script src="_static/doctools.js?v=9a2dae69"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -88,6 +88,8 @@
 <li class="toctree-l3"><a class="reference internal" href="lips.html#lips.particle.Particle.comp_twist_x"><code class="docutils literal notranslate"><span class="pre">Particle.comp_twist_x()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="lips.html#lips.particle.Particle.four_mom"><code class="docutils literal notranslate"><span class="pre">Particle.four_mom</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="lips.html#lips.particle.Particle.four_mom_d"><code class="docutils literal notranslate"><span class="pre">Particle.four_mom_d</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.particle.Particle.is_lightlike"><code class="docutils literal notranslate"><span class="pre">Particle.is_lightlike</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.particle.Particle.is_massless"><code class="docutils literal notranslate"><span class="pre">Particle.is_massless</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="lips.html#lips.particle.Particle.l_sp_d"><code class="docutils literal notranslate"><span class="pre">Particle.l_sp_d</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="lips.html#lips.particle.Particle.l_sp_u"><code class="docutils literal notranslate"><span class="pre">Particle.l_sp_u</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="lips.html#lips.particle.Particle.lsq"><code class="docutils literal notranslate"><span class="pre">Particle.lsq()</span></code></a></li>
@@ -101,6 +103,7 @@
 <li class="toctree-l3"><a class="reference internal" href="lips.html#lips.particle.Particle.randomise_mpc"><code class="docutils literal notranslate"><span class="pre">Particle.randomise_mpc()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="lips.html#lips.particle.Particle.randomise_spinors_in_field"><code class="docutils literal notranslate"><span class="pre">Particle.randomise_spinors_in_field()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="lips.html#lips.particle.Particle.randomise_twist"><code class="docutils literal notranslate"><span class="pre">Particle.randomise_twist()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.particle.Particle.spin_index"><code class="docutils literal notranslate"><span class="pre">Particle.spin_index</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="lips.html#lips.particle.Particle.spinors_are_in_field_extension"><code class="docutils literal notranslate"><span class="pre">Particle.spinors_are_in_field_extension</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="lips.html#lips.particle.Particle.to_field"><code class="docutils literal notranslate"><span class="pre">Particle.to_field()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="lips.html#lips.particle.Particle.twist_x_to_mom"><code class="docutils literal notranslate"><span class="pre">Particle.twist_x_to_mom()</span></code></a></li>
@@ -134,6 +137,7 @@
 <li class="toctree-l3"><a class="reference internal" href="lips.html#lips.particles.Particles.save_phase_space_point"><code class="docutils literal notranslate"><span class="pre">Particles.save_phase_space_point()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="lips.html#lips.particles.Particles.spinors_are_in_field_extension"><code class="docutils literal notranslate"><span class="pre">Particles.spinors_are_in_field_extension</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="lips.html#lips.particles.Particles.subs"><code class="docutils literal notranslate"><span class="pre">Particles.subs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.particles.Particles.swap_spin_indices_positions"><code class="docutils literal notranslate"><span class="pre">Particles.swap_spin_indices_positions()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="lips.html#lips.particles.Particles.to_field"><code class="docutils literal notranslate"><span class="pre">Particles.to_field()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="lips.html#lips.particles.Particles.total_mom"><code class="docutils literal notranslate"><span class="pre">Particles.total_mom</span></code></a></li>
 </ul>
@@ -157,7 +161,76 @@
 <li class="toctree-l2"><a class="reference internal" href="lips.html#lips.hardcoded_limits.particles_set_pair.Particles_SetPair"><code class="docutils literal notranslate"><span class="pre">Particles_SetPair</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="lips.html#module-lips">Module contents</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lips.html#module-lips">Module contents</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="lips.html#lips.Invariants"><code class="docutils literal notranslate"><span class="pre">Invariants</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Invariants.GenerateFromScratch"><code class="docutils literal notranslate"><span class="pre">Invariants.GenerateFromScratch()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Invariants.full"><code class="docutils literal notranslate"><span class="pre">Invariants.full</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Invariants.full_minus_4_brackets"><code class="docutils literal notranslate"><span class="pre">Invariants.full_minus_4_brackets</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Invariants.invs_N"><code class="docutils literal notranslate"><span class="pre">Invariants.invs_N</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Invariants.pw_cache"><code class="docutils literal notranslate"><span class="pre">Invariants.pw_cache</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Invariants.pw_invariants"><code class="docutils literal notranslate"><span class="pre">Invariants.pw_invariants</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="lips.html#lips.Particle"><code class="docutils literal notranslate"><span class="pre">Particle</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particle.angles_for_squares"><code class="docutils literal notranslate"><span class="pre">Particle.angles_for_squares()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particle.comp_twist_x"><code class="docutils literal notranslate"><span class="pre">Particle.comp_twist_x()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particle.four_mom"><code class="docutils literal notranslate"><span class="pre">Particle.four_mom</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particle.four_mom_d"><code class="docutils literal notranslate"><span class="pre">Particle.four_mom_d</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particle.is_lightlike"><code class="docutils literal notranslate"><span class="pre">Particle.is_lightlike</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particle.is_massless"><code class="docutils literal notranslate"><span class="pre">Particle.is_massless</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particle.l_sp_d"><code class="docutils literal notranslate"><span class="pre">Particle.l_sp_d</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particle.l_sp_u"><code class="docutils literal notranslate"><span class="pre">Particle.l_sp_u</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particle.lsq"><code class="docutils literal notranslate"><span class="pre">Particle.lsq()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particle.m"><code class="docutils literal notranslate"><span class="pre">Particle.m</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particle.m2"><code class="docutils literal notranslate"><span class="pre">Particle.m2</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particle.r2_sp"><code class="docutils literal notranslate"><span class="pre">Particle.r2_sp</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particle.r2_sp_b"><code class="docutils literal notranslate"><span class="pre">Particle.r2_sp_b</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particle.r_sp_d"><code class="docutils literal notranslate"><span class="pre">Particle.r_sp_d</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particle.r_sp_u"><code class="docutils literal notranslate"><span class="pre">Particle.r_sp_u</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particle.randomise"><code class="docutils literal notranslate"><span class="pre">Particle.randomise()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particle.randomise_mpc"><code class="docutils literal notranslate"><span class="pre">Particle.randomise_mpc()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particle.randomise_spinors_in_field"><code class="docutils literal notranslate"><span class="pre">Particle.randomise_spinors_in_field()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particle.randomise_twist"><code class="docutils literal notranslate"><span class="pre">Particle.randomise_twist()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particle.spin_index"><code class="docutils literal notranslate"><span class="pre">Particle.spin_index</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particle.spinors_are_in_field_extension"><code class="docutils literal notranslate"><span class="pre">Particle.spinors_are_in_field_extension</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particle.to_field"><code class="docutils literal notranslate"><span class="pre">Particle.to_field()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particle.twist_x_to_mom"><code class="docutils literal notranslate"><span class="pre">Particle.twist_x_to_mom()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="lips.html#lips.Particles"><code class="docutils literal notranslate"><span class="pre">Particles</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particles.analytical_subs_d"><code class="docutils literal notranslate"><span class="pre">Particles.analytical_subs_d()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particles.angles_for_squares"><code class="docutils literal notranslate"><span class="pre">Particles.angles_for_squares()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particles.check_consistency"><code class="docutils literal notranslate"><span class="pre">Particles.check_consistency()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particles.cluster"><code class="docutils literal notranslate"><span class="pre">Particles.cluster()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particles.copy"><code class="docutils literal notranslate"><span class="pre">Particles.copy()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particles.fix_mom_cons"><code class="docutils literal notranslate"><span class="pre">Particles.fix_mom_cons()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particles.four_momenta_for_mathematica"><code class="docutils literal notranslate"><span class="pre">Particles.four_momenta_for_mathematica()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particles.ijk_to_3Ks"><code class="docutils literal notranslate"><span class="pre">Particles.ijk_to_3Ks()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particles.ijk_to_3NonOverlappingLists"><code class="docutils literal notranslate"><span class="pre">Particles.ijk_to_3NonOverlappingLists()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particles.image"><code class="docutils literal notranslate"><span class="pre">Particles.image()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particles.insert"><code class="docutils literal notranslate"><span class="pre">Particles.insert()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particles.internal_masses_dict"><code class="docutils literal notranslate"><span class="pre">Particles.internal_masses_dict</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particles.m2s"><code class="docutils literal notranslate"><span class="pre">Particles.m2s</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particles.make_analytical_d"><code class="docutils literal notranslate"><span class="pre">Particles.make_analytical_d()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particles.momentum_conservation_check"><code class="docutils literal notranslate"><span class="pre">Particles.momentum_conservation_check()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particles.ms"><code class="docutils literal notranslate"><span class="pre">Particles.ms</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particles.multiplicity"><code class="docutils literal notranslate"><span class="pre">Particles.multiplicity</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particles.onshell_relation_check"><code class="docutils literal notranslate"><span class="pre">Particles.onshell_relation_check()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particles.phasespace_consistency_check"><code class="docutils literal notranslate"><span class="pre">Particles.phasespace_consistency_check()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particles.randomise_all"><code class="docutils literal notranslate"><span class="pre">Particles.randomise_all()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particles.randomise_twistor"><code class="docutils literal notranslate"><span class="pre">Particles.randomise_twistor()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particles.save_phase_space_point"><code class="docutils literal notranslate"><span class="pre">Particles.save_phase_space_point()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particles.spinors_are_in_field_extension"><code class="docutils literal notranslate"><span class="pre">Particles.spinors_are_in_field_extension</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particles.subs"><code class="docutils literal notranslate"><span class="pre">Particles.subs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particles.swap_spin_indices_positions"><code class="docutils literal notranslate"><span class="pre">Particles.swap_spin_indices_positions()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particles.to_field"><code class="docutils literal notranslate"><span class="pre">Particles.to_field()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lips.html#lips.Particles.total_mom"><code class="docutils literal notranslate"><span class="pre">Particles.total_mom</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="lips.html#lips.ldot"><code class="docutils literal notranslate"><span class="pre">ldot()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="lips.html#lips.myException"><code class="docutils literal notranslate"><span class="pre">myException</span></code></a></li>
+</ul>
+</li>
 </ul>
 </div>
 </section>
