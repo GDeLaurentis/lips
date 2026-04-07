@@ -1,6 +1,5 @@
 # Author: Giuseppe
 
-import sys
 import re
 import ast
 import functools
@@ -174,7 +173,7 @@ def ast_eval_expr(expr, locals_={}):
 
 def _eval_node(node, locals_={}):
     if isinstance(node, ast.Constant):
-        return node.n
+        return node.value
 
     elif isinstance(node, ast.BinOp):
         return operators[type(node.op)](_eval_node(node.left, locals_), _eval_node(node.right, locals_))
@@ -194,7 +193,7 @@ def _eval_node(node, locals_={}):
     elif isinstance(node, ast.Call):
         if isinstance(node.func, ast.Name) and hasattr(node.func, 'id') and node.func.id == 'oPs':
             function = node.func.id
-            argument = node.args[0].s if sys.version_info[0] > 2 else node.args[0].s.decode('utf-8')
+            argument = node.args[0].value
             allowed_func_call = f"{function}('{argument}')"
         elif isinstance(node.func, ast.Attribute) and node.func.attr in ['mpf', 'sqrt']:
             function, method = 'oPs.field', node.func.attr
@@ -214,10 +213,10 @@ def _eval_node(node, locals_={}):
             else:
                 raise TypeError("Attribute not understood:", node, ast.dump(node))
         elif isinstance(node.func, ast.Name) and hasattr(node.func, 'id') and node.func.id == 'PAdic':
-            function, arguments = 'PAdic', ", ".join(map(str, [arg.n for arg in node.args]))
+            function, arguments = 'PAdic', ", ".join(map(str, [arg.value for arg in node.args]))
             allowed_func_call = f"{function}({arguments})"
         elif isinstance(node.func, ast.Name) and hasattr(node.func, 'id') and node.func.id == 'Fraction':
-            function, arguments = 'Fraction', ", ".join(map(str, [arg.n for arg in node.args]))
+            function, arguments = 'Fraction', ", ".join(map(str, [arg.value for arg in node.args]))
             allowed_func_call = f"{function}({arguments})"
         elif isinstance(node.func, ast.Name) and hasattr(node.func, 'id') and node.func.id == 'tr':
             args = [_eval_node(arg, locals_) for arg in node.args]
