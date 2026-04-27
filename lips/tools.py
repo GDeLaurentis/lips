@@ -40,6 +40,7 @@ ptr = re.compile(r'^tr\((?!\|)(?P<middle>(?:(?:\([\d+\+|-]{1,}\))|(?:[\d+\+|-]{1
 pDijk = re.compile(r'^Δ_(\d+(?:\|\d+)*)$')
 pOijk = re.compile(r'^(?:Ω_)(\d+)$')
 pPijk = re.compile(r'^(?:Π_)(\d+)$')
+pΣ5 = re.compile(r'^Σ5_(\d+(?:\|\d+)*)$')
 pAu = re.compile(r'^(?:⟨|<)(\d+)(?:\|)$')
 pAd = re.compile(r'^(?:\|)(\d+)(?:⟩|>)$')
 pA2 = re.compile(r'^(?:⟨|<)(\d+)(?:\|)(\d+)(?:⟩|>)$')

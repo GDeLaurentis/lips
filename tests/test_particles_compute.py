@@ -199,3 +199,15 @@ def test_particles_eval_with_traces():
 def test_partial_le_ge_aliases_for_angle_bracket():
     oPs = Particles(6, field=Field("finite field", 2 ** 31 - 19, 1), seed=0)
     assert oPs("<3|1+2|4]") == oPs("⟨3|1+2|4]")
+
+
+def test_particles_compute_Sigma5():
+    oPs = Particles(6, field=Field("finite field", 2 ** 31 - 19, 1), seed=0)
+    Σ5 = oPs("(s123 * (s234 - s34) + s23 * s34 + (s234 - s23) * s12) ** 2 + 4 * s123 * s12 * s234 * (s23 - s234 + s34)")
+    Σ5_alt = oPs("(s123 * (s234 - s34) - s23 * s34 - (s234 - s23) * s12) ** 2 + 4 * s123 * s23 * s34 * (s12 + s234 - s34)")
+    assert oPs("Σ5_14|23|56") == Σ5 == Σ5_alt
+
+
+def test_particles_eval_Sigma5():
+    oPs = Particles(6, field=Field("finite field", 2 ** 31 - 19, 1), seed=0)
+    assert oPs("s_56Σ5_14|23|56") == oPs("s_56") * oPs("Σ5_14|23|56")

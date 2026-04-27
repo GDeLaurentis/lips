@@ -13,7 +13,7 @@ import warnings
 import functools
 import operator
 
-from .tools import pSijk, pMi, pMVar, pd5, pDijk, pOijk, pPijk, pA2, pAu, pAd, pS2, pSu, pSd, \
+from .tools import pSijk, pMi, pMVar, pd5, pΣ5, pDijk, pOijk, pPijk, pA2, pAu, pAd, pS2, pSu, pSd, \
     pNB, pNB_open_begin, pNB_open_end, pNB_double_open, ptr5, ptr, det, rsubs_dict, bold_digits
 
 mpmath.mp.dps = 300
@@ -119,6 +119,20 @@ class Particles_Compute:
             r2_sp_1 = sum([self[_i].r2_sp for _i in NonOverlappingLists[0]])
             r2_sp_b_2 = sum([self[_i].r2_sp_b for _i in NonOverlappingLists[1]])
             return (numpy.trace(numpy.dot(r2_sp_1, r2_sp_b_2)) / 2) ** 2 - det(r2_sp_1) * det(r2_sp_b_2)
+
+        if pΣ5.findall(temp_string) != []:
+            match = pΣ5.findall(temp_string)[0]
+            if "|" in match:
+                indices_in_corners = [list(map(int, corner)) for corner in match.split("|")]
+            else:
+                raise Exception("Expected format for Σ5 is Σ5_ij|kl|.., got {temp_string}")
+            (i, l), (j, k) = indices_in_corners[:2]
+            s123, s234 = self(f"s{i}{j}{k}"), self(f"s{j}{k}{l}")
+            s12, s23, s34 = self(f"s{i}{j}"), self(f"s{j}{k}"), self(f"s{k}{l}")
+            Σ5 = (s123 * (s234 - s34) + s23 * s34 + (s234 - s23) * s12) ** 2 + 4 * s123 * s12 * s234 * (s23 - s234 + s34)
+            # Σ5alt = (s123 * (s234 - s34) - s23 * s34 - (s234 - s23) * s12) ** 2 + 4 * s123 * s23 * s34 * (s12 + s234 - s34)
+            # assert Σ5 == Σ5alt, f"Failed to match Σ5 with its alternative expression, {Σ5} vs {Σ5alt}"  # Test would need improving for semi-num slices
+            return Σ5
 
         if pd5.findall(temp_string) != []:
             return (2 * self.compute("s_12") * self.compute("s_23") * self.compute("s_34") * self.compute("s_45") +
