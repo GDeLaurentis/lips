@@ -1,6 +1,5 @@
 # Author: Giuseppe
 
-import sys
 import re
 import ast
 import functools
@@ -38,6 +37,7 @@ pOijk = re.compile(r'(?:Ω_)(\d+)')
 pPijk = re.compile(r'(?:Π_)(\d+)')
 pDijk_adjacent = re.compile(r'(?:Δ_(\d+)(?![\d\|]))')
 pDijk_non_adjacent = re.compile(r'(?:Δ_(\d+(?:\|\d+)*))')
+pΣ5 = re.compile(r'Σ5_(\d+(?:\|\d+)*)')
 # p3B = re.compile(r'(?:\u27e8|\[)(\d+)(?:\|\({0,1})([\d+[\+|-]*]*)(?:\){0,1}\|)(\d+)(?:\u27e9|\])')
 # pNB = re.compile(r'((?:⟨|\[)\d+\|(?:(?:\([\d+\+|-]{1,}\))|(?:[\d+\+|-]{1,}))*\|\d+(?:⟩|\]))')  # this messes up on strings like: '|2⟩⟨1|4+5|3|+|3|4+5|2⟩⟨1|'
 pNB = re.compile(r'((?:<|⟨|\[)\d+\|(?:\(?(?:\d+[\+|-]?)+\)?\|?)+\|\d+(?:⟩|\]|>))')
@@ -138,6 +138,7 @@ class Particles_Eval:
         string = ptr.sub(r"oPs('\1')", string)
         string = pDijk_adjacent.sub(r"oPs('Δ_\1')", string)
         string = pDijk_non_adjacent.sub(r"oPs('Δ_\1')", string)
+        string = pΣ5.sub(r"oPs('Σ5_\1')", string)
         string = pNB.sub(r"oPs('\1')", string)
         # open index start
         string = pAu.sub(r"oPs('⟨\1|')", string)
@@ -174,7 +175,7 @@ def ast_eval_expr(expr, locals_={}):
 
 def _eval_node(node, locals_={}):
     if isinstance(node, ast.Constant):
-        return node.n
+        return node.value
 
     elif isinstance(node, ast.BinOp):
         return operators[type(node.op)](_eval_node(node.left, locals_), _eval_node(node.right, locals_))
@@ -194,7 +195,7 @@ def _eval_node(node, locals_={}):
     elif isinstance(node, ast.Call):
         if isinstance(node.func, ast.Name) and hasattr(node.func, 'id') and node.func.id == 'oPs':
             function = node.func.id
-            argument = node.args[0].s if sys.version_info[0] > 2 else node.args[0].s.decode('utf-8')
+            argument = node.args[0].value
             allowed_func_call = f"{function}('{argument}')"
         elif isinstance(node.func, ast.Attribute) and node.func.attr in ['mpf', 'sqrt']:
             function, method = 'oPs.field', node.func.attr
@@ -214,10 +215,10 @@ def _eval_node(node, locals_={}):
             else:
                 raise TypeError("Attribute not understood:", node, ast.dump(node))
         elif isinstance(node.func, ast.Name) and hasattr(node.func, 'id') and node.func.id == 'PAdic':
-            function, arguments = 'PAdic', ", ".join(map(str, [arg.n for arg in node.args]))
+            function, arguments = 'PAdic', ", ".join(map(str, [arg.value for arg in node.args]))
             allowed_func_call = f"{function}({arguments})"
         elif isinstance(node.func, ast.Name) and hasattr(node.func, 'id') and node.func.id == 'Fraction':
-            function, arguments = 'Fraction', ", ".join(map(str, [arg.n for arg in node.args]))
+            function, arguments = 'Fraction', ", ".join(map(str, [arg.value for arg in node.args]))
             allowed_func_call = f"{function}({arguments})"
         elif isinstance(node.func, ast.Name) and hasattr(node.func, 'id') and node.func.id == 'tr':
             args = [_eval_node(arg, locals_) for arg in node.args]

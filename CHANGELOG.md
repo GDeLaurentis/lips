@@ -17,6 +17,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Deprecated
 
 
+## [0.6.1] - 2026-05-05
+
+### Added
+
+- Evalution of `Σ5` letter
+
+### Changed
+
+- Updated `ast` attribute naming
+- `Particles.cluster` doesn't set spin states unless they are provided
+
+### Fixed
+
+- Massive `Particle` hash involves states only if they are not `None`
+
+
 ## [0.6.0] - 2026-03-06
 
 ### Added
@@ -204,7 +220,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Numerical computation of Lorentz invariant spinor strings.
 
 
-[unreleased]: https://github.com/GDeLaurentis/lips/compare/v0.6.0...HEAD
+[unreleased]: https://github.com/GDeLaurentis/lips/compare/v0.6.1...HEAD
+[0.6.1]: https://github.com/GDeLaurentis/lips/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/GDeLaurentis/lips/compare/v0.5.1...v0.6.0
 [0.5.1]: https://github.com/GDeLaurentis/lips/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/GDeLaurentis/lips/compare/v0.4.5...v0.5.0

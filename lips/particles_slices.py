@@ -151,11 +151,11 @@ class Particles_Slices:
 
             ring = Ring(self.field.characteristic, xs1 + xs2 + ys1 + ys2, 'dp')
             ideal = Ideal(ring, list(map(str, equations)))
-            xSubs = ideal.point_on_variety(self.field, seed=seed)
+            xSubs = ideal.point_on_variety(self.field, seed=seed, verbose=verbose)
             counter = 0
             while 0 in xSubs.values():
                 counter += 1
-                xSubs = ideal.point_on_variety(self.field, seed=seed + counter)
+                xSubs = ideal.point_on_variety(self.field, seed=seed + counter if seed is not None else None, verbose=verbose)
             self.subs(xSubs)
 
         elif algorithm == 'generic':

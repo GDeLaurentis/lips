@@ -197,6 +197,8 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
         Massive fermions can be specificed as e.g.: massive_fermions=((3, 'u', all), (4, 'd', all)))
         More generally, massive spin can be specified as: massive_spins=((index, (left position, left value), (right position, right value)), )
         """
+        if massive_spins is None:
+            massive_spins = ()
         if massive_fermions is not None:
             for leg, index_position, index_value in massive_fermions:
                 massive_spins += ((leg, (index_position, index_value), (index_position, index_value)), )
@@ -206,6 +208,12 @@ class Particles(Particles_Compute, Particles_Eval, Particles_Set, Particles_SetP
                                      for key, val in self.internal_masses_dict.items()}
         selfClustered = Particles([sum([self[i] for i in corner_as_integers]) for corner_as_integers in llIntegers],
                                   field=self.field, fix_mom_cons=False, internal_masses=clustered_internal_masses)
+        for i, corner_as_integers in enumerate(llIntegers):
+            if len(corner_as_integers) > 1:
+                selfClustered[i + 1]._r_sp_d = None
+                selfClustered[i + 1]._l_sp_d = None
+                selfClustered[i + 1]._r_sp_u = None
+                selfClustered[i + 1]._l_sp_u = None
         for (leg, (left_index_position, left_index_value), (right_index_position, right_index_value)) in massive_spins:
             assert len(llIntegers[leg - 1]) == 2
             a, b = llIntegers[leg - 1]

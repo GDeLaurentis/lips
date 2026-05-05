@@ -113,7 +113,9 @@ class Particle(object):
         if self.is_massless:
             return hash(tuple([tuple(self.r_sp_d.flatten()), tuple(self.l_sp_d.flatten())]))
         else:
-            return hash(tuple([tuple(self.r2_sp.flatten()), tuple(self.r_sp_d.flatten()), tuple(self.l_sp_d.flatten())]))
+            return hash(tuple([tuple(self.r2_sp.flatten()),
+                               tuple(self.r_sp_d.flatten()) if self.r_sp_d is not None else None,
+                               tuple(self.l_sp_d.flatten()) if self.l_sp_d is not None else None]))
 
     # GETTERS and SETTERS
 
