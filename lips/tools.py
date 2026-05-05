@@ -4,6 +4,7 @@ import random
 import re
 import warnings
 
+# from syngular import Qi
 mpmath.mp.dps = 300
 
 
@@ -15,6 +16,7 @@ MinkowskiMetric = η = numpy.diag([1, -1, -1, -1])
 Pauli_zero = σ0 = numpy.diag([1, 1])
 Pauli_x = σx = numpy.array([[0, 1], [1, 0]])
 Pauli_y = σy = numpy.array([[0, -1j], [1j, 0]])
+# Pauli_y = numpy.vectorize(Qi)(Pauli_y)  # this would be nice but currently cause problems with type casting
 Pauli_z = σz = numpy.array([[1, 0], [0, -1]])
 Pauli = σ = numpy.array([Pauli_zero, Pauli_x, Pauli_y, Pauli_z])
 Pauli_bar = σb = numpy.array([Pauli_zero, -Pauli_x, -Pauli_y, -Pauli_z])
