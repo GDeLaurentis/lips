@@ -125,7 +125,7 @@ class Particles_Compute:
             if "|" in match:
                 indices_in_corners = [list(map(int, corner)) for corner in match.split("|")]
             else:
-                raise Exception("Expected format for Σ5 is Σ5_ij|kl|.., got {temp_string}")
+                raise Exception(f"Expected format for Σ5 is Σ5_il|jk|.., got {temp_string}")
             (i, l), (j, k) = indices_in_corners[:2]
             s123, s234 = self(f"s{i}{j}{k}"), self(f"s{j}{k}{l}")
             s12, s23, s34 = self(f"s{i}{j}"), self(f"s{j}{k}"), self(f"s{k}{l}")
